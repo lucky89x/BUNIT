@@ -1,0 +1,5 @@
+{
+  "name": "CHUYỂN TEXT THÀNH GIỌNG NÓI",
+  "description": "Ứng dụng chuyển đổi văn bản thành giọng nói (Text-to-Speech) chất lượng cao sử dụng Gemini AI, hỗ trợ xuất file âm thanh cho video creator.",
+  "requestFramePermissions": []
+}
