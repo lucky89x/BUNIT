@@ -1,0 +1,4 @@
+# File chạy trên Windows cần xuống dòng CRLF
+english-quest/*.bat text eol=crlf
+english-quest/tools/*.ps1 text eol=crlf
+*.zip binary

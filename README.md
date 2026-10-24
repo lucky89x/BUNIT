@@ -18,3 +18,11 @@ View your app in AI Studio: https://ai.studio/apps/drive/1OxFEAROx0GefLye-zkqvIM
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+---
+
+## 🎮 English Quest – game phiêu lưu học tiếng Anh (thư mục `english-quest/`)
+
+Game RPG 2D chạy ngoại tuyến trên Chrome/Edge giúp học sinh lớp 6–8 học lại tiếng Anh từ mất gốc.
+- Tải bản đóng gói: [`EnglishQuest-v1.0.zip`](EnglishQuest-v1.0.zip) → giải nén → bấm đúp `index.html` (hoặc `Chay-game.bat`).
+- Hướng dẫn đầy đủ bằng tiếng Việt: [`english-quest/HUONG-DAN.md`](english-quest/HUONG-DAN.md)
