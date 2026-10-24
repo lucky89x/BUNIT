@@ -146,7 +146,7 @@ window.EQ = window.EQ || {};
       mode = w.pic ? 'pic' : 'en';
     }
     const base = { wordId: w.id, topic: w.t, key: 'w:' + w.id, text: w.en + ' = ' + w.vi };
-    const ex = '"' + w.en + '" nghĩa là "' + w.vi + '". Ví dụ: ' + w.ex + ' (' + w.exVi + ')';
+    const ex = '"' + w.en + '" nghĩa là "' + w.vi + '".' + (w.ex ? ' Ví dụ: ' + w.ex + ' (' + w.exVi + ')' : '');
     if (mode === 'pic') {
       const ds = distractors(p, w, n, 'pic');
       return Object.assign(base, {
@@ -187,7 +187,7 @@ window.EQ = window.EQ || {};
       return Object.assign(base, {
         kind: 'type', mode, word, pattern: word.split('').map((c, i) => (i === 0 || c === ' ') ? c : '_').join(' '),
         promptVi: 'Gõ từ tiếng Anh có nghĩa: "' + w.vi + '"', pic: w.pic ? w.e : null, sw: w.sw, say: w.en,
-        explain: 'Từ đúng là "' + w.en + '" (' + w.vi + '). Ví dụ: ' + w.ex, hint: 'Mỗi lần bấm Gợi ý sẽ hiện thêm 1 chữ cái.', sayAfter: w.en
+        explain: 'Từ đúng là "' + w.en + '" (' + w.vi + ').' + (w.ex ? ' Ví dụ: ' + w.ex : ''), hint: 'Mỗi lần bấm Gợi ý sẽ hiện thêm 1 chữ cái.', sayAfter: w.en
       });
     }
     // meaning
@@ -196,7 +196,7 @@ window.EQ = window.EQ || {};
       kind: 'mcq', mode: 'meaning', prompt: w.en, promptVi: 'Từ này nghĩa là gì?', say: w.en, big: true,
       pic: p.diff < 1.5 && w.pic ? w.e : null, sw: p.diff < 1.5 ? w.sw : null,
       opts: U.shuffle([{ t: w.vi, ok: true }].concat(ds.map(d => ({ t: d.vi })))),
-      explain: ex, hint: 'Ví dụ: ' + w.ex, sayAfter: w.en
+      explain: ex, hint: w.ex ? 'Ví dụ: ' + w.ex : 'Từ này thuộc chủ đề: ' + (EQ.TOPICS[w.t] || ''), sayAfter: w.en
     });
   };
 

@@ -29,7 +29,13 @@ window.EQ = window.EQ || {};
     const ox = (t * 14) % (rows[0].length * TS - 960);
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 960, 640);
     const x0 = Math.floor(ox / TS);
+    EQ.sprites.region = 'village';
     for (let y = 0; y < 21 && y < rows.length; y++) for (let x = x0; x < x0 + 32 && x < rows[0].length; x++) EQ.sprites.drawTile(ctx, rows[y][x], x, y, x * TS - ox, y * TS, t);
+    if (EQ.sprites.drawTallTree) {
+      ctx.save(); ctx.translate(-ox, 0);
+      for (let y = 0; y < 23 && y < rows.length; y++) for (let x = x0; x < x0 + 32 && x < rows[0].length; x++) if (EQ.sprites.isTree(rows[y][x])) EQ.sprites.drawTallTree(ctx, rows[y][x], x, y, t);
+      ctx.restore();
+    }
     const g = ctx.createLinearGradient(0, 0, 0, 640);
     g.addColorStop(0, 'rgba(40,20,90,.55)'); g.addColorStop(1, 'rgba(20,10,50,.75)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, 960, 640);
@@ -754,12 +760,12 @@ window.EQ = window.EQ || {};
       unitSel.value = String(cur);
       body.appendChild(el('h2', null, '📗 Học theo sách giáo khoa'));
       body.appendChild(el('div', { class: 'row' }, [sel, unitSel]));
-      body.appendChild(el('p', { class: 'muted small' }, 'Từ ở đây được game soạn theo CHỦ ĐỀ của từng Unit (không phải danh sách chính thức in trong sách). Phụ huynh có thể nhập đúng từ trong sách ở Bảng phụ huynh. Một từ chỉ được tính "Nhớ lâu" khi bé nhớ lại được sau ít nhất 1 ngày.'));
+      body.appendChild(el('p', { class: 'muted small' }, 'Mỗi Unit gồm 📘 từ trong sách (lấy từ ảnh phụ huynh chụp) và một số từ cùng chủ đề có hình minh họa. Một từ chỉ được tính "Nhớ lâu" khi bé nhớ lại được sau ít nhất 1 ngày.'));
       const grid = el('div', { class: 'ucards' });
       if ((p.customWords || []).length) grid.appendChild(card('📝 Từ phụ huynh thêm', 'Từ trong sách / trên lớp', p.customWords.map(w => w.id).filter(id => EQ.V[id]), { cur: true }));
       const units = EQ.CURRICULUM[p.book].slice();
       if (cur) units.sort((a, b) => (b.n === cur) - (a.n === cur));
-      units.forEach(u => grid.appendChild(card('Unit ' + u.n + ': ' + u.en, u.vi, u.words, { cur: u.n === cur, focus: u.focus })));
+      units.forEach(u => grid.appendChild(card('Unit ' + u.n + ': ' + u.en, u.vi + ((u.sgk || []).length ? ' • 📘 ' + u.sgk.length + ' từ trong sách' : ''), EQ.U.uniq((u.sgk || []).concat(u.words)), { cur: u.n === cur, focus: u.focus })));
       body.appendChild(grid);
       body.appendChild(el('div', { class: 'row center' }, [el('button', { class: 'btn', onclick: () => close() }, 'Đóng')]));
     }

@@ -120,6 +120,7 @@ window.EQ = window.EQ || {};
       else if (e.code === 'KeyQ') EQ.screens.quests();
       else if (e.code === 'KeyM') EQ.screens.map();
       else if (e.code === 'KeyB') EQ.screens.book();
+      else if (e.code === 'KeyG') EQ.arcade.open();
     });
     window.addEventListener('keyup', e => { if (KEYMAP[e.code]) G.keys[KEYMAP[e.code]] = false; });
     window.addEventListener('blur', () => { G.keys = {}; });

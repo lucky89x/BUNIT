@@ -99,6 +99,19 @@ Game **không** dùng micro và **không** chấm điểm phát âm.
 - Bật trong Bảng phụ huynh. Cần Internet, micro và Chrome/Edge. Giọng nói được trình duyệt gửi tới máy chủ nhận dạng của Google/Microsoft.
 - Sau khi trả lời đúng trong hội thoại, hoặc ở thẻ từ mới, bé bấm **🎤 Nói thử** và nói lại câu. Game chỉ kiểm tra "máy có nghe ra đúng câu không" và cho thêm chút XP, **không chấm điểm phát âm**.
 
+## 5d. Bản 1.3 – Đồ họa mới, Khu vui chơi, từ vựng đúng theo sách
+
+**🎨 Đồ họa:** nền cỏ/đất/đá có vân và đổ bóng; cây cao nhiều tầng tán (nhân vật đi ra sau cây thì tán cây mờ đi); bờ nước có bọt sóng; đường đất có viền cỏ; nhân vật có viền nổi bật; tia nắng xiên, mây trôi, cánh hoa rơi (Làng), đom đóm (Rừng), bụi sáng (Lâu đài).
+
+**🎮 Khu vui chơi** (nút hồng góc dưới bên trái, hoặc phím G) – 4 trò chơi dùng từ của Unit đang học / từ cần ôn:
+- 🏎️ **Đua xe từ vựng**: đánh lái qua cổng có từ tiếng Anh đúng (đúng → tăng tốc).
+- 🧺 **Hứng chữ**: di chuyển giỏ hứng chữ cái theo đúng thứ tự để ghép từ (luyện chính tả; mỗi từ có 3 tim).
+- 🧗 **Vượt chướng ngại** (kiểu Roblox obby): chạy, nhảy qua các bục; húc vào khối có từ đúng để cây cầu hiện ra.
+- 🎈 **Bắn bóng bay**: bấm vào quả bóng có từ đúng, không tính giờ.
+Mỗi câu trả lời trong trò chơi được ghi vào hệ thống ôn tập; cuối ván có danh sách từ cần ôn lại. Có kỷ lục điểm riêng cho từng bé.
+
+**📘 Từ vựng đúng theo sách:** đã nhập **712 từ mới** từ ảnh "Sổ tay kiến thức Toán Văn Anh lớp 6 & lớp 8" mà phụ huynh tải lên Google Drive (cùng 134 từ trùng với từ đã có), chia đúng theo 24 Unit. File dữ liệu: `js/data/sgk-words.js` – mỗi dòng `từ = nghĩa`, phụ huynh có thể sửa trực tiếp nếu thấy sai.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -155,6 +168,7 @@ english-quest/
 **Kiểm thử (dành cho người lập trình):**
 - `node tests/data-check.cjs` – kiểm tra từ vựng, ngữ pháp, nhiệm vụ, bản đồ.
 - `node tests/playthrough.cjs` – bot tự chơi hết chương 1 trên Chromium (cần Playwright).
+- `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
 ## 10. Bản quyền nội dung

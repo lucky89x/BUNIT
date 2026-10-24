@@ -10,7 +10,7 @@ window.EQ = window.EQ || {};
   const W = {
     id: null, def: null, rows: [], w: 0, h: 0, t: 0,
     player: { x: 0, y: 0, dir: 'down', moving: false, anim: 0 },
-    ents: [], monsters: [], particles: [], floaters: [],
+    ents: [], monsters: [], particles: [], floaters: [], amb: [],
     cam: { x: 0, y: 0 }, fade: 0, fadeDir: 0, fadeCb: null,
     explored: null, lastTile: '', target: null, battleCooldown: 0, portalCooldown: 0, respawn: []
   };
@@ -18,7 +18,7 @@ window.EQ = window.EQ || {};
   W.load = function (id, tx, ty, p) {
     const def = EQ.REGIONS[id];
     if (!def) throw new Error('Không có vùng ' + id);
-    W.id = id; W.def = def;
+    W.id = id; W.def = def; SP.region = id;
     W.rows = def._rows || (def._rows = def.build());
     W.h = W.rows.length; W.w = W.rows[0].length;
     const sp = (tx != null) ? { x: tx, y: ty } : def.spawn;
@@ -28,7 +28,7 @@ window.EQ = window.EQ || {};
     const s = p.explored[id];
     W.explored = new Uint8Array(W.w * W.h);
     if (s && s.length === W.w * W.h) for (let i = 0; i < s.length; i++) W.explored[i] = s.charCodeAt(i) === 49 ? 1 : 0;
-    W.monsters = []; W.particles = []; W.floaters = []; W.respawn = [];
+    W.monsters = []; W.particles = []; W.floaters = []; W.respawn = []; W.amb = [];
     W.portalCooldown = 0.6; W.battleCooldown = 2;
     W.refresh(p);
     W.spawnMonsters(p);
@@ -158,6 +158,7 @@ window.EQ = window.EQ || {};
 
     W.target = W.findTarget();
     W.updateCam(false);
+    if (SP.updateAmbient) SP.updateAmbient(W.id, W.amb, dt, W.t, VIEW_W, VIEW_H);
   };
 
   // chuyển cảnh (chạy cả khi game đang khóa)
@@ -232,13 +233,23 @@ window.EQ = window.EQ || {};
     const cx = Math.round(W.cam.x), cy = Math.round(W.cam.y);
     ctx.fillStyle = '#111'; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     const x0 = Math.floor(cx / TS), y0 = Math.floor(cy / TS);
+    const trees = [];
     for (let y = y0; y <= y0 + VIEW_H / TS + 1 && y < W.h; y++) {
       for (let x = x0; x <= x0 + VIEW_W / TS + 1 && x < W.w; x++) {
-        SP.drawTile(ctx, W.rows[y][x], x, y, x * TS - cx, y * TS - cy, t);
+        const ch = W.rows[y][x];
+        const sx = x * TS - cx, sy = y * TS - cy;
+        SP.drawTile(ctx, ch, x, y, sx, sy, t);
+        if (SP.isTree && SP.isTree(ch)) trees.push([ch, x, y]);
+        drawEdges(ctx, ch, x, y, sx, sy, t);
       }
+    }
+    // cây ở hàng dưới màn hình vẫn có tán vươn lên trong khung nhìn
+    for (let y = y0 + Math.ceil(VIEW_H / TS) + 2; y <= y0 + Math.ceil(VIEW_H / TS) + 3 && y < W.h; y++) {
+      for (let x = x0; x <= x0 + VIEW_W / TS + 1 && x < W.w; x++) if (SP.isTree && SP.isTree(W.rows[y][x])) trees.push([W.rows[y][x], x, y]);
     }
     // danh sách cần vẽ, sắp xếp theo chiều sâu (y)
     const list = [];
+    trees.forEach(tr => list.push({ y: (tr[2] + 1) * TS - 3, tree: tr }));
     W.ents.forEach(e => list.push({ y: (e.y + 0.95) * TS, e }));
     W.monsters.forEach(m => list.push({ y: m.y, m }));
     list.push({ y: W.player.y, pl: true });
@@ -246,6 +257,14 @@ window.EQ = window.EQ || {};
     ctx.save(); ctx.translate(-cx, -cy);
     list.forEach(it => {
       if (it.pl) drawPlayer(ctx, p);
+      else if (it.tree) {
+        const tr = it.tree;
+        // làm mờ tán cây khi nhân vật đứng phía sau để vẫn nhìn thấy
+        const behind = W.player.y < (tr[2] + 1) * TS - 3 && Math.abs(W.player.x - (tr[1] + 0.5) * TS) < 26 && W.player.y > (tr[2] + 1) * TS - 80;
+        if (behind) ctx.globalAlpha = 0.55;
+        SP.drawTallTree(ctx, tr[0], tr[1], tr[2], t);
+        ctx.globalAlpha = 1;
+      }
       else if (it.m) SP.monster(ctx, it.m.def, it.m.x, it.m.y + 2, 11, it.m.color, t + it.m.phase);
       else drawEnt(ctx, it.e, p, t);
     });
@@ -262,8 +281,38 @@ window.EQ = window.EQ || {};
     });
     ctx.globalAlpha = 1;
     ctx.restore();
+    if (SP.atmosphere) SP.atmosphere(ctx, W.id, t, W.amb, VIEW_W, VIEW_H);
     if (W.fade > 0) { ctx.fillStyle = 'rgba(10,8,30,' + W.fade + ')'; ctx.fillRect(0, 0, VIEW_W, VIEW_H); }
   };
+
+  // bọt sóng ven bờ, viền đường đất mềm mại
+  const LANDISH = ch => ch !== '~' && ch !== 'b';
+  function drawEdges(ctx, ch, x, y, sx, sy, t) {
+    if (ch === '~') {
+      const f = 0.55 + 0.25 * Math.sin(t * 2.4 + x + y);
+      ctx.fillStyle = 'rgba(230,248,255,' + f + ')';
+      if (LANDISH(W.tile(x, y - 1))) ctx.fillRect(sx, sy, TS, 3);
+      if (LANDISH(W.tile(x, y + 1))) ctx.fillRect(sx, sy + TS - 2, TS, 2);
+      if (LANDISH(W.tile(x - 1, y))) ctx.fillRect(sx, sy, 3, TS);
+      if (LANDISH(W.tile(x + 1, y))) ctx.fillRect(sx + TS - 3, sy, 3, TS);
+      ctx.fillStyle = 'rgba(20,60,110,.25)';
+      if (LANDISH(W.tile(x, y - 1))) ctx.fillRect(sx, sy + 3, TS, 3);
+    } else if (ch === '=' || ch === 's') {
+      const grass = c2 => c2 === '.' || c2 === ',' || c2 === '"' || c2 === 'g' || c2 === 'M';
+      ctx.fillStyle = ch === '=' ? 'rgba(120,80,40,.28)' : 'rgba(150,120,60,.22)';
+      if (grass(W.tile(x, y - 1))) ctx.fillRect(sx, sy, TS, 2);
+      if (grass(W.tile(x, y + 1))) ctx.fillRect(sx, sy + TS - 2, TS, 2);
+      if (grass(W.tile(x - 1, y))) ctx.fillRect(sx, sy, 2, TS);
+      if (grass(W.tile(x + 1, y))) ctx.fillRect(sx + TS - 2, sy, 2, TS);
+      // cỏ lấn nhẹ lên mép đường
+      const gcol = W.id === 'forest' ? '#3f8640' : '#5fae3e';
+      ctx.fillStyle = gcol;
+      if (grass(W.tile(x, y - 1))) for (let i = 2; i < TS; i += 7) ctx.fillRect(sx + i + (SP.hash(x, y, i) % 3), sy, 2, 2 + SP.hash(i, x, y) % 3);
+      if (grass(W.tile(x - 1, y))) for (let i = 3; i < TS; i += 8) ctx.fillRect(sx, sy + i, 2 + SP.hash(i, y, x) % 2, 2);
+    } else if (ch === 'W' && W.tile(x, y + 1) !== 'W' && W.tile(x, y + 1) !== 'w') {
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(sx, sy + TS, TS, 6);
+    }
+  }
 
   function drawPlayer(ctx, p) {
     const pl = W.player;

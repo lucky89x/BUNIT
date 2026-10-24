@@ -390,8 +390,8 @@ window.EQ = window.EQ || {};
             w.sw ? el('span', { class: 'swatch big' , style: { background: w.sw } }) : el('div', { class: /^\d+$/.test(w.e) ? 'q-num' : 'wc-emoji' }, w.e),
             el('div', { class: 'wc-en' }, [w.en, speakBtn(w.en)]),
             el('div', { class: 'wc-vi' }, w.vi),
-            el('div', { class: 'wc-ex' }, [el('span', null, w.ex), speakBtn(w.ex, '🔊', 'small')]),
-            el('div', { class: 'wc-exvi' }, w.exVi),
+            w.ex ? el('div', { class: 'wc-ex' }, [el('span', null, w.ex), speakBtn(w.ex, '🔊', 'small')]) : null,
+            w.ex ? el('div', { class: 'wc-exvi' }, w.exVi) : (w.sgk ? el('div', { class: 'wc-exvi' }, '📘 Từ trong sách') : null),
             EQ.speech.listenEnabled() ? EQ.speech.micButton(w.en) : null
           ]));
         });

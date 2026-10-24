@@ -253,6 +253,7 @@ window.EQ = window.EQ || {};
     UI.hud.appendChild(left);
     UI.hud.appendChild(el('div', { class: 'hud-top' }, [H.region, H.stones]));
     UI.hud.appendChild(right);
+    UI.hud.appendChild(el('button', { class: 'hud-arcade', title: 'Khu vui chơi (G)', onclick: () => EQ.arcade.open() }, [el('span', null, '🎮'), el('b', null, 'Khu vui chơi')]));
     UI.hud.appendChild(el('div', { class: 'hud-help' }, 'Di chuyển: W A S D / phím mũi tên • Tương tác: E • Tạm dừng: Esc'));
   };
 
