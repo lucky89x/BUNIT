@@ -118,6 +118,7 @@ fs.mkdirSync(OUT, { recursive: true });
     // tìm mục tiêu và dịch chuyển tới cạnh nó
     const info = await page.evaluate(() => {
       const p = EQ.game.profile, W = EQ.world;
+      EQ.learn.timeOffset += 12 * 60000; // giả lập: mỗi bước cách nhau ~12 phút (ôn ngắt quãng cần thời gian)
       const t = EQ.game.questTarget(p);
       if (!t) return null;
       const res = { id: t.id, kind: t.kind, x: t.x, y: t.y, region: p.region };

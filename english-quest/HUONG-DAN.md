@@ -80,6 +80,25 @@ Game **không** dùng micro và **không** chấm điểm phát âm.
 - **⭐ Thử thách hôm nay:** mỗi ngày 1 lần, 8 câu ôn các từ đến hạn + ngữ pháp (Sổ từ vựng → nút ⭐). Huy hiệu "Kiên trì 5 ngày".
 - **Bảng phụ huynh** có thêm "Độ thuộc từ theo vùng" và số lần hoàn thành thử thách hôm nay.
 
+## 5c. Bản 1.2 – Học theo sách Global Success, nhớ lâu, luyện nói
+
+**📗 Học theo sách (phím B, nút "Sách", hoặc gặp Cô giáo Hoa trong làng):**
+- Chọn sách **Tiếng Anh 6** hoặc **Tiếng Anh 8 – Global Success** và **Unit đang học ở lớp** (Unit đó được đưa lên đầu).
+- 24 Unit (12 Unit lớp 6 + 12 Unit lớp 8), **205 từ theo chủ đề** của từng Unit, có nghĩa, câu ví dụ, nút nghe. Mỗi lần học 8 từ, sau đó luyện ngay (phải đúng lần đầu).
+- ⚠️ Đây là **từ theo chủ đề do game soạn**, không phải danh sách chính thức in trong sách. Trọng tâm ngữ pháp ghi ở mỗi Unit chỉ để tham khảo, phụ huynh nên đối chiếu với sách.
+- **Phụ huynh nhập đúng từ trong sách:** Bảng phụ huynh → "📝 Nhập từ theo sách". Mỗi dòng: `từ = nghĩa` (có thể thêm `| câu ví dụ | nghĩa câu`). Từ nhập vào sẽ xuất hiện trong mục Sách, trận đấu, ôn tập hằng ngày.
+- Từ học theo sách cũng được đưa vào trận đấu với quái vật và Thử thách hôm nay → ôn đi ôn lại tự nhiên.
+
+**🧠 Nhớ lâu, tránh nhớ tạm (thay đổi thuật toán ôn tập):**
+- Trả lời đúng nhiều lần liên tiếp **trong cùng một buổi không được tính lên mức**. Một từ chỉ lên mức khi bé nhớ lại được **sau khi đã qua một khoảng thời gian** (10 phút → 1 ngày → 3 ngày → 7 ngày → 16 ngày).
+- Chọn hình/chọn nghĩa (nhận biết) chỉ đưa từ tới mức "Đang nhớ". Muốn **"Nhớ tốt"** phải **tự nhớ ra từ** (gõ từ, ghép chữ, chọn từ tiếng Anh từ nghĩa tiếng Việt).
+- Từ đã nhớ tốt mà trả lời sai sẽ bị hạ mức và được hỏi lại sớm.
+- Mục Sách hiển thị 3 mức cho từng Unit: Đã học / Đang nhớ / **Nhớ lâu** (nhớ lại được sau ≥ 1 ngày).
+
+**🎤 Luyện nói (tùy chọn, mặc định TẮT):**
+- Bật trong Bảng phụ huynh. Cần Internet, micro và Chrome/Edge. Giọng nói được trình duyệt gửi tới máy chủ nhận dạng của Google/Microsoft.
+- Sau khi trả lời đúng trong hội thoại, hoặc ở thẻ từ mới, bé bấm **🎤 Nói thử** và nói lại câu. Game chỉ kiểm tra "máy có nghe ra đúng câu không" và cho thêm chút XP, **không chấm điểm phát âm**.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -117,6 +136,7 @@ english-quest/
 ├─ js/data/vocab.js      140 từ vựng (thêm từ: thêm 1 dòng W(...))
 ├─ js/data/lessons.js    Bài ngữ pháp, câu điền từ, câu sắp xếp, cảnh giới từ
 ├─ js/data/quests.js     Nhiệm vụ, hội thoại, trùm, vật phẩm, trang phục, huy hiệu
+├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
 ├─ js/data/maps.js       Bản đồ 3 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC
 ├─ js/core/              Lưu trữ, âm thanh tự tạo, giọng đọc, hệ thống học (ôn tập ngắt quãng, độ khó)
 ├─ js/engine/            Đồ họa pixel tự vẽ, thế giới, va chạm, camera, bản đồ nhỏ
@@ -135,7 +155,7 @@ english-quest/
 **Kiểm thử (dành cho người lập trình):**
 - `node tests/data-check.cjs` – kiểm tra từ vựng, ngữ pháp, nhiệm vụ, bản đồ.
 - `node tests/playthrough.cjs` – bot tự chơi hết chương 1 trên Chromium (cần Playwright).
-- `node tests/anti-guess.cjs` – kiểm tra các cơ chế chống đoán mò của bản 1.1.
+- `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
 ## 10. Bản quyền nội dung
 

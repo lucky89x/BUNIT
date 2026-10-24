@@ -145,8 +145,57 @@ const ROOT = path.join(__dirname, '..');
   });
   if (!(r7.before && !r7.after && r7.count === 1)) fail('Thử thách hôm nay: ' + JSON.stringify(r7));
 
+  console.log("bước 8"); // 8. Nhớ lâu: đúng liên tục trong 1 buổi không lên mức; nhận biết không vượt hộp 3
+  const r8 = await page.evaluate(() => {
+    const L = EQ.learn, p = EQ.game.profile;
+    L.learnWords(p, ['bird']);
+    const rec = (mode) => L.record(p, { correct: true, wordId: 'bird', topic: 'animal', mode });
+    rec('pic'); const a = p.vocab.bird.box;          // 0 → 1
+    rec('pic'); rec('pic'); const b = p.vocab.bird.box; // vẫn 1 (chưa đến hạn)
+    L.timeOffset += 11 * 60000; rec('pic'); const c = p.vocab.bird.box; // → 2
+    L.timeOffset += 25 * 3600000; rec('pic'); const d = p.vocab.bird.box; // → 3
+    L.timeOffset += 4 * 86400000; rec('pic'); const e = p.vocab.bird.box; // nhận biết: vẫn 3
+    rec('type'); const f = p.vocab.bird.box; // tự nhớ ra từ (đã đến hạn) → 4
+    L.record(p, { correct: false, wordId: 'bird', topic: 'animal', mode: 'pic' }); const g = p.vocab.bird.box; // sai → về 1
+    L.timeOffset = 0;
+    return [a, b, c, d, e, f, g];
+  });
+  if (r8.join() !== '1,1,2,3,3,4,1') fail('Thuật toán nhớ lâu: ' + r8.join());
+
+  console.log("bước 9"); // 9. Học theo sách + từ phụ huynh nhập
+  const r9 = await page.evaluate(async () => {
+    const p = EQ.game.profile; const wait = ms => new Promise(r => setTimeout(r, ms));
+    const add = EQ.learn.addCustomWords(p, 'compass = com-pa\npencil case = hộp bút | I have a pencil case. | Mình có hộp bút.\nhard-working = chăm chỉ\nsai dinh dang');
+    const u = EQ.CURRICULUM.gs6[0];
+    EQ.screens.book();
+    await wait(100);
+    const cards = document.querySelectorAll('.ucard').length;
+    document.querySelectorAll('#modals .modal-back').forEach(b => b.remove()); EQ.ui.stack = [];
+    const pr = EQ.screens.learnWords(u.words.slice(0, 4), 'Unit 1');
+    for (let k = 0; k < 80; k++) {
+      await wait(40);
+      const top = document.querySelector('#modals .modal-back:last-child');
+      if (!top) { if (k > 5) break; continue; }
+      if (EQ.challenge.current) { EQ.challenge._testAnswer(true); await wait(30); const b = top.querySelector('.q-feedback .btn'); if (b) b.click(); continue; }
+      const b = top.querySelector('.btn.primary.big') || top.querySelector('.btn.primary'); if (b) b.click();
+    }
+    await pr;
+    return { add, cards, learned: u.words.slice(0, 4).filter(id => p.vocab[id]).length, custom: p.customWords.map(w => w.id), hw: (p.customWords.find(w => w.en === 'hard-working') || {}).id };
+  });
+  if (!(r9.add.added === 3 && r9.add.bad === 1 && r9.cards === 13 && r9.learned === 4 && r9.hw === 'hard_working')) fail('Học theo sách: ' + JSON.stringify(r9));
+  await clean();
+
+  console.log("bước 10"); // 10. So khớp câu nói (luyện nói)
+  const r10 = await page.evaluate(() => [
+    EQ.speech.match('My name is Lily.', ['my name is lily']).score,
+    EQ.speech.match('I am twelve.', ['i am 12', "i'm twelve"]).score,
+    EQ.speech.match('She is a student.', ['he is a doctor']).score,
+    EQ.speech.match("I don't like fish.", ['I do not like fish']).score
+  ]);
+  if (!(r10[0] === 1 && r10[1] === 1 && r10[2] < 0.7 && r10[3] === 1)) fail('So khớp câu nói: ' + r10.join());
+
   await browser.close();
-  console.log(JSON.stringify({ r1, r2, r3, r4, r5, r6, r7 }));
+  console.log(JSON.stringify({ r1, r2, r3, r4, r5, r6, r7, r8, r9, r10 }));
   if (errors.length) { console.log('❌\n' + errors.join('\n')); process.exit(1); }
   console.log('✅ Cơ chế chống đoán mò hoạt động đúng');
 })().catch(e => { console.error(e); process.exit(1); });

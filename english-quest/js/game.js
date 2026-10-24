@@ -55,6 +55,7 @@ window.EQ = window.EQ || {};
     G.profile = p;
     EQ.store.data.lastProfile = p.id;
     p._ageWord = U.numWord(p.age);
+    EQ.learn.registerCustom(p);
     p.lastPlayed = Date.now();
     G.session = 0;
     const region = EQ.REGIONS[p.region] ? p.region : 'village';
@@ -118,6 +119,7 @@ window.EQ = window.EQ || {};
       else if (e.code === 'KeyN') EQ.screens.notebook();
       else if (e.code === 'KeyQ') EQ.screens.quests();
       else if (e.code === 'KeyM') EQ.screens.map();
+      else if (e.code === 'KeyB') EQ.screens.book();
     });
     window.addEventListener('keyup', e => { if (KEYMAP[e.code]) G.keys[KEYMAP[e.code]] = false; });
     window.addEventListener('blur', () => { G.keys = {}; });
@@ -213,7 +215,12 @@ window.EQ = window.EQ || {};
       const s = Q.stage(p, mine.id);
       return EQ.ui.dialog([{ s: 'npc', en: s.objEn || 'Good luck!', vi: s.objEn ? s.obj : 'Chúc may mắn!' }, { s: 'pip', vi: 'Nhiệm vụ "' + mine.title + '": ' + s.obj + '.' }], sp);
     }
-    // 5. cửa hàng
+    // 5. cô giáo dạy theo sách
+    if (e.book) {
+      await EQ.ui.dialog([{ s: 'npc', en: 'Hello! What unit are you studying at school?', vi: 'Chào em! Ở lớp em đang học Unit mấy?' }], sp);
+      return EQ.screens.book();
+    }
+    // 5b. cửa hàng
     if (e.shop) return EQ.screens.shop(e, sp);
     // 6. trò chuyện + ôn tập tự nhiên
     const idle = (e.idle || [{ en: 'Hello!', vi: 'Xin chào!' }]);
@@ -339,6 +346,16 @@ window.EQ = window.EQ || {};
     }
     G.saveNow();
     return r;
+  };
+  G.drillIds = async function (ids, title) {
+    const p = G.profile;
+    ids = U.shuffle(ids.filter(id => p.vocab[id])).sort((a, b) => p.vocab[a].box - p.vocab[b].box || p.vocab[a].due - p.vocab[b].due).slice(0, 8);
+    if (!ids.length) return;
+    const modes = EQ.learn.wordModes(p);
+    const qs = ids.map(id => EQ.learn.wordQ(p, EQ.V[id], U.pick(modes)));
+    const r = await EQ.challenge.run(qs, { title: 'Ôn: ' + title, icon: '🔁', mastery: true });
+    if (r.completed) { p.reviews++; await G.reward(p, { xp: 8 + r.correct * 2, gold: 2 }); G.checkBadges(p); }
+    G.saveNow();
   };
   G.dailyAvailable = p => !(p.dailyDone || {})[U.today()] && EQ.learn.learnedIds(p).length >= 8;
   G.dailyChallenge = async function () {

@@ -167,6 +167,10 @@ window.EQ = window.EQ || {};
           fb.textContent = '✨ ' + ansText;
           EQ.speech.speak(ansText);
           EQ.game.reward(p, { xp: 5 }, true);
+          if (EQ.speech.listenEnabled()) {
+            let spoke = false;
+            fb.appendChild(el('div', { class: 'dlg-mic' }, EQ.speech.micButton(ansText, () => { if (!spoke) { spoke = true; EQ.game.reward(p, { xp: 3 }, true); } })));
+          }
           const go = el('button', { class: 'btn primary dlg-next', onclick: () => { advance = null; i++; show(); } }, 'Tiếp ▶ (E)');
           main.appendChild(go);
           advance = () => go.click();
@@ -239,6 +243,7 @@ window.EQ = window.EQ || {};
       el('div', { class: 'hud-btns' }, [
         btn('🎒', 'Túi đồ', 'I', () => EQ.screens.inventory()),
         btn('📒', 'Sổ từ', 'N', () => EQ.screens.notebook()),
+        btn('📗', 'Sách', 'B', () => EQ.screens.book()),
         btn('📜', 'Nhiệm vụ', 'Q', () => EQ.screens.quests()),
         btn('🗺️', 'Bản đồ', 'M', () => EQ.screens.map()),
         btn('⏸️', 'Tạm dừng', 'Esc', () => EQ.screens.pause())

@@ -12,7 +12,7 @@ const root = path.join(__dirname, '..');
 const ctx = { window: {}, console };
 ctx.window = ctx;
 vm.createContext(ctx);
-['js/core/util.js', 'js/data/vocab.js', 'js/data/lessons.js', 'js/data/quests.js', 'js/data/maps.js'].forEach(f => {
+['js/core/util.js', 'js/data/vocab.js', 'js/data/lessons.js', 'js/data/curriculum.js', 'js/data/quests.js', 'js/data/maps.js'].forEach(f => {
   vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f });
 });
 const EQ = ctx.EQ;
@@ -151,7 +151,10 @@ Object.values(EQ.REGIONS).forEach(R => R.entities.forEach(e => { if (e.quest && 
 // mọi từ trong rương nghe đã được dạy trước khi tới đó
 const taught = new Set();
 EQ.QUESTS.forEach(q => ((q.teach || {}).words || []).forEach(w => taught.add(w)));
-const untaught = EQ.VOCAB.filter(w => !taught.has(w.id)).map(w => w.id);
+const untaught = EQ.VOCAB.filter(w => w.r !== 'book' && !taught.has(w.id)).map(w => w.id);
+// từ theo sách phải thuộc đúng 1 Unit
+EQ.VOCAB.filter(w => w.r === 'book').forEach(w => { const u = (EQ.CURRICULUM[w.book] || []).find(x => x.id === w.t); if (!u || u.words.indexOf(w.id) < 0) err('Từ sách không thuộc Unit: ' + w.id); });
+console.log('Theo sách:', Object.keys(EQ.CURRICULUM).map(b => b + ' ' + EQ.CURRICULUM[b].length + ' Unit').join(', '));
 if (untaught.length) warn('Từ chưa được dạy trong nhiệm vụ nào: ' + untaught.join(', '));
 console.log('Nhiệm vụ chính:', realQuests, '+ nâng cao:', EQ.QUESTS.length - realQuests, '| Trùm:', Object.keys(EQ.BOSSES).length);
 if (realQuests < 12) err('Cần ít nhất 12 nhiệm vụ');

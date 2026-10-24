@@ -98,7 +98,7 @@ window.EQ = window.EQ || {};
       function record(correct) {
         if (recorded || opts.noRecord) return;
         recorded = true;
-        EQ.learn.record(p, { correct, hint, wordId: q.wordId, topic: q.topic, key: q.key, text: q.text });
+        EQ.learn.record(p, { correct, hint, wordId: q.wordId, topic: q.topic, key: q.key, text: q.text, mode: q.mode });
       }
       function success() {
         finished = true;
@@ -391,7 +391,8 @@ window.EQ = window.EQ || {};
             el('div', { class: 'wc-en' }, [w.en, speakBtn(w.en)]),
             el('div', { class: 'wc-vi' }, w.vi),
             el('div', { class: 'wc-ex' }, [el('span', null, w.ex), speakBtn(w.ex, '🔊', 'small')]),
-            el('div', { class: 'wc-exvi' }, w.exVi)
+            el('div', { class: 'wc-exvi' }, w.exVi),
+            EQ.speech.listenEnabled() ? EQ.speech.micButton(w.en) : null
           ]));
         });
         body.appendChild(grid);

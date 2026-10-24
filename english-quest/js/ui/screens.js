@@ -674,6 +674,8 @@ window.EQ = window.EQ || {};
       wrap.appendChild(el('div', { class: 'small' }, EQ.QUESTS.filter(q => EQ.Q.isDone(p, q.id)).map(q => q.title).join(' • ') || '—'));
       wrap.appendChild(el('div', { class: 'row' }, [
         el('button', { class: 'btn small', onclick: async () => { if (await EQ.ui.confirm('Chơi lại từ đầu với hồ sơ <b>' + U.esc(p.name) + '</b>? Toàn bộ tiến độ của bé này sẽ bị xóa (nên sao lưu trước).', { danger: true, yes: 'Chơi lại từ đầu' })) { store().resetProfile(p.id); cur = store().getProfile(p.id); if (EQ.game.profile && EQ.game.profile.id === p.id) EQ.game.profile = null; draw(); EQ.ui.toast('Đã đặt lại hồ sơ.', 'good'); } } }, '↺ Chơi lại từ đầu'),
+        el('button', { class: 'btn small', onclick: () => S.customWords(p) }, '📝 Nhập từ theo sách (' + ((p.customWords || []).length) + ')'),
+        (() => { const sel = el('select', { class: 'inp small', title: 'Sách đang học', onchange: e => { p.book = e.target.value; store().save(); } }, Object.keys(EQ.BOOKS).map(k => el('option', { value: k }, '📗 ' + EQ.BOOKS[k]))); sel.value = p.book || (p.grade >= 8 ? 'gs8' : 'gs6'); return sel; })(),
         el('button', { class: 'btn small danger', onclick: async () => { if (await EQ.ui.confirm('Xóa hẳn hồ sơ <b>' + U.esc(p.name) + '</b>?', { danger: true, yes: 'Xóa' })) { store().deleteProfile(p.id); cur = store().data.profiles[0] || null; draw(); } } }, '🗑️ Xóa hồ sơ')
       ]));
       return wrap;
@@ -701,6 +703,9 @@ window.EQ = window.EQ || {};
       return el('div', { class: 'psettings' }, [
         el('h3', null, '⚙️ Cài đặt & dữ liệu'),
         el('div', { class: 'row' }, [el('span', null, '⏰ Nhắc nghỉ ngơi:'), sel]),
+        el('label', { class: 'tog' }, [el('input', { type: 'checkbox', checked: st.speakPractice, onchange: e => { st.speakPractice = e.target.checked; store().save(); } }),
+          el('span', null, '🎤 Bật luyện nói (cần Internet & micro; giọng nói được trình duyệt gửi tới máy chủ nhận dạng của Google/Microsoft; game chỉ kiểm tra "nghe ra đúng câu", không chấm điểm phát âm)')]),
+        EQ.speech.canListen() ? null : el('p', { class: 'muted small' }, '⚠️ Trình duyệt này chưa hỗ trợ nhận dạng giọng nói. Hãy dùng Chrome hoặc Edge bản mới.'),
         el('div', { class: 'row' }, [
           el('button', { class: 'btn small', onclick: () => { EQ.game.saveNow(); store().download('english-quest-saoluu-' + U.today() + '.json', store().exportJSON()); } }, '💾 Sao lưu (tải file JSON)'),
           el('button', { class: 'btn small', onclick: () => file.click() }, '📂 Khôi phục từ file JSON'), file,
@@ -710,6 +715,95 @@ window.EQ = window.EQ || {};
       ]);
     }
     draw();
+  };
+
+  // ---------- Học theo sách Global Success ----------
+  S.book = function () {
+    const p = EQ.game.profile;
+    if (!p.book || !EQ.CURRICULUM[p.book]) p.book = p.grade >= 8 ? 'gs8' : 'gs6';
+    const body = el('div', { class: 'bookview' });
+    const close = EQ.ui.modal(body, { cls: 'wide tall', onEsc: () => close() });
+    const stat = ids => {
+      const L = EQ.learn;
+      const learned = ids.filter(id => p.vocab[id]);
+      return { total: ids.length, learned: learned.length, rem: learned.filter(id => p.vocab[id].box >= 2).length, long: learned.filter(id => p.vocab[id].box >= 3).length, due: learned.filter(id => p.vocab[id].due <= L.now()).length };
+    };
+    function card(title, sub, ids, extra) {
+      const st = stat(ids);
+      const pc = st.total ? Math.round(st.long / st.total * 100) : 0;
+      const left = ids.filter(id => !p.vocab[id]);
+      return el('div', { class: 'ucard' + (extra && extra.cur ? ' cur' : '') }, [
+        el('div', { class: 'u-title' }, title),
+        el('div', { class: 'u-sub' }, sub),
+        el('div', { class: 'u-bar' }, [el('div', { class: 'u-fill l', style: { width: (st.learned / Math.max(1, st.total) * 100) + '%' } }), el('div', { class: 'u-fill r', style: { width: (st.rem / Math.max(1, st.total) * 100) + '%' } }), el('div', { class: 'u-fill g', style: { width: pc + '%' } })]),
+        el('div', { class: 'u-nums' }, 'Đã học ' + st.learned + '/' + st.total + ' • Đang nhớ ' + st.rem + ' • Nhớ lâu ' + st.long + (st.due ? ' • ⏰ ' + st.due + ' đến hạn' : '')),
+        el('div', { class: 'row center tight' }, [
+          left.length ? el('button', { class: 'btn primary small', onclick: async () => { close(); await S.learnWords(left.slice(0, 8), title); S.book(); } }, '✨ Học ' + Math.min(8, left.length) + ' từ mới') : null,
+          st.learned ? el('button', { class: 'btn small', onclick: async () => { close(); await EQ.game.drillIds(ids.filter(id => p.vocab[id]), title); S.book(); } }, '🔁 Ôn') : null,
+          extra && extra.focus ? el('span', { class: 'u-focus', title: 'Trọng tâm ngữ pháp (tham khảo)' }, '📐 ' + extra.focus) : null
+        ])
+      ]);
+    }
+    function draw() {
+      body.innerHTML = '';
+      const sel = el('select', { class: 'inp small', onchange: e => { p.book = e.target.value; EQ.store.saveSoon(); draw(); } }, Object.keys(EQ.BOOKS).map(k => el('option', { value: k }, EQ.BOOKS[k])));
+      sel.value = p.book;
+      const unitSel = el('select', { class: 'inp small', onchange: e => { p.schoolUnit = p.schoolUnit || {}; p.schoolUnit[p.book] = +e.target.value; EQ.store.saveSoon(); draw(); } },
+        [el('option', { value: 0 }, 'Đang học Unit mấy ở lớp?')].concat(EQ.CURRICULUM[p.book].map(u => el('option', { value: u.n }, 'Unit ' + u.n))));
+      const cur = (p.schoolUnit || {})[p.book] || 0;
+      unitSel.value = String(cur);
+      body.appendChild(el('h2', null, '📗 Học theo sách giáo khoa'));
+      body.appendChild(el('div', { class: 'row' }, [sel, unitSel]));
+      body.appendChild(el('p', { class: 'muted small' }, 'Từ ở đây được game soạn theo CHỦ ĐỀ của từng Unit (không phải danh sách chính thức in trong sách). Phụ huynh có thể nhập đúng từ trong sách ở Bảng phụ huynh. Một từ chỉ được tính "Nhớ lâu" khi bé nhớ lại được sau ít nhất 1 ngày.'));
+      const grid = el('div', { class: 'ucards' });
+      if ((p.customWords || []).length) grid.appendChild(card('📝 Từ phụ huynh thêm', 'Từ trong sách / trên lớp', p.customWords.map(w => w.id).filter(id => EQ.V[id]), { cur: true }));
+      const units = EQ.CURRICULUM[p.book].slice();
+      if (cur) units.sort((a, b) => (b.n === cur) - (a.n === cur));
+      units.forEach(u => grid.appendChild(card('Unit ' + u.n + ': ' + u.en, u.vi, u.words, { cur: u.n === cur, focus: u.focus })));
+      body.appendChild(grid);
+      body.appendChild(el('div', { class: 'row center' }, [el('button', { class: 'btn', onclick: () => close() }, 'Đóng')]));
+    }
+    draw();
+  };
+
+  // dạy một nhóm từ rồi luyện ngay (bắt buộc đúng lần đầu)
+  S.learnWords = async function (ids, title) {
+    const p = EQ.game.profile;
+    const ok = await EQ.challenge.teach(p, { words: ids });
+    if (ok === false) return;
+    const modes = EQ.learn.wordModes(p).filter(m => m !== 'riddle');
+    const qs = EQ.U.shuffle(ids).slice(0, 6).map(id => EQ.learn.wordQ(p, EQ.V[id], EQ.U.pick(modes)));
+    const r = await EQ.challenge.run(qs, { title: 'Luyện ngay: ' + title, icon: '📗', mastery: true });
+    if (r.completed) {
+      await EQ.game.reward(p, { xp: 15 + r.correct * 2, gold: 3 });
+      EQ.ui.toast('📗 Đã học xong! Ngày mai các từ này sẽ được hỏi lại để nhớ lâu hơn.', 'good', 4500);
+    }
+    EQ.game.saveNow();
+  };
+
+  // ---------- Phụ huynh nhập từ theo sách ----------
+  S.customWords = function (p) {
+    const ta = el('textarea', { class: 'inp', rows: 9, placeholder: 'Mỗi dòng một từ, ví dụ:\ncompass = com-pa\npencil case = hộp bút | I have a pink pencil case. | Mình có một hộp bút màu hồng.' });
+    const list = el('div', { class: 'small' });
+    function drawList() {
+      list.innerHTML = '';
+      (p.customWords || []).forEach((w, i) => list.appendChild(el('div', { class: 'cw-row' }, [el('b', null, w.en), ' = ' + w.vi + (w.ex ? ' — ' + w.ex : ''),
+        el('button', { class: 'btn-mini', onclick: () => { p.customWords.splice(i, 1); EQ.store.save(); drawList(); } }, '✕')])));
+      if (!(p.customWords || []).length) list.appendChild(el('span', { class: 'muted' }, 'Chưa có từ nào.'));
+    }
+    const body = el('div', { class: 'custom' }, [
+      el('h2', null, '📝 Nhập từ theo sách cho ' + p.name),
+      el('p', { class: 'small muted' }, 'Gõ hoặc dán từ vựng của bài đang học trên lớp. Định dạng: "từ tiếng Anh = nghĩa tiếng Việt", có thể thêm "| câu ví dụ | nghĩa câu ví dụ". Từ sẽ xuất hiện trong mục 📗 Sách, trận đấu và ôn tập hằng ngày.'),
+      ta,
+      el('div', { class: 'row' }, [el('button', { class: 'btn primary', onclick: () => {
+        const r = EQ.learn.addCustomWords(p, ta.value);
+        EQ.store.save(); ta.value = ''; drawList();
+        EQ.ui.toast('Đã thêm ' + r.added + ' từ' + (r.bad ? ', bỏ qua ' + r.bad + ' dòng sai định dạng' : '') + '.', r.added ? 'good' : 'warn');
+      } }, '➕ Thêm từ'), el('button', { class: 'btn', onclick: () => close() }, 'Đóng')]),
+      el('h3', null, 'Danh sách từ đã nhập'), list
+    ]);
+    const close = EQ.ui.modal(body, { cls: 'wide', onEsc: () => close() });
+    drawList();
   };
 
   EQ.screens = S;

@@ -12,7 +12,7 @@ window.EQ = window.EQ || {};
   const DEFAULT_SETTINGS = {
     music: true, sfx: true, musicVol: 0.5, sfxVol: 0.7,
     accent: 'auto', voiceName: '', rate: 0.85,
-    breakMin: 20, alwaysVi: false
+    breakMin: 20, alwaysVi: false, speakPractice: false
   };
 
   const S = {
@@ -110,7 +110,7 @@ window.EQ = window.EQ || {};
       hist: [], diff: 1, streak: 0, bestStreak: 0,
       explored: {}, time: { total: 0, days: {} }, daily: {}, reviews: 0,
       placement: { done: false, score: 0 }, stats: { answers: 0, correct: 0, hints: 0 },
-      tracked: null, lastPlayed: 0, dailyDone: {}, dailyCount: 0
+      tracked: null, lastPlayed: 0, dailyDone: {}, dailyCount: 0, book: null, schoolUnit: {}, customWords: []
     };
     for (const k in def) if (p[k] === undefined) p[k] = def[k];
     if (!p.avatar) p.avatar = { hair: 'long', hairC: '#3e2723', skin: '#ffe0bd', outfit: 'basic' };

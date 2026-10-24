@@ -9,7 +9,9 @@ window.EQ = window.EQ || {};
   const INTERVAL = [0, 10 * MIN, DAY, 3 * DAY, 7 * DAY, 16 * DAY];
   const L = {};
 
-  L.now = () => Date.now();
+  // timeOffset chỉ dùng cho kiểm thử tự động (giả lập thời gian trôi qua)
+  L.timeOffset = 0;
+  L.now = () => Date.now() + L.timeOffset;
 
   // ---------- Từ vựng ----------
   L.isLearned = (p, id) => !!p.vocab[id];
@@ -83,10 +85,16 @@ window.EQ = window.EQ || {};
     if (info.wordId && p.vocab[info.wordId]) {
       const e = p.vocab[info.wordId];
       e.seen++; e.last = L.now();
-      if (c && !h) { e.ok++; e.box = Math.min(5, e.box + 1); }
-      else if (c && h) { e.ok++; e.box = Math.max(1, Math.min(e.box, 1)); }
-      else { e.bad++; e.box = 0; }
-      e.due = L.now() + INTERVAL[e.box];
+      // NHỚ LÂU, KHÔNG NHỚ TẠM:
+      // - chỉ lên hộp khi trả lời đúng lúc từ đã "đến hạn" (đã qua đủ thời gian quên bớt), học dồn trong 1 buổi không được tính
+      // - nhận biết (chọn hình, chọn nghĩa) chỉ đưa lên tối đa hộp 3; muốn "Nhớ tốt" (hộp 4–5) phải tự nhớ ra từ (gõ, ghép chữ, chọn từ tiếng Anh)
+      const recall = ['type', 'spell', 'en', 'order'].indexOf(info.mode) >= 0;
+      const due = e.box === 0 || L.now() >= e.due - INTERVAL[e.box] * 0.2;
+      if (c && !h) {
+        e.ok++;
+        if (due && (recall || e.box < 3)) { e.box = Math.min(5, e.box + 1); e.due = L.now() + INTERVAL[e.box]; e.lastUp = L.now(); }
+      } else if (c && h) { e.ok++; }
+      else { e.bad++; e.box = e.box >= 3 ? 1 : 0; e.due = L.now() + INTERVAL[e.box]; }
     }
     if (!c && info.key) {
       const m = p.mistakes[info.key] || { text: info.text || info.key, n: 0, topic: tp };
@@ -404,6 +412,36 @@ window.EQ = window.EQ || {};
         opts: U.shuffle(g.opts.map(o => ({ t: o, ok: o === g.a, en: true }))), explain: g.ex, hint: '', topic: 'g_' + l, key: 'g:' + EQ.GRAMMAR.indexOf(g)
       };
     }
+  };
+
+  // ---------- Từ do phụ huynh nhập ----------
+  EQ.TOPICS.custom = 'Từ phụ huynh thêm (theo sách)';
+  L.registerCustom = function (p) {
+    (p.customWords || []).forEach(w => {
+      if (EQ.V[w.id]) return;
+      const o = { id: w.id, en: w.en, vi: w.vi, e: '📝', ex: w.ex || w.en, exVi: w.exVi || w.vi, t: 'custom', r: 'book', pic: false, custom: true };
+      EQ.VOCAB.push(o); EQ.V[o.id] = o;
+    });
+  };
+  L.addCustomWords = function (p, text) {
+    p.customWords = p.customWords || [];
+    let added = 0, bad = 0;
+    String(text || '').split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (!line) return;
+      const parts = line.split('|').map(x => x.trim());
+      const m = parts[0].match(/^(.+?)\s*[=:]\s*(.+)$/);
+      if (!m || !/[a-z]/i.test(m[1])) { bad++; return; }
+      const en = m[1].trim().replace(/\s+/g, ' '), vi = m[2].trim();
+      if (en.length > 40 || vi.length > 80) { bad++; return; }
+      const existing = EQ.VOCAB.find(w => w.en.toLowerCase() === en.toLowerCase() && !w.custom);
+      const id = existing ? existing.id : 'c_' + en.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      if (p.customWords.some(w => w.id === id)) return;
+      p.customWords.push({ id, en: existing ? existing.en : en, vi: existing ? existing.vi : vi, ex: parts[1] || '', exVi: parts[2] || '' });
+      added++;
+    });
+    L.registerCustom(p);
+    return { added, bad };
   };
 
   // ---------- Thống kê cho phụ huynh ----------
