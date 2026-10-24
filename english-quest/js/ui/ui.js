@@ -182,20 +182,27 @@ window.EQ = window.EQ || {};
           EQ.challenge.render(holder, q, { retry: true, allowHint: true, noRecord: false }).then(() => { first = false; area.innerHTML = ''; done(ansText); });
           return;
         }
-        const opts = U.shuffle(n.opts.map(o => Object.assign({}, o, { en: U.fill(o.en, p), why: U.fill(o.why, p) })));
-        opts.forEach(o => {
-          const b = el('button', { class: 'choice' }, [el('span', null, o.en), el('span', { class: 'choice-say', title: 'Nghe', onclick: e => { e.stopPropagation(); EQ.speech.speak(o.en, { user: true }); } }, '🔊')]);
-          b.onclick = () => {
-            if (b.disabled) return;
-            if (o.ok) { rec(true); b.classList.add('right'); done(o.en); }
-            else {
-              rec(false); b.classList.add('wrong'); b.disabled = true; EQ.audio.sfx('wrong');
-              fb.className = 'dlg-fb bad';
-              fb.textContent = '🧚 Pip: ' + (o.why || 'Chưa đúng, thử câu khác nhé!');
-            }
-          };
-          area.appendChild(b);
-        });
+        let opts = U.shuffle(n.opts.map(o => Object.assign({}, o, { en: U.fill(o.en, p), why: U.fill(o.why, p) })));
+        // sau khi chọn sai: giải thích rồi xáo lại toàn bộ lựa chọn (không loại trừ dần → phải hiểu mới chọn đúng)
+        const drawChoices = () => {
+          area.innerHTML = '';
+          opts.forEach(o => {
+            const b = el('button', { class: 'choice' }, [el('span', null, o.en), el('span', { class: 'choice-say', title: 'Nghe', onclick: e => { e.stopPropagation(); EQ.speech.speak(o.en, { user: true }); } }, '🔊')]);
+            b.onclick = () => {
+              if (b.disabled) return;
+              if (o.ok) { rec(true); b.classList.add('right'); done(o.en); }
+              else {
+                rec(false); b.classList.add('wrong'); EQ.audio.sfx('wrong');
+                area.querySelectorAll('.choice').forEach(x => { x.disabled = true; });
+                fb.className = 'dlg-fb bad';
+                fb.textContent = '🧚 Pip: ' + (o.why || 'Chưa đúng, thử câu khác nhé!');
+                setTimeout(() => { opts = U.shuffle(opts); UI._dlgChoices = opts; drawChoices(); }, 1400);
+              }
+            };
+            area.appendChild(b);
+          });
+        };
+        drawChoices();
         UI._dlgChoices = opts;
       }
       function typewrite(node, text) {

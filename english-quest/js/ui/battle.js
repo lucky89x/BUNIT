@@ -157,9 +157,9 @@ window.EQ = window.EQ || {};
         qbox.innerHTML = '';
         qbox.appendChild(el('div', { class: 'bt-result' }, [
           el('div', { class: 'res-big' }, '😮‍💨 Bạn hơi mệt rồi!'),
-          el('div', { class: 'res-vi' }, 'Không sao cả! Mỗi lần sai là một lần học thêm. Bạn muốn thử lại ngay hay đi ôn bài một chút?'),
+          el('div', { class: 'res-vi' }, 'Không sao cả! Mỗi lần sai là một lần học thêm. ' + o.name + ' đã hồi sức, nên muốn thắng bạn cần trả lời đúng nhiều hơn. Ôn lại các từ vừa sai sẽ giúp bạn mạnh hơn đấy!'),
           el('div', { class: 'row center' }, [
-            el('button', { class: 'btn primary big', onclick: () => { st.over = false; st.hearts = st.maxHearts; EQ.audio.sfx('heal'); turn(); } }, '💪 Thử lại (hồi đầy tim)'),
+            el('button', { class: 'btn primary big', onclick: () => { st.over = false; st.hearts = st.maxHearts; st.hp = st.maxHp; st.combo = 0; EQ.audio.sfx('heal'); turn(); } }, '💪 Đấu lại từ đầu'),
             el('button', { class: 'btn', onclick: () => end('rest') }, '📒 Nghỉ & ôn bài')
           ])
         ]));

@@ -526,23 +526,23 @@ window.EQ = window.EQ || {};
   // ====================== TRÙM & QUÁI VẬT ======================
   // pool: nguồn câu hỏi. regions: từ vựng của vùng nào. lessons: ngữ pháp nào. types: dạng câu.
   EQ.BOSSES = {
-    slimeKing: { name: 'Vua Slime Ục Ịch', draw: 'slime', color: '#e53935', crown: true, hp: 8, size: 2.2,
-      regions: ['village'], lessons: ['greet', 'this', 'tobe'], types: ['meaning', 'pic', 'listen', 'grammar', 'order', 'en'],
+    slimeKing: { mastery: { region: 'village', need: 0.5 }, name: 'Vua Slime Ục Ịch', draw: 'slime', color: '#e53935', crown: true, hp: 8, size: 2.2,
+      regions: ['village'], lessons: ['greet', 'this', 'tobe'], types: ['meaning', 'pic', 'listen', 'grammar', 'order', 'en', 'riddle', 'type'],
       win: { en: 'Blub... Thank you. I was under a bad spell.', vi: 'Bụp... Cảm ơn cậu. Ta đã bị trúng một lời nguyền xấu.' } },
-    mushKing: { name: 'Vua Nấm Cáu Kỉnh', draw: 'mush', color: '#8e24aa', crown: true, hp: 10, size: 2.2,
-      regions: ['forest', 'village'], lessons: ['hesh', 'plural', 'have', 'order', 'tobe'], types: ['meaning', 'pic', 'listen', 'grammar', 'order', 'en'],
+    mushKing: { mastery: { region: 'forest', need: 0.5 }, name: 'Vua Nấm Cáu Kỉnh', draw: 'mush', color: '#8e24aa', crown: true, hp: 10, size: 2.2,
+      regions: ['forest', 'village'], lessons: ['hesh', 'plural', 'have', 'order', 'tobe'], types: ['meaning', 'pic', 'listen', 'grammar', 'order', 'en', 'riddle', 'type'],
       win: { en: 'Oh... my head! Thank you, little hero.', vi: 'Ôi... đầu ta! Cảm ơn cháu, người anh hùng nhỏ.' } },
-    golem: { name: 'Người Đá Ngữ Pháp', draw: 'golem', color: '#78909c', crown: false, hp: 12, size: 2.4,
-      regions: ['castle', 'forest', 'village'], lessons: ['present', 'dodoes', 'neg', 'can', 'prep', 'have', 'tobe'], types: ['grammar', 'order', 'prep', 'listen', 'meaning', 'en'],
+    golem: { mastery: { region: 'castle', need: 0.5 }, name: 'Người Đá Ngữ Pháp', draw: 'golem', color: '#78909c', crown: false, hp: 12, size: 2.4,
+      regions: ['castle', 'forest', 'village'], lessons: ['present', 'dodoes', 'neg', 'can', 'prep', 'have', 'tobe'], types: ['grammar', 'order', 'prep', 'listen', 'meaning', 'en', 'riddle', 'type'],
       win: { en: 'You are right. Mistakes help us learn.', vi: 'Ngươi nói đúng. Lỗi sai giúp chúng ta học hỏi.' } },
     sageV: { name: 'Ảo ảnh Ngôi Sao', draw: 'star', color: '#ffd54f', hp: 8, size: 1.8, hard: true,
-      regions: ['village'], lessons: ['greet', 'this', 'tobe'], types: ['en', 'listen', 'spell', 'order', 'grammar'],
+      regions: ['village'], lessons: ['greet', 'this', 'tobe'], types: ['en', 'listen', 'spell', 'order', 'grammar', 'type', 'riddle'],
       win: { en: 'Well done!', vi: 'Làm tốt lắm!' } },
     sageF: { name: 'Ảo ảnh Ngôi Sao', draw: 'star', color: '#aed581', hp: 10, size: 1.8, hard: true,
-      regions: ['forest', 'village'], lessons: ['plural', 'have', 'hesh', 'order'], types: ['en', 'listen', 'spell', 'order', 'grammar'],
+      regions: ['forest', 'village'], lessons: ['plural', 'have', 'hesh', 'order'], types: ['en', 'listen', 'spell', 'order', 'grammar', 'type', 'riddle'],
       win: { en: 'Well done!', vi: 'Làm tốt lắm!' } },
     sageC: { name: 'Ảo ảnh Ngôi Sao', draw: 'star', color: '#81d4fa', hp: 12, size: 1.8, hard: true,
-      regions: ['castle', 'forest', 'village'], lessons: ['present', 'dodoes', 'neg', 'can', 'prep'], types: ['en', 'listen', 'spell', 'order', 'grammar', 'prep'],
+      regions: ['castle', 'forest', 'village'], lessons: ['present', 'dodoes', 'neg', 'can', 'prep'], types: ['en', 'listen', 'spell', 'order', 'grammar', 'prep', 'type', 'riddle'],
       win: { en: 'Well done!', vi: 'Làm tốt lắm!' } }
   };
   EQ.MONSTERS = {
@@ -607,6 +607,8 @@ window.EQ = window.EQ || {};
     boss3: { name: 'Hiệp sĩ Ngữ Pháp', e: '🔵', desc: 'Hóa giải Người Đá Ngữ Pháp' },
     days3: { name: 'Chăm chỉ 3 ngày', e: '📅', desc: 'Chơi và học 3 ngày khác nhau' },
     review: { name: 'Ôn bài chăm chỉ', e: '🔁', desc: 'Hoàn thành 5 lượt ôn tập trong Sổ từ vựng' },
+    daily5: { name: 'Kiên trì 5 ngày', e: '🗓️', desc: 'Hoàn thành 5 Thử thách hôm nay' },
+    master_village: { name: 'Thuộc lòng Làng', e: '🏡', desc: 'Thuộc ít nhất 50% từ của Làng Khởi Đầu' },
     sage_village: { name: 'Ngôi sao của Làng', e: '⭐', desc: 'Vượt thử thách nâng cao ở Làng' },
     sage_forest: { name: 'Ngôi sao của Rừng', e: '🌟', desc: 'Vượt thử thách nâng cao ở Rừng' },
     sage_castle: { name: 'Ngôi sao Lâu đài', e: '💫', desc: 'Vượt thử thách nâng cao ở Lâu đài' }

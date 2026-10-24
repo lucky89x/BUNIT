@@ -364,7 +364,12 @@ window.EQ = window.EQ || {};
       body.appendChild(el('div', { class: 'nb-head' }, [
         el('h2', null, '📒 Sổ từ vựng'),
         el('div', { class: 'statrow small' }, [stat('📖', 'Đã học', s.learned), stat('🆕', 'Mới học', s.fresh), stat('🔴', 'Cần ôn', s.weak), stat('🟡', 'Đang nhớ', s.learning), stat('🟢', 'Nhớ tốt', s.strong), stat('⏰', 'Đến hạn ôn', s.due)]),
-        el('button', { class: 'btn primary', disabled: s.learned < 3, onclick: quick }, '🔁 Ôn tập nhanh (5 từ)')
+        el('div', { class: 'row center tight' }, [
+          el('button', { class: 'btn primary', disabled: !EQ.game.dailyAvailable(p), onclick: async () => { await EQ.game.dailyChallenge(); draw(); } }, EQ.game.dailyAvailable(p) ? '⭐ Thử thách hôm nay' : '✅ Đã xong thử thách hôm nay'),
+          el('button', { class: 'btn', disabled: s.learned < 3, onclick: quick }, '🔁 Ôn tập nhanh (5 từ)'),
+          (() => { const sel = el('select', { class: 'inp small' }, [el('option', { value: '' }, '📒 Luyện từ chưa thuộc...')].concat(['village', 'forest', 'castle'].filter(r => EQ.learn.regionMastery(p, r).total).map(r => { const m = EQ.learn.regionMastery(p, r); return el('option', { value: r }, EQ.REGIONS[r].name + ' (thuộc ' + m.ok + '/' + m.total + ')'); })));
+            sel.onchange = async () => { const r = sel.value; if (!r) return; await EQ.game.drill(r); draw(); }; return sel; })()
+        ])
       ]));
       const topics = U.uniq(EQ.learn.learnedIds(p).map(id => EQ.V[id].t));
       body.appendChild(el('div', { class: 'row' }, [
@@ -655,6 +660,12 @@ window.EQ = window.EQ || {};
       ]));
       wrap.appendChild(g2);
       const ms = Object.values(p.mistakes).sort((a, b) => b.n - a.n).slice(0, 8);
+      wrap.appendChild(el('h3', null, '🗺️ Độ thuộc từ theo vùng (cần ≥ 50% để đấu trùm)'));
+      wrap.appendChild(el('div', { class: 'tbars' }, ['village', 'forest', 'castle'].map(r => {
+        const m = EQ.learn.regionMastery(p, r); const pc = m.total ? Math.round(m.ratio * 100) : 0;
+        return el('div', { class: 'tbar' }, [el('span', { class: 'tb-l' }, EQ.REGIONS[r].name), el('div', { class: 'tb-track' }, el('div', { class: 'tb-fill ' + (pc >= 70 ? 'g' : pc >= 50 ? 'y' : 'r'), style: { width: pc + '%' } })), el('span', { class: 'tb-v' }, m.ok + '/' + m.total + ' từ')]);
+      })));
+      wrap.appendChild(el('p', { class: 'muted small' }, 'Thử thách hôm nay đã hoàn thành: ' + (p.dailyCount || 0) + ' lần.'));
       wrap.appendChild(el('h3', null, '⚠️ Lỗi hay gặp'));
       wrap.appendChild(ms.length ? el('ul', { class: 'small' }, ms.map(m => el('li', null, m.text + ' — sai ' + m.n + ' lần' + (m.fixed ? ', đã làm đúng lại ' + m.fixed + ' lần' : '')))) : el('p', { class: 'muted small' }, 'Chưa có.'));
       wrap.appendChild(el('h3', null, '💡 Gợi ý ôn tập'));

@@ -87,7 +87,7 @@ window.EQ = window.EQ || {};
       }
       // đề bài tiếng Việt
       const viLine = el('div', { class: 'q-vi' });
-      const isInstruction = q.kind !== 'mcq' || q.mode === 'pic' || q.mode === 'listen' || q.mode === 'en' || q.mode === 'meaning';
+      const isInstruction = q.kind !== 'mcq' || ['pic', 'listen', 'en', 'meaning', 'riddle'].indexOf(q.mode) >= 0;
       if (showVi || isInstruction) viLine.textContent = q.promptVi;
       else viLine.appendChild(el('button', { class: 'btn-mini', onclick: () => { viLine.textContent = q.promptVi; } }, '🇻🇳 Xem nghĩa'));
       root.appendChild(viLine);
@@ -147,7 +147,16 @@ window.EQ = window.EQ || {};
           b.addEventListener('click', () => {
             if (finished || b.disabled) return;
             if (o.ok) { b.classList.add('right'); success(); }
-            else { b.classList.add('wrong'); b.disabled = true; failure(o.t); }
+            else {
+              b.classList.add('wrong'); b.disabled = true; failure(o.t);
+              // không loại trừ dần: sau khi giải thích, mọi lựa chọn được xáo lại để bé phải chọn bằng hiểu biết
+              if (opts.retry) setTimeout(() => {
+                if (finished) return;
+                q.opts.forEach(x => { if (!x._gone) { x._btn.disabled = false; x._btn.classList.remove('wrong'); } });
+                U.shuffle(q.opts).forEach((x, k) => { grid.appendChild(x._btn); x._btn.querySelector('.opt-key').textContent = String(k + 1); });
+                q.opts.sort((a2, b2) => Array.prototype.indexOf.call(grid.children, a2._btn) - Array.prototype.indexOf.call(grid.children, b2._btn));
+              }, 1300);
+            }
             if (o.en && o.t && !o.ok) EQ.speech.speak(o.t);
           });
           o._btn = b;
@@ -158,8 +167,30 @@ window.EQ = window.EQ || {};
         removeWrong = n => {
           const w = U.shuffle(q.opts.filter(o => !o.ok && !o._btn.disabled));
           // luôn chừa lại ít nhất 1 đáp án sai
-          w.slice(0, Math.min(n, Math.max(0, w.length - 1))).forEach(o => { o._btn.disabled = true; o._btn.classList.add('gone'); });
+          w.slice(0, Math.min(n, Math.max(0, w.length - 1))).forEach(o => { o._gone = true; o._btn.disabled = true; o._btn.classList.add('gone'); });
         };
+      } else if (q.kind === 'type') {
+        // gõ từ
+        const pat = el('div', { class: 'q-pattern' }, q.pattern);
+        const inp = el('input', { class: 'inp type-inp', autocomplete: 'off', spellcheck: 'false', placeholder: 'Gõ từ tiếng Anh...' });
+        const norm = t => String(t || '').toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+        let shown = 1;
+        function check() {
+          if (finished || !norm(inp.value)) return;
+          if (norm(inp.value) === norm(q.word)) { inp.classList.add('right'); inp.disabled = true; success(); }
+          else { inp.classList.add('wrong'); setTimeout(() => inp.classList.remove('wrong'), 600); failure(inp.value); if (opts.retry) { inp.select(); } }
+        }
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); check(); } });
+        checkNow = check;
+        root.appendChild(pat);
+        root.appendChild(el('div', { class: 'row center' }, [inp, el('button', { class: 'btn primary', onclick: check }, '✔ Kiểm tra')]));
+        revealAnswer = () => { inp.value = q.word; inp.disabled = true; };
+        removeWrong = () => {
+          shown = Math.min(q.word.length, shown + 1);
+          pat.textContent = q.word.split('').map((c, i) => (i < shown || c === ' ') ? c : '_').join(' ');
+          inp.value = q.word.slice(0, shown); inp.focus();
+        };
+        setTimeout(() => inp.focus(), 50);
       } else {
         // order (sắp xếp từ) & spell (ghép chữ)
         const sep = q.kind === 'spell' ? '' : ' ';
@@ -207,7 +238,7 @@ window.EQ = window.EQ || {};
         const hb = el('button', { class: 'btn-mini' }, '💡 Gợi ý');
         hb.onclick = () => {
           if (finished) return;
-          hint = true; hb.disabled = true;
+          hint = true; if (q.kind !== 'type') hb.disabled = true;
           removeWrong(1);
           fb.className = 'q-feedback hint';
           fb.innerHTML = ''; fb.appendChild(el('div', null, '🧚 Pip: ' + (q.hint || 'Hãy đọc kỹ lại câu hỏi nhé!')));
@@ -237,6 +268,7 @@ window.EQ = window.EQ || {};
       C._testAnswer = (wantCorrect) => {
         if (finished) return;
         if (q.kind === 'mcq') { const o = q.opts.find(x => wantCorrect ? x.ok : (!x.ok && !x._btn.disabled)); if (o) o._btn.click(); }
+        else if (q.kind === 'type') { const inp = root.querySelector('.type-inp'); inp.value = wantCorrect ? q.word : 'xyz'; checkNow(); }
         else {
           const ans = (q.kind === 'spell' ? q.word.split('') : q.answer.split(' '));
           const toks = Array.from(root.querySelectorAll('.q-tokens .tok'));
@@ -255,11 +287,14 @@ window.EQ = window.EQ || {};
     o = o || {};
     return new Promise(resolve => {
       let i = 0, correct = 0, closed = false;
+      qs = qs.slice();
+      const fails = {};
       const body = el('div', { class: 'challenge' });
       const head = el('div', { class: 'ch-head' }, [
         el('div', { class: 'ch-title' }, [el('span', { class: 'ch-icon' }, o.icon || '✨'), o.title || 'Thử thách']),
         o.en ? el('div', { class: 'ch-sub' }, [el('span', null, o.en), speakBtn(o.en)]) : null,
-        o.vi ? el('div', { class: 'ch-subvi' }, o.vi) : null
+        o.vi ? el('div', { class: 'ch-subvi' }, o.vi) : null,
+        o.mastery ? el('div', { class: 'ch-rule' }, '🎯 Phải trả lời đúng ngay lần đầu. Sai thì Pip giải thích và hỏi lại bằng câu khác.') : null
       ]);
       const dots = el('div', { class: 'dots' });
       const qbox = el('div', { class: 'qbox' });
@@ -274,9 +309,19 @@ window.EQ = window.EQ || {};
         if (closed) return;
         if (i >= qs.length) { close(); resolve({ completed: true, correct, total: qs.length }); return; }
         drawDots();
-        const r = await C.render(qbox, qs[i], { retry: o.retry !== false, noRecord: o.noRecord });
+        const cur = qs[i];
+        const soft = !!cur._soft;
+        const r = await C.render(qbox, cur, { retry: o.mastery ? soft : o.retry !== false, noRecord: o.noRecord });
         if (closed) return;
         if (r.correct) correct++;
+        else if (o.mastery && !soft) {
+          // hỏi lại bằng câu khác cùng kiến thức; sai 2 lần thì cho làm lại có hướng dẫn
+          const base = cur.base || cur.key || String(i);
+          fails[base] = (fails[base] || 0) + 1;
+          const v = EQ.learn.variant(EQ.game.profile, cur);
+          if (fails[base] >= 2) v._soft = true;
+          qs.push(v);
+        }
         if (o.onAnswer) o.onAnswer(r, qs[i]);
         i++;
         next();

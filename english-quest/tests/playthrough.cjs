@@ -164,7 +164,7 @@ fs.mkdirSync(OUT, { recursive: true });
     if (!info) { errors.push('Bot bị kẹt: không có mục tiêu nhiệm vụ'); break; }
     const key = info.id + '@' + info.region;
     visited.push(key);
-    if (key === last && visited.filter(v => v === key).length > 12) { errors.push('Bot lặp lại mãi ở ' + key); break; }
+    if (key === last && visited.filter(v => v === key).length > 40) { errors.push('Bot lặp lại mãi ở ' + key); break; }
     last = key;
   }
   await driveUI();

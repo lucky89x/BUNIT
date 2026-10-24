@@ -248,6 +248,69 @@ window.EQ = window.EQ || {};
   s('can', "Fish can't walk.", 'Cá không thể đi bộ.', 2);
   EQ.SENTENCES = S;
 
+  // Câu đố đọc hiểu: [đáp án, câu đố tiếng Anh, nghĩa, các lựa chọn sai]
+  // Chỉ hỏi khi bé đã học từ đáp án. Câu đố không hiện sẵn tiếng Việt → phải đọc hiểu mới chọn đúng.
+  const R = [];
+  function r(a, en, vi, d) { R.push({ a, en, vi, d }); }
+  // Làng
+  r('dog', 'It has four legs. It says "woof".', 'Nó có bốn chân. Nó kêu "gâu gâu".', ['cat', 'egg', 'ball']);
+  r('cat', 'It says "meow". It likes fish.', 'Nó kêu "meo meo". Nó thích cá.', ['dog', 'cup', 'hat']);
+  r('apple', 'It is a fruit. It is red or green.', 'Nó là một loại quả. Nó màu đỏ hoặc xanh lá.', ['egg', 'bread', 'ball']);
+  r('egg', 'It is small and white. You can eat it.', 'Nó nhỏ và màu trắng. Bạn có thể ăn nó.', ['ball', 'key', 'book']);
+  r('milk', 'It is white. You drink it.', 'Nó màu trắng. Bạn uống nó.', ['bread', 'cake', 'egg']);
+  r('water', 'Fish live in it. You drink it every day.', 'Cá sống trong nó. Bạn uống nó mỗi ngày.', ['milk', 'bread', 'cake']);
+  r('cake', 'You eat it on your birthday.', 'Bạn ăn nó vào ngày sinh nhật.', ['bread', 'egg', 'cup']);
+  r('bread', 'You eat it for breakfast. It is brown.', 'Bạn ăn nó vào bữa sáng. Nó màu nâu.', ['cake', 'apple', 'milk']);
+  r('key', 'You open the door with it.', 'Bạn mở cửa bằng nó.', ['ball', 'pen', 'cup']);
+  r('umbrella', 'You open it when it rains.', 'Bạn mở nó ra khi trời mưa.', ['hat', 'bag', 'book']);
+  r('ball', 'It is round. You play with it.', 'Nó tròn. Bạn chơi với nó.', ['box', 'book', 'chair']);
+  r('chair', 'You sit on it.', 'Bạn ngồi lên nó.', ['box', 'ball', 'door']);
+  r('book', 'It has many pages. You read it.', 'Nó có nhiều trang. Bạn đọc nó.', ['pen', 'bag', 'cup']);
+  r('pen', 'You write with it.', 'Bạn viết bằng nó.', ['key', 'cup', 'ball']);
+  r('cup', 'You drink tea from it.', 'Bạn uống trà từ nó.', ['hat', 'box', 'bag']);
+  r('clock', 'It tells you the time.', 'Nó cho bạn biết giờ.', ['door', 'house', 'book']);
+  r('hat', 'You wear it on your head.', 'Bạn đội nó trên đầu.', ['bag', 'cup', 'umbrella']);
+  r('bag', 'You put your books in it.', 'Bạn để sách vào trong nó.', ['hat', 'cup', 'clock']);
+  r('house', 'You live in it with your family.', 'Bạn sống trong nó cùng gia đình.', ['box', 'door', 'clock']);
+  // Rừng
+  r('bird', 'It can fly. It has two legs.', 'Nó có thể bay. Nó có hai chân.', ['fish', 'cow', 'pig']);
+  r('fish', 'It lives in water. It can swim.', 'Nó sống dưới nước. Nó có thể bơi.', ['bird', 'horse', 'rabbit']);
+  r('rabbit', 'It has long ears. It likes carrots.', 'Nó có đôi tai dài. Nó thích cà rốt.', ['pig', 'cow', 'bear']);
+  r('elephant', 'It is very big. It is grey.', 'Nó rất to. Nó màu xám.', ['monkey', 'rabbit', 'duck']);
+  r('monkey', 'It can climb trees. It likes bananas.', 'Nó có thể trèo cây. Nó thích chuối.', ['cow', 'fish', 'duck']);
+  r('cow', 'It gives us milk.', 'Nó cho chúng ta sữa.', ['pig', 'horse', 'tiger']);
+  r('tiger', 'It is orange and black. It is a big cat.', 'Nó màu cam và đen. Nó là một con mèo lớn.', ['bear', 'cow', 'pig']);
+  r('duck', 'It can swim. It says "quack".', 'Nó có thể bơi. Nó kêu "quạc quạc".', ['bird', 'pig', 'horse']);
+  r('banana', 'It is a long yellow fruit.', 'Nó là một loại quả dài màu vàng.', ['apple', 'carrot', 'orange_fruit']);
+  r('carrot', 'It is orange. Rabbits like it.', 'Nó màu cam. Thỏ thích nó.', ['banana', 'apple', 'egg']);
+  r('ice_cream', 'It is cold and sweet.', 'Nó lạnh và ngọt.', ['tea', 'chicken', 'rice']);
+  r('tea', 'It is hot. Grandfather drinks it.', 'Nó nóng. Ông uống nó.', ['ice_cream', 'milk', 'cake']);
+  r('grandfather', "He is your father's father.", 'Ông ấy là bố của bố bạn.', ['grandmother', 'brother', 'baby']);
+  r('grandmother', "She is your mother's mother.", 'Bà ấy là mẹ của mẹ bạn.', ['grandfather', 'sister', 'mother']);
+  r('baby', 'He is very small. He cannot walk.', 'Em ấy rất nhỏ. Em ấy chưa thể đi.', ['mother', 'father', 'grandfather']);
+  r('teacher', 'She works at school. She teaches students.', 'Cô ấy làm việc ở trường. Cô ấy dạy học sinh.', ['baby', 'grandmother', 'father']);
+  r('ruler', 'You draw lines with it.', 'Bạn kẻ đường thẳng bằng nó.', ['scissors', 'notebook', 'crayon']);
+  r('scissors', 'You cut paper with it.', 'Bạn cắt giấy bằng nó.', ['ruler', 'notebook', 'pencil']);
+  r('eye', 'You see with it.', 'Bạn nhìn bằng nó.', ['ear', 'nose', 'mouth']);
+  r('ear', 'You hear with it.', 'Bạn nghe bằng nó.', ['eye', 'nose', 'hand']);
+  r('nose', 'You smell flowers with it.', 'Bạn ngửi hoa bằng nó.', ['ear', 'mouth', 'eye']);
+  r('mouth', 'You eat and speak with it.', 'Bạn ăn và nói bằng nó.', ['nose', 'ear', 'foot']);
+  r('tooth', 'You brush it every day. It is white.', 'Bạn đánh nó mỗi ngày. Nó màu trắng.', ['hand', 'foot', 'ear']);
+  r('foot', 'You wear a shoe on it.', 'Bạn đi giày vào nó.', ['hand', 'eye', 'arm']);
+  r('sleep', 'You do it in bed at night.', 'Bạn làm việc này trên giường vào ban đêm.', ['eat', 'swim', 'run']);
+  r('swim', 'You do it in the water.', 'Bạn làm việc này ở dưới nước.', ['run', 'read', 'cook']);
+  r('eat', 'You do it when you are hungry.', 'Bạn làm việc này khi bạn đói.', ['sleep', 'run', 'write']);
+  r('cook', 'Mom does it in the kitchen.', 'Mẹ làm việc này trong bếp.', ['swim', 'sleep', 'run']);
+  // Lâu đài
+  r('crown', 'The king wears it on his head.', 'Nhà vua đội nó trên đầu.', ['bed', 'castle', 'guard']);
+  r('bed', 'You sleep in it.', 'Bạn ngủ trong nó.', ['crown', 'castle', 'chair']);
+  r('castle', 'A king and a queen live in it.', 'Vua và hoàng hậu sống trong nó.', ['house', 'bed', 'crown']);
+  r('fly', 'Birds can do it. Fish cannot.', 'Chim làm được việc này. Cá thì không.', ['swim', 'walk', 'draw']);
+  r('climb', 'Monkeys do it on trees.', 'Khỉ làm việc này trên cây.', ['fly', 'swim', 'draw']);
+  r('draw', 'You do it with a pencil on paper.', 'Bạn làm việc này bằng bút chì trên giấy.', ['sing', 'jump', 'fly']);
+  r('dance', 'You move to the music.', 'Bạn chuyển động theo tiếng nhạc.', ['draw', 'climb', 'speak']);
+  EQ.RIDDLES = R;
+
   // Cảnh minh họa giới từ (vẽ bằng SVG trong challenge.js)
   // group: các câu trả lời trong cùng một nhóm vật mốc để tránh mơ hồ
   EQ.PREP_SCENES = [

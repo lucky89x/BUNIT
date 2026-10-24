@@ -60,10 +60,12 @@ window.EQ = window.EQ || {};
   L.nOpts = p => (p.diff < 1.6 ? 3 : 4);
   L.showVi = p => EQ.store.settings().alwaysVi || p.diff < 2.2;
   L.wordModes = function (p, hard) {
-    if (hard) return ['en', 'listen', 'spell', 'en'];
+    if (hard) return ['en', 'listen', 'type', 'riddle', 'spell'];
     const m = ['pic', 'meaning'];
     if (p.diff >= 1.4) m.push('listen', 'en');
-    if (p.diff >= 2.2) m.push('spell', 'en', 'listen');
+    if (p.diff >= 1.6) m.push('riddle');
+    if (p.diff >= 1.9) m.push('type');
+    if (p.diff >= 2.2) m.push('spell', 'type', 'riddle');
     return m;
   };
 
@@ -130,6 +132,11 @@ window.EQ = window.EQ || {};
     if ((mode === 'pic' || mode === 'listen') && !w.pic) mode = 'meaning';
     if (mode === 'listen' && !EQ.speech.available()) mode = 'pic';
     if (mode === 'spell' && (w.en.length > 8 || /\s/.test(w.en))) mode = 'en';
+    if (mode === 'riddle') {
+      const rq = L.riddleQ(p, w, opt);
+      if (rq) return rq;
+      mode = w.pic ? 'pic' : 'en';
+    }
     const base = { wordId: w.id, topic: w.t, key: 'w:' + w.id, text: w.en + ' = ' + w.vi };
     const ex = '"' + w.en + '" nghĩa là "' + w.vi + '". Ví dụ: ' + w.ex + ' (' + w.exVi + ')';
     if (mode === 'pic') {
@@ -167,6 +174,14 @@ window.EQ = window.EQ || {};
         hint: 'Chữ cái đầu tiên là "' + w.en.charAt(0) + '".', sayAfter: w.en
       });
     }
+    if (mode === 'type') {
+      const word = w.en.toLowerCase();
+      return Object.assign(base, {
+        kind: 'type', mode, word, pattern: word.split('').map((c, i) => (i === 0 || c === ' ') ? c : '_').join(' '),
+        promptVi: 'Gõ từ tiếng Anh có nghĩa: "' + w.vi + '"', pic: w.pic ? w.e : null, sw: w.sw, say: w.en,
+        explain: 'Từ đúng là "' + w.en + '" (' + w.vi + '). Ví dụ: ' + w.ex, hint: 'Mỗi lần bấm Gợi ý sẽ hiện thêm 1 chữ cái.', sayAfter: w.en
+      });
+    }
     // meaning
     const ds = distractors(p, w, n, 'vi');
     return Object.assign(base, {
@@ -175,6 +190,44 @@ window.EQ = window.EQ || {};
       opts: U.shuffle([{ t: w.vi, ok: true }].concat(ds.map(d => ({ t: d.vi })))),
       explain: ex, hint: 'Ví dụ: ' + w.ex, sayAfter: w.en
     });
+  };
+
+  // câu đố đọc hiểu: chỉ có tiếng Anh, phải hiểu mới chọn đúng
+  L.riddleQ = function (p, w, opt) {
+    opt = opt || {};
+    const list = (EQ.RIDDLES || []).filter(r => r.a === w.id);
+    if (!list.length || !w.pic) return null;
+    const r = U.pick(list);
+    const n = (opt.nOpts || L.nOpts(p)) - 1;
+    const ds = r.d.map(id => EQ.V[id]).filter(x => x && x.pic && x.e !== w.e).slice(0, n);
+    return {
+      kind: 'mcq', mode: 'riddle', wordId: w.id, topic: w.t, key: 'r:' + w.id, text: r.en + ' → ' + w.en,
+      prompt: r.en, promptVi: 'Đọc câu đố tiếng Anh rồi chọn hình đúng', say: r.en, riddleVi: r.vi,
+      opts: U.shuffle([Object.assign({ ok: true }, picOf(w))].concat(ds.map(d => picOf(d)))),
+      explain: '"' + r.en + '" nghĩa là: ' + r.vi + ' → Đáp án: ' + w.en + ' (' + w.vi + ').',
+      hint: 'Nghĩa câu đố: ' + r.vi, sayAfter: w.en
+    };
+  };
+
+  // tạo câu hỏi khác nhưng cùng kiến thức (dùng khi bé trả lời sai)
+  L.variant = function (p, q) {
+    let v = null;
+    if (q.wordId && EQ.V[q.wordId]) {
+      const alt = { pic: 'meaning', meaning: 'pic', listen: 'pic', en: 'pic', spell: 'en', type: 'en', riddle: 'pic' }[q.mode] || 'pic';
+      v = L.wordQ(p, EQ.V[q.wordId], alt);
+    } else if (q.mode === 'grammar' && q.lesson) v = L.grammarQ(p, [q.lesson], { avoid: [q.q] });
+    else if (q.kind === 'order' && q.lesson) v = L.orderQ(p, [q.lesson], { avoid: [q.answer] });
+    else if (q.mode === 'prep') { for (let i = 0; i < 10; i++) { v = L.prepQ(p); if (v.key !== q.key) break; } }
+    if (!v) v = Object.assign({}, q, { opts: q.opts ? U.shuffle(q.opts.map(o => Object.assign({}, o))) : undefined, tokens: q.tokens ? U.shuffle(q.tokens) : undefined });
+    v.base = q.base || q.key;
+    return v;
+  };
+
+  // độ thuộc từ của một vùng: số từ đã học ở mức "Đang nhớ" trở lên
+  L.regionMastery = function (p, region) {
+    const ids = L.learnedIds(p).filter(id => EQ.V[id].r === region);
+    const ok = ids.filter(id => p.vocab[id].box >= 2).length;
+    return { ok, total: ids.length, ratio: ids.length ? ok / ids.length : 0, weak: ids.filter(id => p.vocab[id].box < 2) };
   };
 
   L.grammarQ = function (p, lessons, opt) {
@@ -245,7 +298,7 @@ window.EQ = window.EQ || {};
       ws = U.shuffle(ws);
       // ưu tiên từ hình ảnh để dễ
       const modes = L.wordModes(p);
-      for (let i = 0; i < gen.words.n && i < ws.length; i++) qs.push(L.wordQ(p, ws[i], modes[i % modes.length]));
+      for (let i = 0; i < gen.words.n && i < ws.length; i++) qs.push(L.wordQ(p, ws[i], U.pick(modes)));
     }
     if (gen.grammar) {
       const used = [];
@@ -290,7 +343,7 @@ window.EQ = window.EQ || {};
     if (!hard) {
       const modes = L.wordModes(p);
       types = types.filter(t => ['grammar', 'order', 'prep'].indexOf(t) >= 0 || modes.indexOf(t) >= 0);
-      if (!types.some(t => ['pic', 'meaning', 'listen', 'en', 'spell'].indexOf(t) >= 0)) types.push('pic', 'meaning');
+      if (!types.some(t => ['pic', 'meaning', 'listen', 'en', 'spell', 'type', 'riddle'].indexOf(t) >= 0)) types.push('pic', 'meaning');
     }
     const orderLessons = lessons.filter(l => EQ.SENTENCES.some(s => s.l === l));
     const prepOk = !!p.lessons.prep;
@@ -303,8 +356,8 @@ window.EQ = window.EQ || {};
         if (t === 'grammar' && lessons.length) { const q = L.grammarQ(p, lessons, { avoid: usedG, hard }); if (q) { usedG.push(q.q); if (usedG.length > 8) usedG.shift(); return q; } }
         else if (t === 'order' && orderLessons.length) { const q = L.orderQ(p, orderLessons, { avoid: usedO, hard }); if (q) { usedO.push(q.answer); if (usedO.length > 6) usedO.shift(); return q; } }
         else if (t === 'prep' && prepOk) return L.prepQ(p);
-        else if (['pic', 'meaning', 'listen', 'en', 'spell'].indexOf(t) >= 0) {
-          let ws = L.pickWords(p, 8, w => wordFilter(w) && usedWords.indexOf(w.id) < 0 && (t !== 'pic' && t !== 'listen' || w.pic));
+        else if (['pic', 'meaning', 'listen', 'en', 'spell', 'type', 'riddle'].indexOf(t) >= 0) {
+          let ws = L.pickWords(p, 8, w => wordFilter(w) && usedWords.indexOf(w.id) < 0 && (['pic', 'listen', 'riddle'].indexOf(t) < 0 || w.pic) && (t !== 'riddle' || (EQ.RIDDLES || []).some(r => r.a === w.id)));
           if (!ws.length) ws = L.pickWords(p, 8, w => usedWords.indexOf(w.id) < 0);
           if (!ws.length) ws = L.pickWords(p, 8);
           if (ws.length) {
@@ -320,7 +373,7 @@ window.EQ = window.EQ || {};
     }
     function missed(q) {
       // hỏi lại câu sai sau vài lượt (tạo câu mới cùng nội dung để xáo đáp án)
-      if (q.wordId) retry.push(L.wordQ(p, EQ.V[q.wordId], q.mode === 'spell' ? 'en' : q.mode, { nOpts: hard ? 4 : undefined }));
+      if (q.wordId) retry.push(L.variant(p, q));
       else if (q.kind === 'order') retry.push(L.orderFrom(q.answer, (q.promptVi.match(/"(.*)"/) || [0, ''])[1], q.topic, q.key, q.lesson));
     }
     return { next, missed, hard };

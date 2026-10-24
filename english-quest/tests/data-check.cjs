@@ -57,6 +57,16 @@ Object.keys(EQ.LESSONS).forEach(l => { if (!perLesson[l] && l !== 'order' && l !
 EQ.SENTENCES.forEach(s => { if (!EQ.LESSONS[s.l]) err('Câu sắp xếp có bài lạ: ' + s.s); if (!/[.!?]$/.test(s.s)) err('Câu sắp xếp thiếu dấu câu: ' + s.s); });
 console.log('Câu sắp xếp:', EQ.SENTENCES.length);
 
+// ---- câu đố
+(EQ.RIDDLES || []).forEach(r => {
+  const w = EQ.V[r.a];
+  if (!w) return err('Câu đố có đáp án lạ: ' + r.a);
+  if (!w.pic) err('Đáp án câu đố phải có hình: ' + r.a);
+  r.d.forEach(id => { const d = EQ.V[id]; if (!d) err('Câu đố ' + r.a + ': lựa chọn lạ ' + id); else if (!d.pic || d.e === w.e) err('Câu đố ' + r.a + ': lựa chọn không dùng được ' + id); });
+  if (!/[.!?]$/.test(r.en)) warn('Câu đố thiếu dấu câu: ' + r.en);
+});
+console.log('Câu đố:', (EQ.RIDDLES || []).length);
+
 // ---- bản đồ
 const regionEnts = {};
 const allEntIds = new Set();

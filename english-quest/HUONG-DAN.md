@@ -69,6 +69,17 @@ Game **không** dùng micro và **không** chấm điểm phát âm.
 - **Bài khởi động 10 câu** (có thể bỏ qua) để chọn mức xuất phát. Không mặc định lớp 8 giỏi hơn lớp 6.
 - **Không gây nghiện:** không có thời gian đếm ngược, không phần thưởng đăng nhập hằng ngày, có **nhắc nghỉ sau 20 phút** (phụ huynh chỉnh được). Gợi ý nhẹ nhàng khi học hơn 30 từ mới/ngày.
 
+## 5b. Bản 1.1 – Chống đoán mò (bắt buộc phải hiểu mới qua)
+
+- **Cổng phép thuật, bài kiểm tra của NPC, rương kho báu, thử thách hôm nay:** chỉ tính câu **đúng ngay lần đầu**. Chọn sai → Pip giải thích, rồi hỏi lại **bằng một câu khác cùng kiến thức** (đổi câu, đổi dạng, xáo đáp án). Sai 2 lần cùng một kiến thức thì được làm lại có hướng dẫn để không bị kẹt.
+- **Không loại trừ dần đáp án:** chọn sai không làm đáp án đó biến mất; mọi lựa chọn được xáo lại, nên bấm bừa lần lượt không qua được.
+- **Dạng mới – Gõ từ:** nhìn hình + nghĩa tiếng Việt, tự gõ từ tiếng Anh (gợi ý hiện dần từng chữ cái).
+- **Dạng mới – Câu đố đọc hiểu:** chỉ có tiếng Anh (ví dụ *"You open the door with it."*), phải hiểu mới chọn đúng hình. Có 55 câu đố.
+- **Trùm đòi thuộc từ:** muốn đấu Vua Slime / Vua Nấm / Người Đá, bé phải thuộc **ít nhất 50% từ của vùng** (mỗi từ trả lời đúng ngay lần đầu ít nhất 2 lần). Chưa đủ thì Pip báo số từ đã thuộc và mở ngay bài **Luyện từ** 8 từ yếu nhất.
+- **Hết tim khi đấu:** trùm/quái vật hồi đầy máu khi đấu lại → không thể thắng bằng cách đoán mãi.
+- **⭐ Thử thách hôm nay:** mỗi ngày 1 lần, 8 câu ôn các từ đến hạn + ngữ pháp (Sổ từ vựng → nút ⭐). Huy hiệu "Kiên trì 5 ngày".
+- **Bảng phụ huynh** có thêm "Độ thuộc từ theo vùng" và số lần hoàn thành thử thách hôm nay.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -124,6 +135,7 @@ english-quest/
 **Kiểm thử (dành cho người lập trình):**
 - `node tests/data-check.cjs` – kiểm tra từ vựng, ngữ pháp, nhiệm vụ, bản đồ.
 - `node tests/playthrough.cjs` – bot tự chơi hết chương 1 trên Chromium (cần Playwright).
+- `node tests/anti-guess.cjs` – kiểm tra các cơ chế chống đoán mò của bản 1.1.
 
 ## 10. Bản quyền nội dung
 

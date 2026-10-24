@@ -401,3 +401,10 @@ button { font-family: inherit; cursor: pointer; }
 @keyframes pulse { 0%, 100% { box-shadow: 0 5px 0 #0288d1, 0 0 0 0 rgba(41,182,246,.5); } 50% { box-shadow: 0 5px 0 #0288d1, 0 0 0 14px rgba(41,182,246,0); } }
 @keyframes bannerIn { to { transform: translate(-50%, -50%) scale(1); } }
 @keyframes bannerOut { to { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
+
+/* ---------- Bản 1.1: gõ từ, luật thử thách ---------- */
+.ch-rule { font-size: 13px; color: #8a5a00; background: #fff6d6; border-radius: 10px; padding: 4px 10px; display: inline-block; margin-top: 4px; }
+.q-pattern { font-size: 34px; font-weight: 900; letter-spacing: 4px; color: var(--pri2); margin: 6px 0; font-family: "Consolas", "Courier New", monospace; }
+.type-inp { width: 320px; font-size: 26px; text-align: center; font-weight: 800; }
+.type-inp.right { border-color: var(--ok); background: #e9fbf1; }
+.type-inp.wrong { border-color: var(--bad); animation: shake .35s; }

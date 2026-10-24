@@ -70,6 +70,7 @@ window.EQ = window.EQ || {};
     EQ.ui.banner(EQ.REGIONS[region].name, EQ.REGIONS[region].en);
     G.checkBadges(p);
     G.saveNow();
+    if (G.dailyAvailable(p)) setTimeout(() => EQ.ui.toast('⭐ Có Thử thách hôm nay! Mở Sổ từ vựng (phím N) để làm.', 'gold', 5000), 2500);
   };
 
   G.toMenu = function () {
@@ -254,7 +255,7 @@ window.EQ = window.EQ || {};
     if (s.type === 'quiz') {
       await EQ.ui.dialog([{ s: 'npc', en: 'Are you ready?', vi: 'Cháu sẵn sàng chưa?' }], sp);
       const qs = EQ.learn.quizFromGen(p, s.gen);
-      const r = await EQ.challenge.run(qs, { title: s.title || q.title, icon: '📝', retry: true });
+      const r = await EQ.challenge.run(qs, { title: s.title || q.title, icon: '📝', mastery: true });
       if (!r.completed) return pip('Không sao, lúc nào sẵn sàng thì quay lại nhé!');
       await EQ.ui.dialog(s.script || [], sp);
       return G.advance(q);
@@ -266,6 +267,19 @@ window.EQ = window.EQ || {};
     }
     if (s.type === 'boss') {
       const def = EQ.BOSSES[s.boss];
+      // phải thật sự thuộc từ của vùng mới được đấu trùm
+      if (def.mastery) {
+        const m = EQ.learn.regionMastery(p, def.mastery.region);
+        const need = Math.ceil(m.total * def.mastery.need);
+        if (m.ok < need) {
+          await EQ.ui.dialog([{ s: 'npc', en: 'Ha! You do not know my words yet!', vi: 'Ha! Ngươi chưa thuộc các từ của ta đâu!' }], sp);
+          await pip('Để đấu với ' + def.name + ', bạn cần thuộc ít nhất ' + need + ' từ của ' + EQ.REGIONS[def.mastery.region].name +
+            ' (mức "Đang nhớ" trở lên). Hiện bạn đã thuộc ' + m.ok + '/' + m.total + ' từ.\nMỗi từ cần trả lời đúng ngay lần đầu ít nhất 2 lần.');
+          if (await EQ.ui.confirm('Luyện ngay 8 từ bạn chưa thuộc của vùng này?', { yes: '📒 Luyện ngay', no: 'Để sau' })) await G.drill(def.mastery.region);
+          return;
+        }
+        if (def.mastery.region === 'village') G.award(p, 'master_village');
+      }
       const res = await EQ.battle.start({ def, hp: def.hp, name: def.name, boss: !def.hard, hard: def.hard, spec: { regions: def.regions, lessons: def.lessons, types: def.types, hard: def.hard } });
       if (res === 'win') {
         p.flags['boss:' + s.boss] = true;
@@ -304,6 +318,47 @@ window.EQ = window.EQ || {};
     EQ.world.refresh(p);
     G.saveNow();
     if (q.id === 'c_boss') { await U.sleep(300); await EQ.screens.chapterEnd(); }
+  };
+
+  // ====================== Luyện từ & thử thách hôm nay ======================
+  // luyện các từ chưa thuộc (ưu tiên từ yếu nhất), phải đúng ngay lần đầu
+  G.drill = async function (region) {
+    const p = G.profile;
+    let ids = region ? EQ.learn.regionMastery(p, region).weak : EQ.learn.learnedIds(p).filter(id => p.vocab[id].box < 2);
+    if (!ids.length) ids = EQ.learn.learnedIds(p).filter(id => !region || EQ.V[id].r === region);
+    ids = U.shuffle(ids).sort((a, b) => p.vocab[a].box - p.vocab[b].box).slice(0, 8);
+    if (!ids.length) return EQ.ui.toast('Chưa có từ nào để luyện.', 'warn');
+    const modes = EQ.learn.wordModes(p);
+    const qs = ids.map(id => EQ.learn.wordQ(p, EQ.V[id], U.pick(modes)));
+    const r = await EQ.challenge.run(qs, { title: 'Luyện từ' + (region ? ': ' + EQ.REGIONS[region].name : ''), icon: '📒', mastery: true });
+    if (r.completed) {
+      p.reviews++;
+      await G.reward(p, { xp: 8 + r.correct * 2, gold: 2 });
+      if (region) { const m = EQ.learn.regionMastery(p, region); EQ.ui.toast('📒 ' + EQ.REGIONS[region].name + ': đã thuộc ' + m.ok + '/' + m.total + ' từ', 'good', 4000); }
+      G.checkBadges(p);
+    }
+    G.saveNow();
+    return r;
+  };
+  G.dailyAvailable = p => !(p.dailyDone || {})[U.today()] && EQ.learn.learnedIds(p).length >= 8;
+  G.dailyChallenge = async function () {
+    const p = G.profile;
+    if (!G.dailyAvailable(p)) return EQ.ui.toast('Hôm nay bạn đã hoàn thành thử thách rồi. Hẹn gặp lại ngày mai!', 'good');
+    const ws = EQ.learn.pickWords(p, 6);
+    const modes = EQ.learn.wordModes(p);
+    const qs = ws.map(w => EQ.learn.wordQ(p, w, U.pick(modes)));
+    const lessons = Object.keys(p.lessons);
+    if (lessons.length) { const g = EQ.learn.grammarQ(p, lessons); if (g) qs.push(g); const o = EQ.learn.orderQ(p, lessons); if (o) qs.push(o); }
+    const r = await EQ.challenge.run(U.shuffle(qs), { title: 'Thử thách hôm nay', icon: '⭐', mastery: true });
+    if (r.completed) {
+      p.dailyDone = p.dailyDone || {};
+      p.dailyDone[U.today()] = true;
+      p.dailyCount = (p.dailyCount || 0) + 1;
+      await G.reward(p, { xp: 30, gold: 10 });
+      EQ.ui.banner('⭐ Xong thử thách hôm nay!', 'Hẹn gặp lại ngày mai nhé', 'gold');
+      if (p.dailyCount >= 5) G.award(p, 'daily5');
+    }
+    G.saveNow();
   };
 
   // ====================== Nhặt đồ ======================
@@ -351,7 +406,7 @@ window.EQ = window.EQ || {};
       const words = U.shuffle(e.words.filter(id => p.vocab[id] && EQ.V[id].pic)).slice(0, 3);
       const qs = words.map(id => EQ.learn.wordQ(p, EQ.V[id], 'listen'));
       const r = await EQ.challenge.run(qs, {
-        title: 'Khóa âm thanh', icon: '🔐', retry: true,
+        title: 'Khóa âm thanh', icon: '🔐', mastery: true,
         en: 'Listen and choose the right picture.', vi: EQ.speech.available() ? 'Nghe từ tiếng Anh và chọn hình đúng.' : 'Máy chưa có giọng đọc, nên bạn hãy đọc từ và chọn hình đúng.'
       });
       if (!r.completed) return;
@@ -379,7 +434,7 @@ window.EQ = window.EQ || {};
     await EQ.challenge.teach(p, { lesson: lessons });
     const n = e.n + (p.diff >= 2.2 ? 1 : 0);
     const qs = EQ.learn.gateQuestions(p, lessons, n);
-    const r = await EQ.challenge.run(qs, { title: e.title, icon: '🚪', en: e.en, vi: e.vi, retry: true });
+    const r = await EQ.challenge.run(qs, { title: e.title, icon: '🚪', en: e.en, vi: e.vi, mastery: true });
     if (!r.completed) return pip('Cánh cổng vẫn đang chờ bạn. Quay lại bất cứ lúc nào!');
     p.flags['open:' + e.id] = true;
     EQ.audio.sfx('open');
