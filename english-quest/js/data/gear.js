@@ -2,7 +2,7 @@
  *
  * Chỉ số nhân vật:
  *   ⚔️ Sức mạnh (atk)  – sát thương mỗi câu trả lời đúng
- *   ❤️ Máu (hp)        – số trái tim trong trận
+ *   ❤️ Máu (hp)        – mỗi điểm = +10 máu tối đa (thanh máu) và +1 mạng trong trò hành động
  *   🛡️ Phòng thủ (def) – % cơ hội chặn đòn khi trả lời sai (tối đa 60%)
  *   🍀 May mắn (luck)  – % vàng nhận thêm (tối đa 150%)
  * Trang bị KHÔNG thay thế việc học: vẫn phải trả lời đúng tiếng Anh mới gây sát thương.
@@ -17,7 +17,10 @@ window.EQ = window.EQ || {};
     weapon: { name: 'Vũ khí', icon: '🪄' },
     hat: { name: 'Mũ / vương miện', icon: '👑' },
     neck: { name: 'Dây chuyền', icon: '📿' },
-    ring: { name: 'Nhẫn', icon: '💍' }
+    ring: { name: 'Nhẫn', icon: '💍' },
+    glove: { name: 'Bao tay', icon: '🧤' },
+    armor: { name: 'Áo giáp', icon: '🦺' },
+    boots: { name: 'Giày', icon: '👢' }
   };
   R.TIERS = ['', 'Thường', 'Hiếm', 'Quý', 'Sử thi', 'Huyền thoại'];
   R.TIER_COL = ['', '#9e9e9e', '#42a5f5', '#ab47bc', '#ffa000', '#ff4081'];
@@ -45,6 +48,22 @@ window.EQ = window.EQ || {};
   g('r3', 'ring', 'Nhẫn sapphire', '💎', 3, 260, { atk: 1, luck: 25 }, '#1e88e5', 'Xanh như biển sâu.');
   g('r4', 'ring', 'Nhẫn kim cương', '💎', 4, 520, { atk: 2, luck: 30 }, '#e1f5fe', 'Cứng nhất, sáng nhất.');
   g('r5', 'ring', 'Nhẫn cầu vồng', '🌈', 5, 1000, { atk: 3, luck: 40, def: 5 }, '#ce93d8', 'Bảy màu bảy phép thuật.');
+  // bản 1.8: bao tay (sức mạnh + chí mạng), áo giáp (máu + phòng thủ), giày (phòng thủ + chạy nhanh hơn trên bản đồ)
+  g('g1', 'glove', 'Bao tay vải', '🧤', 1, 40, { atk: 1 }, '#bcaaa4', 'Giữ đũa phép chắc tay hơn.');
+  g('g2', 'glove', 'Bao tay da hươu', '🧤', 2, 120, { atk: 1, luck: 8 }, '#8d6e63', 'Mềm mà bền, quà của bác thợ da.');
+  g('g3', 'glove', 'Bao tay thép', '🥊', 3, 270, { atk: 2, luck: 10 }, '#90a4ae', 'Đấm đâu chắc đó.');
+  g('g4', 'glove', 'Bao tay lửa', '🔥', 4, 540, { atk: 3, luck: 15 }, '#ff7043', 'Mỗi phép thuật nóng rực như lửa.');
+  g('g5', 'glove', 'Bao tay rồng', '🐲', 5, 1000, { atk: 4, luck: 20, def: 5 }, '#7cb342', 'Làm từ vảy rồng xanh.');
+  g('a1', 'armor', 'Áo vải dày', '👕', 1, 40, { hp: 1 }, '#a1887f', 'Áo khoác dày cho chuyến đi xa.');
+  g('a2', 'armor', 'Áo giáp da', '🦺', 2, 120, { hp: 1, def: 4 }, '#795548', 'Đỡ được những cú cắn nhẹ.');
+  g('a3', 'armor', 'Giáp lưới thép', '🛡️', 3, 280, { hp: 2, def: 6 }, '#b0bec5', 'Kêu leng keng khi bước đi.');
+  g('a4', 'armor', 'Giáp hiệp sĩ', '🛡️', 4, 560, { hp: 3, def: 8 }, '#cfd8dc', 'Giáp của đội cận vệ Lâu đài.');
+  g('a5', 'armor', 'Giáp vảy rồng', '🐉', 5, 1050, { hp: 4, def: 12 }, '#26a69a', 'Không quái nào cắn thủng nổi.');
+  g('b1', 'boots', 'Dép cỏ', '🩴', 1, 30, { def: 3 }, '#9ccc65', 'Nhẹ tênh, đi nhanh hơn một chút.');
+  g('b2', 'boots', 'Giày da', '👞', 2, 100, { def: 5, hp: 1 }, '#6d4c41', 'Đi đường xa không mỏi chân.');
+  g('b3', 'boots', 'Ủng thám hiểm', '👢', 3, 230, { def: 8, hp: 1 }, '#8d6e63', 'Lội rừng, lội suối đều được.');
+  g('b4', 'boots', 'Giày gió', '👟', 4, 500, { def: 10, hp: 2 }, '#4fc3f7', 'Chạy nhanh như gió thổi.');
+  g('b5', 'boots', 'Giày sao băng', '🌠', 5, 950, { def: 14, hp: 2, luck: 10 }, '#ffd54f', 'Mỗi bước để lại một vệt sáng.');
   R.GEAR = G;
   R.GI = {}; G.forEach(x => { R.GI[x.id] = x; });
 
@@ -57,6 +76,9 @@ window.EQ = window.EQ || {};
     if (it.slot === 'hat') { s.def += lv * 2; if (lv >= 5) s.hp += 1; }
     if (it.slot === 'neck') s.def += lv * 2;
     if (it.slot === 'ring') s.luck += lv * 5;
+    if (it.slot === 'glove') { s.atk += Math.floor(lv / 2); s.luck += lv * 2; }
+    if (it.slot === 'armor') { s.def += lv * 2; if (lv >= 5) s.hp += 1; }
+    if (it.slot === 'boots') s.def += lv * 2;
     return s;
   };
   R.ensure = function (p) {
@@ -64,6 +86,7 @@ window.EQ = window.EQ || {};
     p.counters = p.counters || {};
     p.jobs = p.jobs || null;
     p.tower = p.tower || { best: 0 };
+    if (typeof p.life !== 'number' || isNaN(p.life)) { p.life = 0; p.life = R.maxLife(p); }
     return p;
   };
   R.stats = function (p) {
@@ -75,7 +98,7 @@ window.EQ = window.EQ || {};
       const s = R.itemStats(R.GI[id], p.gear.owned[id] || 0);
       base.atk += s.atk; base.hp += s.hp; base.def += s.def; base.luck += s.luck;
     });
-    base.hp = Math.min(12, base.hp);
+    base.hp = Math.min(16, base.hp);
     base.def = Math.min(60, base.def);
     base.luck = Math.min(150, base.luck);
     return base;
@@ -89,12 +112,47 @@ window.EQ = window.EQ || {};
     const s = R.stats(p);
     const w = p.gear && p.gear.eq.weapon && R.GI[p.gear.eq.weapon];
     return {
-      atk: s.atk, hp: s.hp, def: s.def, luck: s.luck,
+      atk: s.atk, hp: Math.min(10, s.hp), def: s.def, luck: s.luck,   // hp = số mạng trong trò hành động (tối đa 10)
       crit: Math.min(40, Math.round(s.luck / 4)),   // % đánh chí mạng (x2 sát thương)
       weapon: w || null,                             // vũ khí đang cầm → hình phép thuật khi tấn công
       neckCol: p.gear && p.gear.eq.neck && R.GI[p.gear.eq.neck] ? R.GI[p.gear.eq.neck].col : null,
-      tier: w ? w.tier : 0
+      tier: w ? w.tier : 0,
+      speed: R.speedBonus(p)
     };
+  };
+  // ---------- ❤️ THANH MÁU (bản 1.8) ----------
+  // Máu tối đa = 50 + 5/cấp + 10 cho mỗi điểm ❤️ (mũ, dây chuyền, áo giáp, giày...)
+  // Trả lời sai trong trận → quái cắn mất máu (🛡️ Phòng thủ có thể chặn). Hết máu → gục ngã, rơi 1 món đồ đang mặc.
+  R.maxLife = p => 50 + (p.level || 1) * 5 + R.stats(p).hp * 10;
+  R.lifeOf = p => { R.ensure(p); return Math.max(0, Math.min(R.maxLife(p), Math.round(p.life))); };
+  R.heal = (p, n) => { R.ensure(p); p.life = Math.min(R.maxLife(p), p.life + n); };
+  // giày: đi nhanh hơn trên bản đồ (6% mỗi bậc hiếm)
+  R.speedBonus = p => { const id = p.gear && p.gear.eq.boots; return id && R.GI[id] ? R.GI[id].tier * 0.06 : 0; };
+  // gục ngã: mất ngẫu nhiên 1 món đang mặc (nếu không mặc gì: mất 20% vàng)
+  R.die = function (p) {
+    R.ensure(p);
+    const worn = Object.keys(R.SLOTS).map(s => p.gear.eq[s]).filter(id => id && R.GI[id]);
+    let lost = null, gold = 0;
+    if (worn.length) {
+      const id = U.pick(worn); lost = R.GI[id];
+      p.gear.eq[lost.slot] = null; delete p.gear.owned[id];
+    } else { gold = Math.floor(p.gold * 0.2); p.gold -= gold; }
+    p.counters = p.counters || {}; p.counters.deaths = (p.counters.deaths || 0) + 1;
+    R.syncLook(p);
+    p.life = R.maxLife(p);
+    return { lost, gold };
+  };
+  // món đồ ngẫu nhiên (boss thưởng): ưu tiên món chưa có, bậc tối đa maxTier
+  R.randomDrop = function (p, minTier, maxTier) {
+    R.ensure(p);
+    let cand = G.filter(it => it.tier >= minTier && it.tier <= maxTier && p.gear.owned[it.id] == null);
+    if (!cand.length) cand = G.filter(it => it.tier >= minTier && it.tier <= maxTier);
+    // May mắn tăng cơ hội ra đồ bậc cao
+    const luck = R.stats(p).luck;
+    const w = cand.map(it => Math.pow(it.tier, 1 + luck / 150));
+    let r = Math.random() * w.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < cand.length; i++) { r -= w[i]; if (r <= 0) return cand[i]; }
+    return cand[cand.length - 1];
   };
   // số câu đúng cần để hạ quái có hp máu
   R.hitsToKill = (p, hp) => Math.max(1, Math.ceil(hp / R.stats(p).atk));
@@ -108,6 +166,9 @@ window.EQ = window.EQ || {};
     if (gi(e.hat)) { g.hat = e.hat; g.hatC = gi(e.hat).col; }
     if (gi(e.neck)) g.neck = gi(e.neck).col;
     if (gi(e.ring)) g.ring = gi(e.ring).col;
+    if (gi(e.glove)) g.glove = gi(e.glove).col;
+    if (gi(e.armor)) g.armor = gi(e.armor).col;
+    if (gi(e.boots)) g.boots = gi(e.boots).col;
     p.avatar._gear = Object.keys(g).length ? g : null;
   };
   R.buy = function (p, id) {

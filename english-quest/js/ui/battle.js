@@ -1,4 +1,7 @@
-/* Trận đấu kiến thức: trả lời đúng → tung phép thuật; sai → được giải thích, mất 1 trái tim (không bị phạt nặng) */
+/* Trận đấu kiến thức: trả lời đúng → tung phép thuật; sai → được giải thích và bị quái CẮN MẤT MÁU.
+ * Bản 1.8: dùng THANH MÁU chung của nhân vật (p.life, xem EQ.rpg.maxLife). Hết máu → gục ngã:
+ *   - quái ngoài bản đồ / Vùng hoang dã / Boss thế giới: rơi mất 1 món đồ đang mặc, hồi sinh ở Làng
+ *   - trùm cốt truyện, Tháp Thử Thách (o.safe): chỉ ngất đi, không mất đồ */
 window.EQ = window.EQ || {};
 (function () {
   const U = EQ.U, el = U.el, SP = EQ.sprites;
@@ -7,18 +10,25 @@ window.EQ = window.EQ || {};
   // chỉ số lấy từ cấp độ + trang bị (xem js/data/gear.js)
   B.power = p => EQ.rpg.stats(p).atk;
   B.maxHearts = p => EQ.rpg.stats(p).hp;
+  // sức cắn của quái mỗi lần trả lời sai
+  B.bite = o => o.bite || (o.def && o.def.bite) || ((o.boss ? 14 : 8) + ((o.matk || 1) - 1) * 6);
   B.critChance = p => Math.min(40, Math.round(EQ.rpg.stats(p).luck / 4));
 
   // o: {def, color, hp, name, spec, boss, hard}
   B.start = function (o) {
     const p = EQ.game.profile;
     return new Promise(resolve => {
-      const st = { hp: o.hp, maxHp: o.hp, hearts: B.maxHearts(p), maxHearts: B.maxHearts(p), combo: 0, fx: [], shake: 0, mShake: 0, mJump: 0, t: 0, over: false };
+      EQ.rpg.ensure(p);
+      const st = { hp: o.hp, maxHp: o.hp, life: EQ.rpg.lifeOf(p), maxLife: EQ.rpg.maxLife(p), bite: B.bite(o), combo: 0, fx: [], shake: 0, mShake: 0, mJump: 0, t: 0, over: false };
+      // vào trận khi gần hết máu: hồi tối thiểu 25% để còn sức chiến đấu
+      if (st.life < st.maxLife * 0.25) { st.life = Math.ceil(st.maxLife * 0.25); p.life = st.life; }
       const src = EQ.learn.battleSource(p, o.spec || {});
       EQ.audio.music('battle');
       const cv = el('canvas', { width: 720, height: 210, class: 'arena' });
       const ctx = cv.getContext('2d');
-      const heartsEl = el('div', { class: 'bt-hearts' });
+      const lifeFill = el('div', { class: 'life-fill' });
+      const lifeText = el('div', { class: 'life-text' });
+      const heartsEl = el('div', { class: 'life-bar' }, [lifeFill, lifeText]);
       const hpFill = el('div', { class: 'hp-fill' });
       const hpText = el('div', { class: 'hp-text' });
       const comboEl = el('div', { class: 'bt-combo' });
@@ -33,7 +43,7 @@ window.EQ = window.EQ || {};
           '🎯 Còn cần ' + hits + ' câu đúng',
           '🛡️ Chặn đòn ' + E.def + '%',
           '🍀 Chí mạng ' + E.crit + '%',
-          '❤️ ' + E.hp + ' tim'
+          '🦷 Quái cắn ' + st.bite + ' máu/câu sai'
         ].forEach(t => gearEl.appendChild(el('span', null, t)));
       }
       const pieBtn = el('button', { class: 'btn small' });
@@ -52,24 +62,27 @@ window.EQ = window.EQ || {};
       const close = EQ.ui.modal(body, { cls: 'wide battle-card', onEsc: () => fleeBtn.click() });
       function drawBars() {
         drawGear();
-        heartsEl.innerHTML = '';
-        for (let i = 0; i < st.maxHearts; i++) heartsEl.appendChild(el('span', { class: 'heart' + (i < st.hearts ? '' : ' empty') }, i < st.hearts ? '❤️' : '🤍'));
+        lifeFill.style.width = Math.max(0, st.life / st.maxLife * 100) + '%';
+        lifeFill.classList.toggle('low', st.life <= st.maxLife * 0.3);
+        lifeText.textContent = '❤️ ' + Math.max(0, st.life) + ' / ' + st.maxLife;
+        p.life = st.life;
         hpFill.style.width = Math.max(0, st.hp / st.maxHp * 100) + '%';
         hpText.textContent = Math.max(0, st.hp) + ' / ' + st.maxHp;
         comboEl.textContent = st.combo >= 2 ? '🔥 Combo x' + st.combo : '';
         const n = p.items.pie || 0;
         pieBtn.textContent = '🥧 Bánh táo (' + n + ')';
-        pieBtn.disabled = n <= 0 || st.hearts >= st.maxHearts;
+        pieBtn.disabled = n <= 0 || st.life >= st.maxLife;
       }
+      B.PIE = 35;
       pieBtn.onclick = () => {
-        if (!(p.items.pie > 0) || st.hearts >= st.maxHearts) return;
-        p.items.pie--; st.hearts = Math.min(st.maxHearts, st.hearts + 2);
-        EQ.audio.sfx('heal'); fxText(170, 70, '+2 ❤️', '#ff8a80'); drawBars();
+        if (!(p.items.pie > 0) || st.life >= st.maxLife || st.over) return;
+        p.items.pie--; st.life = Math.min(st.maxLife, st.life + B.PIE);
+        EQ.audio.sfx('heal'); fxText(170, 70, '+' + B.PIE + ' ❤️', '#ff8a80'); drawBars();
       };
       fleeBtn.onclick = () => { if (st.over) return; end('flee'); };
 
       // ----- vẽ đấu trường -----
-      const themes = { village: ['#9be7ff', '#bff3a7', '#7cc35a'], forest: ['#7fd1b9', '#5fae6e', '#3f8f46'], castle: ['#b39ddb', '#9fa8da', '#8e88a3'] };
+      const themes = { village: ['#9be7ff', '#bff3a7', '#7cc35a'], forest: ['#7fd1b9', '#5fae6e', '#3f8f46'], castle: ['#b39ddb', '#9fa8da', '#8e88a3'], wild: ['#ffcc80', '#c5a76b', '#8d6e3f'] };
       function fxText(x, y, text, color) { st.fx.push({ type: 'text', x, y, text, color, life: 1.2 }); }
       function loop() {
         if (st.closed) return;
@@ -173,15 +186,16 @@ window.EQ = window.EQ || {};
             st.shield = 0.9;
             EQ.audio.sfx('heal'); fxText(170, 70, '🛡️ Trang bị chặn đòn!', '#80d8ff');
           } else {
-            const lose = o.matk || 1;
-            st.hearts = Math.max(0, st.hearts - lose); st.shake = 0.4;
+            // cú cắn dao động ±20%
+            const lose = Math.max(1, Math.round(st.bite * (0.8 + Math.random() * 0.4)));
+            st.life = Math.max(0, st.life - lose); st.shake = 0.4;
             EQ.audio.sfx('bump');
-            fxText(170, 70, '-' + lose + ' ❤️', '#ff8a80');
+            fxText(170, 70, '🦷 -' + lose + ' ❤️', '#ff8a80');
           }
         }
         drawBars();
         if (st.hp <= 0) return win();
-        if (st.hearts <= 0) return tired();
+        if (st.life <= 0) return o.safe ? tired() : dead();
         turn();
       }
 
@@ -199,14 +213,29 @@ window.EQ = window.EQ || {};
         ]));
         EQ.speech.speak(winMsg.en);
       }
+      // gục ngã ngoài bản đồ: mất 1 món đồ đang mặc
+      function dead() {
+        st.over = true;
+        const r = EQ.rpg.die(p);
+        st.life = p.life;
+        EQ.audio.sfx('wrong');
+        qbox.innerHTML = '';
+        qbox.appendChild(el('div', { class: 'bt-result dead' }, [
+          el('div', { class: 'res-big' }, '💀 Bạn đã gục ngã!'),
+          el('div', { class: 'res-vi' }, r.lost ? ['Trong lúc chạy trốn, bạn đánh rơi ', el('b', null, r.lost.e + ' ' + r.lost.name), '. ' + o.name + ' đã nhặt mất rồi!']
+            : 'Bạn không mặc trang bị nào nên bị rơi mất ' + r.gold + ' 🪙 vàng.'),
+          el('div', { class: 'res-vi small' }, 'Mẹo: ôn lại các từ hay sai, mặc 🦺 áo giáp / 👢 giày để có thêm máu, mang theo 🥧 bánh táo (+' + B.PIE + ' ❤️).'),
+          el('div', { class: 'row center' }, [el('button', { class: 'btn primary big', onclick: () => end('dead') }, '🏡 Hồi sinh ở Làng')])
+        ]));
+      }
       function tired() {
         st.over = true;
         qbox.innerHTML = '';
         qbox.appendChild(el('div', { class: 'bt-result' }, [
-          el('div', { class: 'res-big' }, '😮‍💨 Bạn hơi mệt rồi!'),
-          el('div', { class: 'res-vi' }, 'Không sao cả! Mỗi lần sai là một lần học thêm. ' + o.name + ' đã hồi sức, nên muốn thắng bạn cần trả lời đúng nhiều hơn. Ôn lại các từ vừa sai sẽ giúp bạn mạnh hơn đấy!'),
+          el('div', { class: 'res-big' }, '😮‍💨 Bạn hết máu rồi!'),
+          el('div', { class: 'res-vi' }, 'Không sao cả, ở thử thách này bạn không bị mất đồ. Mỗi lần sai là một lần học thêm. Ôn lại các từ vừa sai sẽ giúp bạn mạnh hơn đấy!'),
           el('div', { class: 'row center' }, [
-            el('button', { class: 'btn primary big', onclick: () => { st.over = false; st.hearts = st.maxHearts; st.hp = st.maxHp; st.combo = 0; EQ.audio.sfx('heal'); turn(); } }, '💪 Đấu lại từ đầu'),
+            el('button', { class: 'btn primary big', onclick: () => { st.over = false; st.life = st.maxLife; st.hp = st.maxHp; st.combo = 0; EQ.audio.sfx('heal'); turn(); } }, '💪 Đấu lại từ đầu'),
             el('button', { class: 'btn', onclick: () => end('rest') }, '📒 Nghỉ & ôn bài')
           ])
         ]));
@@ -214,7 +243,9 @@ window.EQ = window.EQ || {};
       function end(result) {
         st.over = true; st.closed = true;
         close();
+        if (result === 'rest') p.life = Math.max(p.life, Math.ceil(st.maxLife * 0.5));
         EQ.audio.music(EQ.REGIONS[p.region].music);
+        if (result === 'dead' && EQ.game.respawn) EQ.game.respawn(p);
         resolve(result);
       }
       B._st = st;

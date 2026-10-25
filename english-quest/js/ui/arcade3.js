@@ -168,16 +168,18 @@ window.EQ = window.EQ || {};
         for (let i = 0; i < 4; i++) c.fillRect(cx - 34 + i * 20, cy - 82, 12, 14);
         c.fillStyle = '#4a3b6b'; c.beginPath(); c.moveTo(cx - 14, cy + 20); c.lineTo(cx - 14, cy - 8); c.quadraticCurveTo(cx, cy - 22, cx + 14, cy - 8); c.lineTo(cx + 14, cy + 20); c.fill();
         c.fillStyle = '#e53935'; c.fillRect(cx - 2, cy - 112, 3, 30); c.beginPath(); c.moveTo(cx + 1, cy - 112); c.lineTo(cx + 24, cy - 104 + Math.sin(t * 5) * 2); c.lineTo(cx + 1, cy - 96); c.fill();
-        // pháo (màu theo cấp vũ khí)
+        // pháo: ảnh pháo tháp thật, đổi kiểu theo bậc vũ khí đang cầm (bản 1.8)
+        const tk = 'tur_t' + [1, 1, 5, 10, 15, 20][Math.min(5, E.tier)];
         const tc = ['#78909c', '#8d6e63', '#43a047', '#1e88e5', '#8e24aa', '#ffb300'][Math.min(5, E.tier)];
         TUR.forEach(tu => {
-          c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(tu.x, tu.y + 18, 28, 9, 0, 0, 7); c.fill();
-          c.fillStyle = '#6d6875'; c.beginPath(); c.arc(tu.x, tu.y, 24, 0, 7); c.fill();
-          c.fillStyle = '#9e9aa8'; c.beginPath(); c.arc(tu.x, tu.y - 3, 20, 0, 7); c.fill();
-          c.save(); c.translate(tu.x, tu.y - 3); c.rotate(tu.ang);
-          c.fillStyle = tc; c.fillRect(-4 - tu.kick * 40, -7, 32, 14); c.fillStyle = '#263238'; c.fillRect(24 - tu.kick * 40, -8, 6, 16);
-          c.beginPath(); c.arc(0, 0, 11, 0, 7); c.fillStyle = tc; c.fill();
-          c.restore();
+          c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(tu.x, tu.y + 22, 30, 10, 0, 0, 7); c.fill();
+          c.fillStyle = '#6d6875'; c.beginPath(); c.ellipse(tu.x, tu.y + 12, 30, 14, 0, 0, 7); c.fill();
+          const kx = -Math.cos(tu.ang) * tu.kick * 30, ky = -Math.sin(tu.ang) * tu.kick * 30;
+          if (!draw(c, tk, tu.x + kx, tu.y + ky, 72, { rot: tu.ang + Math.PI / 2 })) {
+            c.save(); c.translate(tu.x, tu.y - 3); c.rotate(tu.ang);
+            c.fillStyle = tc; c.fillRect(-4 - tu.kick * 40, -7, 32, 14); c.beginPath(); c.arc(0, 0, 11, 0, 7); c.fill();
+            c.restore();
+          }
         });
         // bọ
         st.bugs.forEach(b => {
@@ -189,7 +191,10 @@ window.EQ = window.EQ || {};
           label(c, b.n + '. ' + b.w.en, q.x, q.y - 42, 130);
           c.fillStyle = '#4e342e'; c.fillRect(q.x - 22, q.y - 28, 44, 5); c.fillStyle = '#ef5350'; c.fillRect(q.x - 22, q.y - 28, 44 * Math.max(0, b.hp) / b.max, 5);
         });
-        st.bolts.forEach(o => { c.fillStyle = '#ffeb3b'; c.beginPath(); c.arc(o.x, o.y, 6, 0, 7); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(o.x, o.y, 3, 0, 7); c.fill(); });
+        st.bolts.forEach(o => {
+          const q = at(o.b.s), ang = Math.atan2(q.y - o.y, q.x - o.x);
+          if (!draw(c, 'tur_shot', o.x, o.y, 30, { rot: ang + Math.PI / 2 })) { c.fillStyle = '#ffeb3b'; c.beginPath(); c.arc(o.x, o.y, 6, 0, 7); c.fill(); }
+        });
         hearts(c, st.lives, st.max, 14, CH - 22);
         txt(c, 'Pháo ⚔️' + E.atk + '/phát', CW - 12, CH - 22, 14, '#fff', 'right');
         if (st.w && !st.done) promptBar(c, st.w, st.mode, t, 'Bấm con bọ mang từ đúng!');
@@ -818,7 +823,7 @@ window.EQ = window.EQ || {};
     const E = fx(p);
     p.arcade = p.arcade || {};
     let close = () => {};
-    const ICON = { td: 'td_beetle0', candy: 'candy_pink', plane: 'plane_fly1', hill: 'car_girl_body', pirate: 'pir_flag', robot: 'robot_blue_drive1' };
+    const ICON = { td: 'td_beetle0', candy: 'candy_pink', plane: 'plane_fly1', hill: 'car_girl_body', pirate: 'pir_flag', robot: 'robot_blue_drive1', farm: 'farm_carrot' };
     const body = el('div', { class: 'booth-card' }, [
       el('div', { class: 'booth-head' }, [
         EQ.MG_IMG && EQ.MG_IMG[ICON[id]] ? el('img', { class: 'booth-img', src: EQ.MG_IMG[ICON[id]], alt: '' }) : null,

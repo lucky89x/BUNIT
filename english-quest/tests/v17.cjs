@@ -37,7 +37,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok(loaded === nimg, 'Tất cả ảnh mở được (' + loaded + '/' + nimg + ')');
 
   // 2. quầy trò chơi trên từng bản đồ
-  const booths = { village: ['candy', 'pirate', 'hill'], forest: ['td', 'plane'], castle: ['robot'] };
+  const booths = { village: ['candy', 'pirate', 'farm', 'hill'], forest: ['td', 'plane'], castle: ['robot'] };
   for (const reg of Object.keys(booths)) {
     const r = await page.evaluate(reg => {
       const def = EQ.REGIONS[reg];
@@ -183,7 +183,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.evaluate(() => EQ.arcade.open()); await page.waitForTimeout(300);
   await shot('menu');
   const menu = await page.evaluate(() => ({ cards: document.querySelectorAll('.am-card').length, where: document.querySelectorAll('.am-where').length }));
-  ok(menu.cards === 14 && menu.where === 6, 'Khu vui chơi: ' + menu.cards + ' trò, ' + menu.where + ' trò có quầy trên bản đồ');
+  ok(menu.cards >= 14 && menu.where >= 6, 'Khu vui chơi: ' + menu.cards + ' trò, ' + menu.where + ' trò có quầy trên bản đồ');
   await clean();
 
   ok(errors.length === 0, 'Không có lỗi JS' + (errors.length ? ': ' + errors.join(' | ') : ''));

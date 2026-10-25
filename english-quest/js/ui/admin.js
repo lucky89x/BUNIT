@@ -156,7 +156,9 @@ window.EQ = window.EQ || {};
           act('Có bản đồ & đũa phép', () => { who.items.map = 1; who.items.wand = 1; })])]),
         el('div', { class: 'adm-box' }, [el('b', null, '🚪 Bản đồ'), el('div', { class: 'row tight' }, [
           act('Mở mọi cổng phép', () => { Object.keys(EQ.REGIONS).forEach(r => (EQ.REGIONS[r].entities || []).forEach(e => { if (e.kind === 'gate') who.flags['open:' + e.id] = true; })); }),
-          act('Đặt lại Tháp', () => { who.tower = { best: 0 }; })])])
+          act('Đặt lại Tháp', () => { who.tower = { best: 0 }; }),
+          act('❤️ Hồi đầy máu', () => { who.life = R.maxLife(who); }),
+          act('👹 Gọi Boss thế giới dậy', () => { if (who.wboss) who.wboss.next = 0; })])])
       ]));
     }
     function passTab(box) {

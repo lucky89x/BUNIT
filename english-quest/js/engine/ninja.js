@@ -84,6 +84,10 @@ window.EQ = window.EQ || {};
       R(x, 7, 1, 7, '#5d3a1e'); R(x - 0.5, 5.5, 2, 2, g.wand); R(x, 5.5, 1, 1, '#ffffff');
     }
     if (g.ring && dir !== 'up') R(dir === 'left' ? 4 : 11, 12, 1, 1, g.ring);
+    // bản 1.8: áo giáp, bao tay, giày
+    if (g.armor) { ctx.globalAlpha = 0.85; R(5, 10, 6, 3, g.armor); ctx.globalAlpha = 1; R(5, 10, 6, 1, 'rgba(255,255,255,.35)'); }
+    if (g.glove) { R(3, 11, 2, 2, g.glove); R(11, 11, 2, 2, g.glove); }
+    if (g.boots) { R(5, 14, 2, 2, g.boots); R(9, 14, 2, 2, g.boots); }
     const hy = -1;
     if (g.hat === 'h1') { R(10, hy + 1, 2, 2, '#ff80ab'); R(13, hy + 1, 2, 2, '#ff80ab'); R(12, hy + 2, 1, 1, '#c2185b'); }
     else if (g.hat === 'h2') { R(3, hy + 2, 10, 1, '#4527a0'); R(5, hy, 6, 2, '#5e35b1'); R(6, hy - 2, 4, 2, '#5e35b1'); R(7, hy - 4, 2, 2, '#5e35b1'); R(7, hy + 1, 1, 1, '#ffd54f'); }

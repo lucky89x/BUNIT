@@ -118,6 +118,7 @@ window.EQ = window.EQ || {};
       // quầy trò chơi (bản 1.7)
       { id: 'mg_candy', kind: 'npc', name: 'Tiệm kẹo chữ', x: 5, y: 25, draw: 'booth', game: 'candy', icon: 'candy_pink', col: '#ec407a' },
       { id: 'mg_pirate', kind: 'npc', name: 'Bến kho báu', x: 12, y: 21, draw: 'booth', game: 'pirate', icon: 'pir_flag', col: '#5d4037' },
+      { id: 'mg_farm', kind: 'npc', name: 'Nông trại chữ', x: 25, y: 22, draw: 'booth', game: 'farm', icon: 'farm_carrot', col: '#7cb342' },
       { id: 'mg_hill', kind: 'npc', name: 'Đường đua leo đồi', x: 37, y: 25, draw: 'booth', game: 'hill', icon: 'car_girl_body', col: '#43a047' },
       { id: 'lamp_v1', kind: 'deco', draw: 'lamp', x: 10, y: 13, solid: true },
       { id: 'lamp_v2', kind: 'deco', draw: 'lamp', x: 26, y: 13, solid: true },
@@ -150,6 +151,9 @@ window.EQ = window.EQ || {};
       { id: 'secretV', kind: 'chest', x: 37, y: 2, secret: true, reward: { gold: 20, items: { pie: 1 } }, msg: 'Bạn tìm ra khu vườn bí mật! +20 vàng, 1 Bánh táo 🥧' },
       // Trùm & cổng sang rừng
       { id: 'slimeKing', kind: 'boss', x: 36, y: 14, name: 'Vua Slime Ục Ịch', boss: 'slimeKing' },
+      { id: 'toWild', kind: 'portal', x: 0, y: 14, to: 'wild', tx: 37, ty: 14, need: 'item:wand',
+        lockedVi: 'Vùng Hoang Dã rất nguy hiểm! Hãy nhận Đũa phép từ Trưởng làng trước đã.' },
+      { id: 'sign_wild', kind: 'sign', x: 2, y: 13, en: 'West: Wild Lands. Danger!', vi: 'Phía tây: Vùng Hoang Dã – quái mạnh, có Boss khổng lồ. Nhớ mặc trang bị!' },
       { id: 'toForest', kind: 'portal', x: 39, y: 14, to: 'forest', tx: 1, ty: 14, need: 'boss:slimeKing',
         lockedVi: 'Vua Slime đang chặn đường sang Rừng Phép Thuật!' }
     ],
@@ -169,6 +173,7 @@ window.EQ = window.EQ || {};
       // hành lang phía đông
       g.rect(33, 11, 7, 3, 'T'); g.rect(33, 15, 7, 3, 'T');
       g.set(39, 14, '=');
+      g.set(0, 14, '='); g.set(1, 14, '=');
       // khu chợ
       g.rect(3, 9, 9, 3, '='); g.vline(7, 12, 13, '=');
       // hồ nước
@@ -312,6 +317,40 @@ window.EQ = window.EQ || {};
       const ents = EQ.REGIONS.castle.entities;
       const avoid = any(nearEntities(ents, 1), nearRow(14, 1), (x, y) => x > 12);
       g.scatter('f', 14, 31, ['S'], avoid);
+      return g.rows();
+    }
+  };
+
+  // =================== VÙNG HOANG DÃ (bản 1.8): săn quái kiếm vàng & XP, Boss thế giới ===================
+  EQ.REGIONS.wild = {
+    id: 'wild', name: 'Vùng Hoang Dã', en: 'Wild Lands', w: 40, h: 28, ground: '.', music: 'forest',
+    spawn: { x: 37, y: 14 },
+    entities: [
+      { id: 'wboss', kind: 'npc', name: '👹 Boss: Quỷ Một Mắt', x: 20, y: 6, draw: 'wboss', worldBoss: true },
+      { id: 'spring', kind: 'npc', name: 'Suối hồi máu', x: 33, y: 11, draw: 'fountain', healer: true },
+      { id: 'sign_w', kind: 'sign', x: 36, y: 13, en: 'Wild Lands. Be brave!', vi: 'Vùng Hoang Dã: quái mạnh hơn, thưởng nhiều vàng & XP. Trả lời sai sẽ bị cắn mất máu!' },
+      { id: 'secretW', kind: 'chest', x: 2, y: 25, secret: true, reward: { gold: 40, items: { pie: 2 } }, msg: 'Rương của thợ săn! +40 vàng, 2 Bánh táo 🥧' },
+      { id: 'toVillageW', kind: 'portal', x: 39, y: 14, to: 'village', tx: 1, ty: 14 }
+    ],
+    monsters: { kinds: ['wolf', 'shroom', 'imp', 'rock'], need: 'item:wand', count: 7, zones: [[3, 3, 9, 8], [28, 2, 9, 7], [3, 17, 10, 8], [15, 17, 10, 8], [28, 17, 9, 8]] },
+    build() {
+      const g = new Grid(40, 28, '.');
+      g.frame(0, 0, 40, 28, 'T');
+      g.set(39, 14, '=');
+      g.hline(26, 38, 14, '='); g.vline(26, 11, 22, '='); g.hline(6, 26, 22, '=');
+      g.vline(20, 11, 14, '='); g.hline(20, 26, 14, '=');
+      // đấu trường Boss: sàn cát, vòng đá
+      g.rect(14, 2, 13, 9, 's'); g.frame(13, 1, 15, 11, 'R'); g.set(20, 11, 's'); g.set(19, 11, 's'); g.set(21, 11, 's');
+      // hồ & suối
+      g.frame(30, 7, 7, 4, 's'); g.rect(31, 8, 5, 2, '~');
+      g.frame(4, 11, 7, 5, 's'); g.rect(5, 12, 5, 3, '~');
+      const ents = EQ.REGIONS.wild.entities;
+      const avoid = any(nearEntities(ents, 1), nearRow(14, 1), nearRow(22, 1), (x, y) => (x >= 12 && x <= 28 && y <= 12) || x === 26 || x === 20);
+      g.scatter('"', 60, 41, ['.'], avoid);
+      g.scatter(',', 30, 42, ['.'], avoid);
+      g.scatter('t', 22, 43, ['.'], avoid);
+      g.scatter('R', 14, 44, ['.'], avoid);
+      g.scatter('B', 10, 45, ['.'], avoid);
       return g.rows();
     }
   };

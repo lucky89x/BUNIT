@@ -109,10 +109,10 @@ const ROOT = path.join(__dirname, '..');
   if (!(r5.blocked && r5.battle2)) fail('Khóa trùm theo độ thuộc từ: ' + JSON.stringify(r5));
   await clean();
 
-  console.log("bước 6"); // 6. Trận đấu: hết tim, đấu lại thì trùm hồi đầy máu (không thắng được bằng cách đoán mãi)
+  console.log("bước 6"); // 6. Trận đấu (trùm cốt truyện = safe): hết máu, đấu lại thì trùm hồi đầy máu (không thắng được bằng cách đoán mãi)
   const r6 = await page.evaluate(async () => {
     const d = EQ.BOSSES.slimeKing; const wait = ms => new Promise(r => setTimeout(r, ms));
-    const pr = EQ.battle.start({ def: d, hp: d.hp, name: d.name, boss: true, spec: { regions: d.regions, lessons: d.lessons, types: ['meaning'] } });
+    const pr = EQ.battle.start({ def: d, hp: d.hp, name: d.name, boss: true, safe: true, bite: 30, spec: { regions: d.regions, lessons: d.lessons, types: ['meaning'] } });
     await wait(100);
     // đúng 1 câu rồi sai đến hết tim
     EQ.challenge._testAnswer(true); await wait(1900);

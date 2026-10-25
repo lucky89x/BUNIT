@@ -24,6 +24,7 @@ Nếu game báo *"Trình duyệt đang chặn lưu dữ liệu"*, hãy dùng **C
 | Phím | Chức năng |
 |---|---|
 | **W A S D** hoặc **phím mũi tên** | Di chuyển |
+| **Bấm chuột vào bản đồ** | Nhân vật tự tìm đường đi tới chỗ bấm (bản 1.8). Bấm vào NPC/quầy/rương ở xa → tự đi tới rồi nói chuyện |
 | **E** hoặc **Space** | Nói chuyện, nhặt đồ, mở rương, mở cổng |
 | **Chuột** | Chọn đáp án, bấm 🔊 để nghe, mở menu |
 | **1 – 4** | Chọn nhanh đáp án |
@@ -190,6 +191,44 @@ Mọi câu trả lời đều ghi vào hệ thống ôn tập như các trò kh�
 
 > Hai gói chưa dùng được: *farm game asset* (9,5 MB) và *kenney_space-kit* (6,6 MB) lớn quá giới hạn tải của công cụ Drive, còn *idle turret defense kit* (52 MB) chỉ dùng được phần đã giải nén sẵn (bọ cánh cứng, bọ bay). Các khẩu pháo trong gói đó là ảnh hoạt họa Spine (cần thư viện riêng), nên pháo được vẽ bằng mã. Nếu muốn có trò nông trại hay không gian, hãy giải nén 2 gói đó lên Drive (như thư mục Grounds Enemy) để lần sau dùng tiếp.
 
+## 5i. Bản 1.8 – Thanh máu, Vùng Hoang Dã & Boss, trang bị mới, bấm chuột để đi
+
+**🐍 Rắn săn chữ làm lại hoàn toàn**
+- Sửa lỗi gốc: trước đây chữ cái được đặt ở vị trí lẻ (ví dụ ô 7,4) nên rắn **đi qua chữ đúng mà không ăn được**. Giờ chữ nằm đúng giữa ô.
+- Trên bàn luôn có **đủ mọi chữ cái của từ** (kể cả chữ lặp, ví dụ *apple* có 2 chữ P), cộng thêm 2–3 chữ nhiễu → luôn ghép được từ.
+- Chữ to, ô gỗ sáng màu, chữ nâu đậm dễ đọc; dãy ô **"Ghép từ"** ở dưới hiện chữ đã ăn (xanh) và ô đang cần (vàng, dấu **?**).
+- Rắn **đi xuyên tường** (ra mép này vào mép kia) thay vì chết; ăn nhầm chữ hoặc cắn đuôi mới bị trừ ❤️. Sau khi sai, chữ đúng **phát sáng** gợi ý; bấm **H** để xin gợi ý.
+- Điều khiển êm hơn (ghi nhớ tới 3 lần bấm hướng), chạy chậm hơn; **bấm chuột** để rẽ về phía điểm bấm.
+
+**❤️ Thanh máu nhân vật** (hiện trên góc trái màn hình, trong trận đấu và trong 🎒 Trang bị)
+- Máu tối đa = 50 + 5 × cấp + 10 × chỉ số ❤️ (mũ, dây chuyền, **áo giáp**, **giày** tăng ❤️). Lên cấp hồi đầy máu.
+- Đánh quái: **trả lời sai → quái cắn mất máu** (số máu bị cắn hiện trong trận, ví dụ Slime 8, quái Vùng Hoang Dã 16–22, Boss 26+). 🛡️ Phòng thủ có cơ hội chặn cú cắn. 🥧 Bánh táo hồi 35 máu.
+- Đi trên bản đồ tự hồi 2 máu/giây; ⛲ Suối hồi máu ở Vùng Hoang Dã hồi đầy ngay.
+- **Hết máu khi đánh quái ngoài bản đồ → 💀 gục ngã, rơi mất 1 món đồ đang mặc** (ngẫu nhiên), hồi sinh ở Làng với đầy máu. Không mặc gì thì mất 20% vàng.
+- Riêng **trùm cốt truyện** và **Tháp Thử Thách** chỉ "ngất" và được đấu lại, không mất đồ (để bé không bị kẹt cốt truyện).
+
+**🌵 Vùng Hoang Dã** – cổng ở **mép trái (tây) Làng Khởi Đầu**, cần có Đũa phép
+- 7 quái mạnh (Sói Bông Hoang, Nấm Độc, Tinh Linh Lửa, Người Đá Con + bản ⭐ tinh anh), cho nhiều vàng & XP hơn quái trong làng/rừng.
+- **👹 Boss thế giới "Quỷ Một Mắt"** trong đấu trường đá giữa bản đồ: bấm vào để xem chỉ số (máu, sức cắn, 💪 lực chiến đề xuất). Thắng: **+150 vàng trở lên, +150 XP và 1 trang bị ngẫu nhiên** (bậc Hiếm → Huyền thoại; 🍀 May mắn càng cao càng dễ ra đồ xịn; nếu đã có món đó thì được nâng cấp +1). Thắng xong Boss ngủ 5 phút, lần sau mạnh hơn và rơi đồ xịn hơn.
+
+**🎒 Trang bị mới** (bán ở 💎 Tiệm trang sức, mỗi loại 5 bậc, nâng cấp tới +5)
+
+| Ô | Chỉ số chính | Ghi chú |
+|---|---|---|
+| 🧤 Bao tay | ⚔️ +1 → +4, 🍀 tới +20% | Đánh mạnh hơn, dễ chí mạng |
+| 🦺 Áo giáp | ❤️ +1 → +4 (= +10 → +40 máu), 🛡️ tới +12% | Chịu được nhiều câu sai hơn |
+| 👢 Giày | 🛡️ +3 → +14%, ❤️ tới +2 | **Đi nhanh hơn trên bản đồ** 6% mỗi bậc |
+
+Cân bằng: nhân vật cấp 1 không trang bị có 85 máu, đánh Slime (3 máu, cắn 8) rất dễ; Vùng Hoang Dã cần trang bị bậc Hiếm/Quý; Boss nên đánh khi 💪 Lực chiến gần mức đề xuất.
+
+**🖱️ Bấm chuột để đi:** bấm vào chỗ bất kỳ trên bản đồ, nhân vật tự tìm đường (vòng qua cây, nhà, nước) và đi tới, có chấm trắng chỉ đường. Bấm vào NPC/quầy/rương/Boss ở xa → đi tới cạnh rồi tự mở hội thoại. Bấm phím di chuyển bất kỳ để hủy.
+
+**🌱 Nông trại chữ** (quầy mới ở Làng, cạnh vườn táo): 6 luống đất mang từ tiếng Anh, bấm luống có từ đúng để tưới cây → hạt → mầm → nụ → **rau củ chín** tự bay vào thùng. Bấm nhầm thì quạ tới mổ (🛡️ bù nhìn đuổi quạ). ⚔️ Sức mạnh ≥ 6 = phân bón (lớn 2 bậc), 🍀 may mắn = được mùa x2.
+
+**🐞 Pháo đài côn trùng** dùng ảnh **pháo tháp thật** từ gói *Idle Turret Defense* đã giải nén: vũ khí bậc càng cao, pháo càng xịn (5 kiểu pháo), đạn là viên năng lượng phát sáng.
+
+**Về game "Situation Normal" trong thư mục Drive:** đây là game 3D cho máy tính (file .exe chạy bằng Java, kèm thư viện Steam) của tác giả khác. Trình duyệt không chạy được file .exe, và đó là sản phẩm có bản quyền riêng, nên **không thể ghép vào English Quest**. Nếu bạn muốn một trò có lối chơi tương tự, hãy mô tả cách chơi, mình sẽ làm một trò mới chạy trong trình duyệt.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -228,7 +267,9 @@ english-quest/
 ├─ js/data/lessons.js    Bài ngữ pháp, câu điền từ, câu sắp xếp, cảnh giới từ
 ├─ js/data/quests.js     Nhiệm vụ, hội thoại, trùm, vật phẩm, trang phục, huy hiệu
 ├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
-├─ js/data/maps.js       Bản đồ 3 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC, quầy trò chơi
+├─ js/ui/wild.js         Vùng Hoang Dã: Boss thế giới, suối hồi máu (bản 1.8)
+├─ js/ui/arcade4.js      Trò Nông trại chữ (bản 1.8)
+├─ js/data/maps.js       Bản đồ 4 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC, quầy trò chơi
 ├─ js/data/minigame-assets.js  Ảnh các trò trên bản đồ (tự sinh: python tools/build-minigame-assets.py)
 ├─ js/core/              Lưu trữ, âm thanh tự tạo, giọng đọc, hệ thống học (ôn tập ngắt quãng, độ khó)
 ├─ js/engine/            Đồ họa pixel tự vẽ, thế giới, va chạm, camera, bản đồ nhỏ
@@ -250,10 +291,11 @@ english-quest/
 - `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
 - `node tests/v16.cjs` – kiểm tra bản 1.6: game hành động, trang bị trong trận, quái tinh anh, đấu 2 bé, admin.
 - `node tests/v17.cjs` – kiểm tra bản 1.7: 6 quầy trò chơi trên bản đồ, ảnh mới, bot tự chơi từng trò.
+- `node tests/v18.cjs` – kiểm tra bản 1.8: rắn săn chữ mới, trang bị mới, thanh máu & gục ngã, Vùng Hoang Dã + Boss, bấm chuột để đi, nông trại, pháo tháp.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
 ## 10. Bản quyền nội dung
 
 Toàn bộ hình vẽ pixel, bản đồ, nhạc nền và hiệu ứng âm thanh đều **được tạo bằng mã nguồn** trong game (không dùng ảnh/nhạc bên ngoài). Biểu tượng cảm xúc (emoji) hiển thị bằng phông chữ có sẵn của Windows. Giọng đọc là của hệ điều hành/trình duyệt.
 
-Ngoại lệ: từ bản 1.5 có ảnh nhân vật/quái/nền của bộ **Ninja Adventure** (CC0, xem `assets/ninja/CREDITS.md`); từ bản 1.7 có ảnh các trò trên bản đồ (Kenney CC0, craftpix.net, Freepik – xem `assets/minigame/CREDITS.md`).
+Ngoại lệ: từ bản 1.5 có ảnh nhân vật/quái/nền của bộ **Ninja Adventure** (CC0, xem `assets/ninja/CREDITS.md`); từ bản 1.7 có ảnh các trò trên bản đồ (Kenney CC0, craftpix.net, Freepik – xem `assets/minigame/CREDITS.md`); bản 1.8 thêm ảnh pháo tháp (craftpix.net) và biểu tượng nông trại.

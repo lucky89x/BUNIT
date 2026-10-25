@@ -546,9 +546,14 @@ window.EQ = window.EQ || {};
       win: { en: 'Well done!', vi: 'Làm tốt lắm!' } }
   };
   EQ.MONSTERS = {
-    slime: { name: 'Slime nghịch ngợm', draw: 'slime', colors: ['#66bb6a', '#42a5f5', '#ffca28'], hp: 3, xp: 12, gold: 4 },
-    fluff: { name: 'Bông xù tinh nghịch', draw: 'fluff', colors: ['#f48fb1', '#ce93d8', '#80deea'], hp: 3, xp: 14, gold: 5 },
-    ink: { name: 'Giọt mực lém lỉnh', draw: 'slime', colors: ['#5c6bc0', '#26a69a', '#7e57c2'], hp: 4, xp: 16, gold: 6 }
+    slime: { name: 'Slime nghịch ngợm', draw: 'slime', colors: ['#66bb6a', '#42a5f5', '#ffca28'], hp: 3, xp: 12, gold: 4, bite: 8 },
+    fluff: { name: 'Bông xù tinh nghịch', draw: 'fluff', colors: ['#f48fb1', '#ce93d8', '#80deea'], hp: 4, xp: 14, gold: 5, bite: 10 },
+    ink: { name: 'Giọt mực lém lỉnh', draw: 'slime', colors: ['#5c6bc0', '#26a69a', '#7e57c2'], hp: 5, xp: 16, gold: 6, bite: 12 },
+    // Vùng Hoang Dã (bản 1.8): máu nhiều, cắn đau, thưởng lớn
+    wolf: { name: 'Sói Bông Hoang', draw: 'fluff', colors: ['#8d6e63', '#78909c', '#a1887f'], hp: 8, xp: 30, gold: 14, bite: 16, matk: 2 },
+    shroom: { name: 'Nấm Độc Rừng Sâu', draw: 'mush', colors: ['#8e24aa', '#e53935', '#ff7043'], hp: 10, xp: 36, gold: 16, bite: 18, matk: 2 },
+    imp: { name: 'Tinh Linh Lửa', draw: 'star', colors: ['#ff7043', '#ffca28', '#f4511e'], hp: 12, xp: 42, gold: 20, bite: 20, matk: 2 },
+    rock: { name: 'Người Đá Con', draw: 'golem', colors: ['#78909c', '#8d6e63', '#546e7a'], hp: 15, xp: 50, gold: 25, bite: 22, matk: 3 }
   };
 
   // ====================== VẬT PHẨM ======================
@@ -556,7 +561,7 @@ window.EQ = window.EQ || {};
     map: { name: 'Bản đồ làng', e: '🗺️', desc: 'Bấm M để xem bản đồ những nơi đã khám phá.' },
     wand: { name: 'Đũa phép Ngôn ngữ', e: '🪄', desc: 'Dùng tiếng Anh để hóa giải quái vật.' },
     spellbook: { name: 'Sách phép thuật', e: '📘', desc: 'Phép thuật mạnh hơn: +1 sát thương mỗi câu đúng.' },
-    pie: { name: 'Bánh táo', e: '🥧', desc: 'Dùng trong trận đấu: hồi 2 trái tim.', use: 'battle' },
+    pie: { name: 'Bánh táo', e: '🥧', desc: 'Dùng trong trận đấu: hồi 35 máu ❤️.', use: 'battle' },
     hint: { name: 'Cuộn gợi ý', e: '📜', desc: 'Dùng khi trả lời: loại bỏ 2 đáp án sai.', use: 'question' },
     letter: { name: 'Lá thư cũ', e: '✉️', desc: '"Nobody listens to me. So I take your words." – Chúa tể Im Lặng' },
     stone_red: { name: 'Viên Đá Lời Chào', e: '🔴', desc: 'Viên đá phép thuật thứ 1/5.', stone: true },

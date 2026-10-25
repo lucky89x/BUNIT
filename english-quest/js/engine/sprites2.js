@@ -258,6 +258,9 @@ window.EQ = window.EQ || {};
       R(hx, 8 + bob, 1, 6, '#6d4c41'); R(hx, 7 + bob, 1, 1, g.wand); Rp(hx, 6 + bob, '#ffffff');
     }
     if (g.ring && dir !== 'up') Rp(dir === 'left' ? 7 : 2, 13 + bob, g.ring);
+    if (g.armor) { R(4, 10 + bob, 8, 3, g.armor); R(4, 10 + bob, 8, 1, 'rgba(255,255,255,.3)'); }
+    if (g.glove) { R(2, 12 + bob, 2, 2, g.glove); R(12, 12 + bob, 2, 2, g.glove); }
+    if (g.boots) { R(4, 15, 3, 1, g.boots); R(9, 15, 3, 1, g.boots); }
     const hy = bob;
     if (g.hat === 'h1') { R(9, 0 + hy, 2, 2, '#ff80ab'); R(12, 0 + hy, 2, 2, '#ff80ab'); R(11, 1 + hy, 1, 1, '#c2185b'); R(3, 2 + hy, 10, 1, '#ff80ab'); }
     else if (g.hat === 'h2') { R(2, 1 + hy, 12, 1, '#4527a0'); R(4, -1 + hy, 8, 2, '#5e35b1'); R(5, -3 + hy, 6, 2, '#5e35b1'); R(7, -5 + hy, 3, 2, '#5e35b1'); R(6, -1 + hy, 1, 1, '#ffd54f'); }

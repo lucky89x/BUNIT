@@ -18,9 +18,10 @@ window.EQ = window.EQ || {};
     return el('div', { class: 'g-panel' }, [
       el('div', { class: 'g-prev' }, EQ.screens.avatarCanvas(p.avatar, 150)),
       el('div', { class: 'g-power' }, ['💪 Lực chiến ', el('b', null, String(R.power(p)))]),
+      el('div', { class: 'life-bar big', title: 'Thanh máu' }, [el('div', { class: 'life-fill', style: { width: (R.lifeOf(p) / R.maxLife(p) * 100) + '%' } }), el('div', { class: 'life-text' }, '❤️ ' + R.lifeOf(p) + ' / ' + R.maxLife(p))]),
       el('div', { class: 'g-statgrid' }, [
         el('div', null, ['⚔️ Sức mạnh', el('b', null, String(s.atk))]),
-        el('div', null, ['❤️ Máu', el('b', null, String(s.hp))]),
+        el('div', null, ['❤️ Máu tối đa', el('b', null, String(R.maxLife(p)))]),
         el('div', null, ['🛡️ Phòng thủ', el('b', null, s.def + '%')]),
         el('div', null, ['🍀 May mắn', el('b', null, '+' + s.luck + '%')])
       ]),
@@ -37,8 +38,9 @@ window.EQ = window.EQ || {};
       el('b', null, '🎒 Trang bị giúp bạn thế nào?'),
       el('ul', null, [
         el('li', null, '⚔️ Đánh quái: quái thường cần ' + h(slime) + ' câu đúng, ⭐ quái tinh anh cần ' + h(elite) + ' câu, Vua Slime cần ' + h(boss) + ' câu.'),
-        el('li', null, '🛡️ Trả lời sai: ' + E.def + '% không bị mất tim (khiên hiện ra). ⭐ Quái tinh anh đánh mất 2 tim/lần.'),
-        el('li', null, '❤️ ' + E.hp + ' tim trong trận, ' + E.hp + ' mạng trong trò ⚡ Hành động.'),
+        el('li', null, '❤️ Thanh máu ' + R.maxLife(p) + ' (mũ, dây chuyền, áo giáp, giày tăng máu). Trả lời sai → quái cắn mất máu; hết máu là gục ngã và RƠI 1 MÓN ĐỒ đang mặc!'),
+        el('li', null, '🛡️ Trả lời sai: ' + E.def + '% chặn được cú cắn (khiên hiện ra). ' + E.hp + ' mạng trong trò ⚡ Hành động.'),
+        R.speedBonus(p) ? el('li', null, '👢 Giày giúp đi nhanh hơn ' + Math.round(R.speedBonus(p) * 100) + '% trên bản đồ.') : null,
         el('li', null, '🍀 ' + E.crit + '% đòn chí mạng x2, +' + E.luck + '% vàng & điểm, dễ nhặt đồ rơi từ quái tinh anh.'),
         el('li', null, '🗼 Tháp Thử Thách, 🆚 Đấu trường 2 bé, 🎮 game hành động đều dùng các chỉ số này.')
       ])
@@ -157,7 +159,7 @@ window.EQ = window.EQ || {};
       const pw = R.power(p);
       if (pw < fl.rec * 0.8 && !(await EQ.ui.confirm('Lực chiến của bạn (' + pw + ') thấp hơn đề xuất (' + fl.rec + '). Trận này sẽ khó: quái vật nhiều máu và đánh mạnh. Vẫn thử chứ?', { yes: 'Thử sức!', no: 'Để sau' }))) return;
       close();
-      const res = await EQ.battle.start({ def: fl.def, color: fl.def.color, hp: fl.hp, name: fl.def.name + ' (Tầng ' + f + ')', boss: fl.boss, matk: fl.matk, spec: {} });
+      const res = await EQ.battle.start({ def: fl.def, color: fl.def.color, hp: fl.hp, name: fl.def.name + ' (Tầng ' + f + ')', boss: fl.boss, matk: fl.matk, safe: true, spec: {} });
       if (res === 'win') {
         const first = f > (p.tower.best || 0);
         if (first) p.tower.best = f;

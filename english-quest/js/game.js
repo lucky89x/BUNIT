@@ -127,7 +127,14 @@ window.EQ = window.EQ || {};
     window.addEventListener('blur', () => { G.keys = {}; });
     window.addEventListener('mousedown', () => { EQ.audio.init(); G.idle = 0; });
     // chạm vào bản đồ để tương tác (hỗ trợ chuột)
-    document.getElementById('game').addEventListener('click', () => { if (G.mode === 'play' && !EQ.ui.busy() && EQ.world.target) G.interact(); });
+    // bản 1.8: bấm chuột vào bản đồ → nhân vật tự tìm đường đi tới; bấm vào NPC/quầy → đi tới rồi nói chuyện
+    const gameCv = document.getElementById('game');
+    gameCv.addEventListener('click', e => {
+      if (G.mode !== 'play' || EQ.ui.busy() || G.lock) return;
+      const r = gameCv.getBoundingClientRect();
+      const x = (e.clientX - r.left) * gameCv.width / r.width, y = (e.clientY - r.top) * gameCv.height / r.height;
+      if (EQ.world.clickAt(x, y) === 'interact') G.interact();
+    });
   };
 
   // ====================== Vòng lặp ======================
@@ -137,7 +144,11 @@ window.EQ = window.EQ || {};
     if (G.mode === 'play' && G.profile) {
       const p = G.profile;
       const busy = EQ.ui.busy() || G.lock;
-      if (!busy) EQ.world.update(dt, G.keys, p);
+      if (!busy) {
+        EQ.world.update(dt, G.keys, p);
+        // ❤️ hồi máu dần khi đi trên bản đồ (2 máu/giây)
+        if (p.life < EQ.rpg.maxLife(p)) EQ.rpg.heal(p, dt * 2);
+      }
       else { EQ.world.t += dt; EQ.world.player.moving = false; }
       EQ.world.tickFade(dt);
       EQ.world.render(G.ctx, p);
@@ -165,6 +176,15 @@ window.EQ = window.EQ || {};
     requestAnimationFrame(G.frame);
   };
 
+  // gục ngã → hồi sinh ở Làng, đầy máu
+  G.respawn = function (p) {
+    p.life = EQ.rpg.maxLife(p);
+    setTimeout(() => {
+      EQ.world.load('village', null, null, p);
+      EQ.ui.toast('🏡 Bạn đã hồi sinh ở Làng Khởi Đầu với đầy máu.', 'warn', 4500);
+      G.saveNow();
+    }, 50);
+  };
   G.canStartBattle = () => G.mode === 'play' && !EQ.ui.busy() && !G.lock;
 
   // ====================== Tương tác ======================
@@ -193,6 +213,8 @@ window.EQ = window.EQ || {};
 
   G.talkTo = async function (e) {
     const p = G.profile;
+    if (e.worldBoss) return EQ.wild.boss(e);
+    if (e.healer) return EQ.wild.heal(e);
     const sp = speaker(e);
     // 1. bước nhiệm vụ đang chờ ở NPC này
     for (const q of Q.active(p)) {
@@ -294,7 +316,7 @@ window.EQ = window.EQ || {};
         }
         if (def.mastery.region === 'village') G.award(p, 'master_village');
       }
-      const res = await EQ.battle.start({ def, hp: def.hp, name: def.name, boss: !def.hard, hard: def.hard, spec: { regions: def.regions, lessons: def.lessons, types: def.types, hard: def.hard } });
+      const res = await EQ.battle.start({ def, hp: def.hp, name: def.name, boss: !def.hard, hard: def.hard, safe: true, spec: { regions: def.regions, lessons: def.lessons, types: def.types, hard: def.hard } });
       if (res === 'win') {
         p.flags['boss:' + s.boss] = true;
         EQ.world.refresh(p);
@@ -535,6 +557,7 @@ window.EQ = window.EQ || {};
       if (G.mode === 'play' && !quiet) EQ.world.atPlayer('+' + r.xp + ' XP', '#b9f6ca');
       while (p.xp >= G.xpNeed(p.level)) {
         p.xp -= G.xpNeed(p.level); p.level++;
+        if (EQ.rpg.maxLife) p.life = EQ.rpg.maxLife(p); // lên cấp → hồi đầy máu
         EQ.audio.sfx('level');
         EQ.ui.banner('⭐ Lên cấp ' + p.level + '!', 'Phép thuật của bạn mạnh hơn rồi!', 'gold');
         if (G.mode === 'play') EQ.world.burst(EQ.world.player.x, EQ.world.player.y - 30, ['#ffd54f', '#fff59d', '#ffffff'], 40);

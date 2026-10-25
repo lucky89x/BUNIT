@@ -12,7 +12,8 @@ window.EQ = window.EQ || {};
     player: { x: 0, y: 0, dir: 'down', moving: false, anim: 0 },
     ents: [], monsters: [], particles: [], floaters: [], amb: [],
     cam: { x: 0, y: 0 }, fade: 0, fadeDir: 0, fadeCb: null,
-    explored: null, lastTile: '', target: null, battleCooldown: 0, portalCooldown: 0, respawn: []
+    explored: null, lastTile: '', target: null, battleCooldown: 0, portalCooldown: 0, respawn: [],
+    path: null, goal: null, mark: null, stuck: 0
   };
 
   W.load = function (id, tx, ty, p) {
@@ -30,6 +31,7 @@ window.EQ = window.EQ || {};
     if (s && s.length === W.w * W.h) for (let i = 0; i < s.length; i++) W.explored[i] = s.charCodeAt(i) === 49 ? 1 : 0;
     W.monsters = []; W.particles = []; W.floaters = []; W.respawn = []; W.amb = [];
     W.portalCooldown = 0.6; W.battleCooldown = 2;
+    W.path = null; W.goal = null; W.mark = null;
     W.refresh(p);
     W.spawnMonsters(p);
     W.markExplored(p, true);
@@ -87,7 +89,7 @@ window.EQ = window.EQ || {};
   W.spawnOne = function (p) {
     const m = W.def.monsters;
     if (!W.monstersAllowed(p)) return;
-    const def = EQ.MONSTERS[m.kind];
+    const def = EQ.MONSTERS[m.kinds ? U.pick(m.kinds) : m.kind];
     for (let k = 0; k < 30; k++) {
       const z = U.pick(m.zones);
       const tx = z[0] + Math.floor(Math.random() * z[2]), ty = z[1] + Math.floor(Math.random() * z[3]);
@@ -96,14 +98,14 @@ window.EQ = window.EQ || {};
       if (U.dist(x, y, W.player.x, W.player.y) < TS * 4) continue;
       // ⭐ Quái tinh anh: nhiều máu, đánh mạnh, thưởng lớn → cần trang bị tốt để hạ nhanh
       const elite = Math.random() < 0.25;
-      const d = elite ? Object.assign({}, def, { name: '⭐ ' + def.name + ' tinh anh', hp: 8 + Math.floor(p.level / 2), xp: def.xp * 2, gold: def.gold * 4, matk: 2, elite: true, size: 1.8 }) : def;
+      const d = elite ? Object.assign({}, def, { name: '⭐ ' + def.name + ' tinh anh', hp: def.hp * 2 + 2 + Math.floor(p.level / 2), xp: def.xp * 2, gold: def.gold * 4, matk: 2, bite: Math.round((def.bite || 8) * 1.7), elite: true, size: 1.8 }) : def;
       d.rec = W.monsterRec(d);
-      W.monsters.push({ x, y, def: d, kind: m.kind, elite, color: U.pick(def.colors), vx: 0, vy: 0, timer: 0, zone: z, phase: Math.random() * 6 });
+      W.monsters.push({ x, y, def: d, kind: d.draw, elite, color: U.pick(def.colors), vx: 0, vy: 0, timer: 0, zone: z, phase: Math.random() * 6 });
       return;
     }
   };
   // sức mạnh đề xuất của quái (cùng thang với 💪 Lực chiến)
-  W.monsterRec = d => Math.round(d.hp * 5 + ((d.matk || 1) - 1) * 15 + 5);
+  W.monsterRec = d => Math.round(d.hp * 5 + ((d.bite || 8) - 8) * 2 + ((d.matk || 1) - 1) * 10 + 5);
   W.removeMonster = function (mon) {
     W.monsters = W.monsters.filter(m => m !== mon);
     W.respawn.push(45 + Math.random() * 30);
@@ -118,15 +120,32 @@ window.EQ = window.EQ || {};
       if (input.left) dx -= 1; if (input.right) dx += 1;
       if (input.up) dy -= 1; if (input.down) dy += 1;
     }
-    pl.moving = !!(dx || dy);
-    if (pl.moving) {
+    // 👢 giày giúp đi nhanh hơn
+    const spd = SPEED * (1 + (EQ.rpg && EQ.rpg.speedBonus ? EQ.rpg.speedBonus(p) : 0));
+    if (dx || dy) { W.path = null; W.goal = null; }       // bấm phím → hủy đường đi bằng chuột
+    else if (W.path && W.path.length) {
+      const n = W.path[0], gx = (n[0] + 0.5) * TS, gy = (n[1] + 0.75) * TS;
+      const ddx = gx - pl.x, ddy = gy - pl.y, d = Math.hypot(ddx, ddy);
+      if (d <= spd * dt + 0.5) {
+        pl.x = gx; pl.y = gy; W.path.shift(); W.stuck = 0;
+        if (Math.abs(ddx) > Math.abs(ddy)) pl.dir = ddx < 0 ? 'left' : 'right'; else if (d > 0.5) pl.dir = ddy < 0 ? 'up' : 'down';
+        pl.moving = true; pl.anim += dt * 8;
+        if (!W.path.length) arrive();
+      } else { dx = ddx / d; dy = ddy / d; }
+    }
+    pl.moving = !!(dx || dy) || pl.moving && !!W.path;
+    if (dx || dy) {
       const len = Math.hypot(dx, dy); dx /= len; dy /= len;
       if (Math.abs(dx) > Math.abs(dy)) pl.dir = dx < 0 ? 'left' : 'right'; else pl.dir = dy < 0 ? 'up' : 'down';
-      const nx = pl.x + dx * SPEED * dt, ny = pl.y + dy * SPEED * dt;
+      const nx = pl.x + dx * spd * dt, ny = pl.y + dy * spd * dt;
+      const ox = pl.x, oy = pl.y;
       if (!collide(nx, pl.y)) pl.x = nx;
       if (!collide(pl.x, ny)) pl.y = ny;
       pl.anim += dt * 8;
+      // kẹt (bị quái/vật cản chắn) quá 0.6 giây → dừng đi tự động
+      if (W.path && Math.hypot(pl.x - ox, pl.y - oy) < 0.01) { W.stuck += dt; if (W.stuck > 0.6) { W.path = null; W.goal = null; W.stuck = 0; } }
     }
+    if (W.mark) { W.mark.t -= dt; if (W.mark.t <= 0) W.mark = null; }
     const ptx = Math.floor(pl.x / TS), pty = Math.floor((pl.y - 4) / TS);
     const tk = ptx + ',' + pty;
     if (tk !== W.lastTile) { W.lastTile = tk; W.markExplored(p); W.onTile(p, ptx, pty); }
@@ -197,6 +216,72 @@ window.EQ = window.EQ || {};
     if (!W.explored) return 0;
     let n = 0; for (let i = 0; i < W.explored.length; i++) n += W.explored[i];
     return n / W.explored.length;
+  };
+
+  // ---------- 🖱️ Bấm chuột để đi (bản 1.8) ----------
+  // Tìm đường ngắn nhất (BFS theo ô) từ chỗ đứng tới ô được bấm. Bấm vào NPC/rương/quầy → đi tới cạnh rồi tự nói chuyện.
+  const INTER = ['npc', 'chest', 'gate', 'boss', 'sign', 'pickup'];
+  function bfs(goals) {
+    const pl = W.player, sx = Math.floor(pl.x / TS), sy = Math.floor((pl.y - 4) / TS);
+    const key = (x, y) => y * W.w + x, want = new Set(goals.map(g => key(g[0], g[1])));
+    if (want.has(key(sx, sy))) return [];
+    const prev = new Int32Array(W.w * W.h).fill(-2);
+    prev[key(sx, sy)] = -1;
+    const q = [[sx, sy]];
+    for (let qi = 0; qi < q.length; qi++) {
+      const [x, y] = q[qi];
+      for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + d[0], ny = y + d[1];
+        if (nx < 0 || ny < 0 || nx >= W.w || ny >= W.h || prev[key(nx, ny)] !== -2 || W.solid(nx, ny)) continue;
+        prev[key(nx, ny)] = key(x, y);
+        if (want.has(key(nx, ny))) {
+          const path = []; let k = key(nx, ny);
+          while (k !== key(sx, sy)) { path.unshift([k % W.w, Math.floor(k / W.w)]); k = prev[k]; }
+          return path;
+        }
+        q.push([nx, ny]);
+      }
+    }
+    return null;
+  }
+  W.bfs = bfs;
+  function arrive() {
+    W.path = null;
+    const g = W.goal; W.goal = null;
+    if (!g) return;
+    const c = W.entCenter(g), pl = W.player, ddx = c.x - pl.x, ddy = c.y - pl.y;
+    if (Math.abs(ddx) > Math.abs(ddy)) pl.dir = ddx < 0 ? 'left' : 'right'; else pl.dir = ddy < 0 ? 'up' : 'down';
+    W.target = W.findTarget();
+    if (W.target === g && EQ.game.interact) EQ.game.interact();
+  }
+  // sx, sy: tọa độ trên khung 960x640. Trả về 'interact' | 'walk' | 'none'
+  W.clickAt = function (sx, sy) {
+    const wx = sx + W.cam.x, wy = sy + W.cam.y;
+    const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
+    // bấm vào thực thể (tính cả phần đầu nhô lên ô phía trên)
+    const ent = W.ents.find(e => INTER.indexOf(e.kind) >= 0 && e.x === tx && e.y === ty) || W.ents.find(e => INTER.indexOf(e.kind) >= 0 && e.x === tx && e.y === ty + 1);
+    if (ent) {
+      if (W.target === ent) return 'interact';
+      const goals = [[0, 1], [0, -1], [1, 0], [-1, 0]].map(d => [ent.x + d[0], ent.y + d[1]]).filter(g => !W.solid(g[0], g[1]));
+      if (!W.isSolidEnt(ent)) goals.push([ent.x, ent.y]);
+      const path = bfs(goals);
+      if (!path) return 'none';
+      W.path = path; W.goal = ent; W.mark = { x: (ent.x + 0.5) * TS, y: (ent.y + 0.9) * TS, t: 0.9, ent: true };
+      if (!path.length) arrive();
+      return 'walk';
+    }
+    let goals = [[tx, ty]];
+    if (W.solid(tx, ty)) { // bấm vào cây/tường → đi tới ô trống gần nhất
+      goals = [];
+      for (let r = 1; r <= 2 && !goals.length; r++) for (let y = ty - r; y <= ty + r; y++) for (let x = tx - r; x <= tx + r; x++) if (!W.solid(x, y)) goals.push([x, y]);
+      if (!goals.length) return 'none';
+    }
+    const path = bfs(goals);
+    if (!path) return 'none';
+    W.path = path; W.goal = null; W.stuck = 0;
+    const last = path.length ? path[path.length - 1] : goals[0];
+    W.mark = { x: (last[0] + 0.5) * TS, y: (last[1] + 0.75) * TS, t: 0.9 };
+    return 'walk';
   };
 
   W.entCenter = e => ({ x: (e.x + 0.5) * TS, y: (e.y + 0.6) * TS });
@@ -282,6 +367,15 @@ window.EQ = window.EQ || {};
     drawQuestPointer(ctx, p, t);
     W.particles.forEach(q => { ctx.globalAlpha = Math.min(1, q.life * 2); ctx.fillStyle = q.color; ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size, q.size); });
     ctx.globalAlpha = 1;
+    if (W.mark) { // vòng tròn chỗ vừa bấm chuột
+      const k = W.mark.t / 0.9;
+      ctx.strokeStyle = W.mark.ent ? 'rgba(255,235,59,' + k + ')' : 'rgba(255,255,255,' + k + ')'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(W.mark.x, W.mark.y, 6 + (1 - k) * 10, 3 + (1 - k) * 5, 0, 0, 7); ctx.stroke();
+    }
+    if (W.path && W.path.length) { // chấm chỉ đường
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      W.path.forEach((n, i) => { if (i % 2 === 0) { ctx.beginPath(); ctx.arc((n[0] + 0.5) * TS, (n[1] + 0.75) * TS, 2.5, 0, 7); ctx.fill(); } });
+    }
     ctx.textAlign = 'center'; ctx.font = 'bold 18px "Baloo 2", system-ui, sans-serif';
     W.floaters.forEach(f => {
       ctx.globalAlpha = Math.min(1, f.life);

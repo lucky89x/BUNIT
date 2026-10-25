@@ -230,12 +230,14 @@ window.EQ = window.EQ || {};
     H.xpFill = el('div', { class: 'xp-fill' });
     H.xpText = el('div', { class: 'xp-text' });
     H.gold = el('div', { class: 'hud-gold' });
+    H.lifeFill = el('div', { class: 'life-fill' });
+    H.lifeText = el('div', { class: 'life-text' });
     H.stones = el('div', { class: 'hud-stones' });
     H.region = el('div', { class: 'hud-region' });
     H.quest = el('div', { class: 'hud-quest' });
     H.mini = el('canvas', { class: 'minimap', width: 160, height: 112, title: 'Bản đồ (M)', onclick: () => EQ.screens.map() });
     const left = el('div', { class: 'hud-left' }, [
-      el('div', { class: 'hud-card' }, [H.port, el('div', { class: 'hud-info' }, [el('div', { class: 'row tight' }, [H.name, H.lv]), el('div', { class: 'xp-bar' }, [H.xpFill, H.xpText]), H.gold])]),
+      el('div', { class: 'hud-card' }, [H.port, el('div', { class: 'hud-info' }, [el('div', { class: 'row tight' }, [H.name, H.lv]), el('div', { class: 'life-bar hud', title: 'Thanh máu: trả lời sai khi đánh quái sẽ bị cắn mất máu. Hết máu → gục ngã, rơi 1 món đồ!' }, [H.lifeFill, H.lifeText]), el('div', { class: 'xp-bar' }, [H.xpFill, H.xpText]), H.gold])]),
       H.quest
     ]);
     const btn = (icon, label, key, fn) => el('button', { class: 'hud-btn', title: label + ' (' + key + ')', onclick: fn }, [el('span', null, icon), el('small', null, label)]);
@@ -254,7 +256,7 @@ window.EQ = window.EQ || {};
     UI.hud.appendChild(el('div', { class: 'hud-top' }, [H.region, H.stones]));
     UI.hud.appendChild(right);
     UI.hud.appendChild(el('button', { class: 'hud-arcade', title: 'Khu vui chơi (G)', onclick: () => EQ.arcade.open() }, [el('span', null, '🎮'), el('b', null, 'Khu vui chơi')]));
-    UI.hud.appendChild(el('div', { class: 'hud-help' }, 'Di chuyển: W A S D / phím mũi tên • Tương tác: E • Tạm dừng: Esc'));
+    UI.hud.appendChild(el('div', { class: 'hud-help' }, 'Di chuyển: W A S D / phím mũi tên / 🖱️ bấm chuột vào bản đồ • Tương tác: E hoặc bấm vào NPC • Tạm dừng: Esc'));
   };
 
   UI.updateHud = function () {
@@ -265,6 +267,10 @@ window.EQ = window.EQ || {};
     H.lv.textContent = 'Cấp ' + p.level;
     H.xpFill.style.width = Math.min(100, p.xp / need * 100) + '%';
     H.xpText.textContent = 'XP ' + p.xp + ' / ' + need;
+    const life = EQ.rpg.lifeOf(p), ml = EQ.rpg.maxLife(p);
+    H.lifeFill.style.width = (life / ml * 100) + '%';
+    H.lifeFill.classList.toggle('low', life <= ml * 0.3);
+    H.lifeText.textContent = '❤️ ' + life + ' / ' + ml;
     H.gold.textContent = '🪙 ' + p.gold + '   💪 ' + EQ.rpg.power(p) + '   ⭐ ' + EQ.learn.learnedIds(p).length + ' từ';
     if (!H.port.firstChild || H._outfit !== p.avatar.outfit + p.avatar.hair + p.avatar.hairC + p.avatar.skin) {
       H.port.innerHTML = ''; H.port.appendChild(UI.portrait({ look: EQ.sprites.playerLook(p.avatar) }));
