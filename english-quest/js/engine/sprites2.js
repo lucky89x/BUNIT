@@ -1,4 +1,4 @@
-/* ENGLISH QUEST – Đồ họa nâng cấp (bản 1.3)
+/* ENGLISH QUEST – Đồ họa nâng cấp (bản 1.3; bản 1.5 thêm móc cho ảnh Ninja Adventure ở ninja.js)
  * - Nền có vân, đổ bóng, chuyển tiếp mềm giữa các loại đất
  * - Cây cao nhiều tầng tán (vẽ theo chiều sâu, có thể che nhân vật)
  * - Nhân vật có viền tối giúp nổi bật trên nền
@@ -159,14 +159,15 @@ window.EQ = window.EQ || {};
   };
 
   function tileCanvas(ch, v) {
-    const k = 't2' + ch + v + (SP.region === 'forest' ? 'f' : '');
+    const k = 't2' + ch + v + (SP.region === 'forest' ? 'f' : '') + (SP.ninjaKey ? SP.ninjaKey() : '');
     if (cache[k]) return cache[k];
     const cv = document.createElement('canvas'); cv.width = TS; cv.height = TS;
     const c = cv.getContext('2d');
     let g = G[ch] ? ch : (UNDER[ch] || null);
     if (g === '.' && SP.region === 'forest') g = 'g';
-    if (g && G[g]) G[g](c, v);
-    if (D[ch]) D[ch](c, v);
+    const nj = EQ.ninja;
+    if (g && G[g] && !(nj && nj.ground(c, g, v))) G[g](c, v);
+    if (D[ch] && !(nj && nj.deco(c, ch, v))) D[ch](c, v);
     if (ch === 'T' || ch === 'A' || ch === 't') SP.shadow(c, 16, 28, 14, 5);
     cache[k] = cv;
     return cv;
@@ -196,10 +197,11 @@ window.EQ = window.EQ || {};
   // ---------- Cây cao (vẽ theo chiều sâu) ----------
   SP.isTree = ch => ch === 'T' || ch === 'A' || ch === 't';
   SP.tallTree = function (ch, v) {
-    const k = 'tree' + ch + v;
+    const k = 'tree' + ch + v + (SP.ninjaKey ? SP.ninjaKey() : '');
     if (cache[k]) return cache[k];
     const cv = document.createElement('canvas'); cv.width = 64; cv.height = 84;
     const c = cv.getContext('2d');
+    if (EQ.ninja && EQ.ninja.tree(c, ch, v)) { cache[k] = cv; return cv; }
     const bx = 32, by = 82; // gốc cây
     if (ch === 't') {
       px(c, bx - 3, by - 16, 6, 14, '#5b3a22'); px(c, bx - 3, by - 16, 2, 14, '#7a4b2a');

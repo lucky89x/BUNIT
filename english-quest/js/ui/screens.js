@@ -254,6 +254,8 @@ window.EQ = window.EQ || {};
           status
         ])
       ]),
+      el('h3', null, '🎨 Đồ họa'),
+      toggle('ninjaArt', 'Đồ họa Ninja Adventure (tắt để dùng hình vẽ cổ điển)'),
       el('h3', null, '📖 Học tập'),
       toggle('alwaysVi', 'Luôn hiện nghĩa tiếng Việt (tắt để game tự quyết định theo trình độ)'),
       el('div', { class: 'row center' }, [el('button', { class: 'btn primary', onclick: () => close() }, 'Xong ✓')])
@@ -321,7 +323,11 @@ window.EQ = window.EQ || {};
         }));
         const hairs = el('div', { class: 'picks' }, Object.keys(EQ.HAIRS).map(h => el('button', { class: 'chip' + (p.avatar.hair === h ? ' on' : ''), onclick: () => { p.avatar.hair = h; store().saveSoon(); draw(); } }, EQ.HAIRS[h])));
         const hcs = el('div', { class: 'picks' }, EQ.HAIR_COLORS.map(c => el('button', { class: 'sw' + (p.avatar.hairC === c ? ' on' : ''), style: { background: c }, onclick: () => { p.avatar.hairC = c; store().saveSoon(); draw(); } })));
-        body.appendChild(el('div', { class: 'wardrobe' }, [prevBox, el('div', null, [el('h3', null, 'Trang phục'), outs, el('h3', null, 'Kiểu tóc'), hairs, el('h3', null, 'Màu tóc'), hcs])]));
+        // Đồ họa Ninja: mỗi trang phục là một ninja riêng, kiểu tóc chỉ dùng cho hình vẽ cổ điển
+        const nj = EQ.ninja && EQ.ninja.on();
+        const looks = nj ? [el('p', { class: 'muted' }, '🥷 Mỗi trang phục là một nhân vật ninja. Kiểu tóc/màu tóc dùng khi tắt "Đồ họa Ninja Adventure" trong ⚙️ Cài đặt.')]
+          : [el('h3', null, 'Kiểu tóc'), hairs, el('h3', null, 'Màu tóc'), hcs];
+        body.appendChild(el('div', { class: 'wardrobe' }, [prevBox, el('div', null, [el('h3', null, 'Trang phục'), outs].concat(looks))]));
       } else {
         body.appendChild(badgeGrid(p));
       }

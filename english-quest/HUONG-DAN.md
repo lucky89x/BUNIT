@@ -128,6 +128,17 @@ Mỗi món nâng cấp được từ +1 đến +5. Trang bị đang mặc **hi�
 
 > Trang bị chỉ giúp đánh khỏe hơn và chịu đòn tốt hơn. **Vẫn phải trả lời đúng tiếng Anh mới hạ được quái vật**, nên vàng và đồ đẹp là phần thưởng cho việc học, không thay được việc học.
 
+## 5f. Bản 1.5 – Đồ họa Ninja Adventure
+
+Game dùng hình pixel art từ bộ **Ninja Adventure** (tác giả Pixel-boy & AAA, giấy phép CC0, được dùng miễn phí). Bộ ảnh lấy từ thư mục "game english" trên Google Drive.
+- 🥷 **Nhân vật của bé là một ninja.** Mỗi trang phục là một ninja khác nhau: Áo phiêu lưu là ninja xanh, Áo anh hùng là ninja đỏ, Váy hoàng gia là pháp sư cam, v.v. Trang bị (đũa, mũ, vương miện, dây chuyền, nhẫn) vẫn hiện trên người.
+- 👵 **NPC có hình riêng.** Trưởng làng là ông lão, bà Rose là bà cụ, lính gác là samurai, công chúa Mia là công chúa. Khi nói chuyện, hộp thoại hiện **chân dung** của người đang nói.
+- 👾 **Quái vật và trùm mới.** Có slime, bông xù (linh hồn), nấm, tinh tú (ngọn lửa) và người đá (quái một mắt). Quái được tô màu theo từng loại. Trùm là bản khổng lồ: Slime khổng lồ, Tre khổng lồ, Quỷ một mắt, Linh hồn khổng lồ, Ếch khổng lồ.
+- 🌳 **Bản đồ mới.** Nền cỏ, đường đất, cát, cây, cây táo, cây thông, bụi cây, đá, hoa và cỏ cao đều dùng ảnh của bộ Ninja Adventure.
+- ⚙️ Muốn quay lại hình cũ: **Cài đặt → 🎨 Đồ họa → bỏ chọn "Đồ họa Ninja Adventure"**. Khi dùng hình cũ, mục Kiểu tóc/Màu tóc trong Tủ đồ hiện trở lại.
+
+Ảnh gốc nằm trong `assets/ninja/` (xem `assets/ninja/CREDITS.md`). Các ảnh đã được nhúng sẵn vào `js/data/ninja-assets.js`, nên **bấm đúp `index.html` vẫn chơi được**, không cần mạng. Nếu thay ảnh, chạy `python tools/build-ninja-assets.py` để đóng gói lại.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
