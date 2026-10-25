@@ -17,7 +17,7 @@ window.EQ = window.EQ || {};
     runner: { name: 'Ninja vượt ải', icon: '🥷', action: true, desc: 'Chạy, nhảy qua chông và quái, phi tiêu diệt quái. Chạm cuộn giấy có từ đúng!', keys: 'Space/↑ nhảy (2 lần = nhảy đôi) • F phi tiêu' },
     slayer: { name: 'Ninja diệt quái', icon: '🗡️', action: true, desc: 'Quái vây quanh, mỗi con mang 1 từ. Phi tiêu trúng con mang từ đúng! Sức mạnh càng cao, quái càng nhanh gục.', keys: 'W A S D di chuyển • bấm chuột hoặc Space phi tiêu' },
     whack: { name: 'Đập chuột chữ', icon: '🔨', action: true, desc: 'Chuột thò lên cầm từ tiếng Anh. Đập trúng con cầm từ đúng trước khi nó trốn!', keys: 'Bấm chuột, hoặc phím 1–8' },
-    snake: { name: 'Rắn săn chữ', icon: '🐍', action: true, desc: 'Đủ mọi chữ cái của từ nằm trên bàn – ăn lần lượt theo đúng thứ tự để ghép từ. Rắn đi xuyên tường, ăn nhầm bị trừ máu.', keys: '← ↑ → ↓ / W A S D hoặc bấm chuột để rẽ • H gợi ý' }
+    snake: { vocabOnly: true, name: 'Rắn săn chữ', icon: '🐍', action: true, desc: 'Đủ mọi chữ cái của từ nằm trên bàn – ăn lần lượt theo đúng thứ tự để ghép từ. Rắn đi xuyên tường, ăn nhầm bị trừ máu.', keys: '← ↑ → ↓ / W A S D hoặc bấm chuột để rẽ • H gợi ý' }
   });
 
   // hiệu quả trang bị trong trò hành động

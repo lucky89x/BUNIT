@@ -34,6 +34,8 @@ window.EQ = window.EQ || {};
       const comboEl = el('div', { class: 'bt-combo' });
       const qbox = el('div', { class: 'qbox' });
       const E = EQ.rpg.effects(p);
+      const painted = !!(EQ.paint && EQ.paint.on());
+      const look0 = (function () { const l = SP.playerLook(p.avatar); const g0 = Object.assign({}, l.g || {}); g0.wand = null; return Object.assign({}, l, { g: g0 }); })();
       const gearEl = el('div', { class: 'bt-gear' });
       function drawGear() {
         const hits = Math.max(1, Math.ceil(Math.max(0, st.hp) / E.atk));
@@ -88,12 +90,21 @@ window.EQ = window.EQ || {};
         if (st.closed) return;
         const dt = 1 / 60; st.t += dt;
         const th = themes[p.region] || themes.village;
-        const g = ctx.createLinearGradient(0, 0, 0, 210);
-        g.addColorStop(0, th[0]); g.addColorStop(0.6, th[1]); g.addColorStop(1, th[2]);
-        ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 210);
-        ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.ellipse(170, 178, 90, 14, 0, 0, 7); ctx.ellipse(540, 178, 120, 18, 0, 0, 7); ctx.fill();
+        if (painted) {
+          // bản 2.0: phông nền và nhân vật vẽ tay kiểu Ghibli (nút 🎨 ở góc màn hình để về 2D)
+          ctx.drawImage(EQ.paint.battleBG(p.region), 0, 0); EQ.paint.drawClouds(ctx, st.t);
+        } else {
+          const g = ctx.createLinearGradient(0, 0, 0, 210);
+          g.addColorStop(0, th[0]); g.addColorStop(0.6, th[1]); g.addColorStop(1, th[2]);
+          ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 210);
+          ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.ellipse(170, 178, 90, 14, 0, 0, 7); ctx.ellipse(540, 178, 120, 18, 0, 0, 7); ctx.fill();
+        }
         const sx = st.shake > 0 ? Math.sin(st.t * 60) * 4 : 0; st.shake = Math.max(0, st.shake - dt);
-        SP.human(ctx, 170 + sx, 180, SP.playerLook(p.avatar), 'right', Math.floor(st.t * 4), { scale: 4, moving: false });
+        if (painted) {
+          const cv2 = EQ.paint.human(look0, 'right', st.shake > 0 ? 1 : (Math.floor(st.t * 2) % 2) * 0);
+          const hgt = 168, wd = hgt * cv2.width / cv2.height, bob = Math.sin(st.t * 3) * 2;
+          ctx.drawImage(cv2, 170 + sx - wd / 2, 184 - hgt + bob, wd, hgt);
+        } else SP.human(ctx, 170 + sx, 180, SP.playerLook(p.avatar), 'right', Math.floor(st.t * 4), { scale: 4, moving: false });
         // vũ khí đang cầm (trang bị) hoặc đũa gỗ mặc định
         if (E.weapon) {
           ctx.save(); ctx.translate(222 + sx, 120); ctx.rotate(-0.5 + Math.sin(st.t * 3) * 0.08);
@@ -116,7 +127,11 @@ window.EQ = window.EQ || {};
           const my = 182 - (st.mJump > 0 ? Math.sin((1 - st.mJump) * Math.PI) * 30 : 0);
           st.mShake = Math.max(0, st.mShake - dt); st.mJump = Math.max(0, st.mJump - dt * 2);
           ctx.globalAlpha = st.hp > 0 ? 1 : Math.max(0, st.mFade);
-          SP.monster(ctx, o.def, mx, my, 26 * (o.def.size || 1.4) * (o.boss ? 1 : 0.9), o.color || o.def.color, st.t);
+          if (painted) {
+            const mc = EQ.paint.monster(o.def, o.color || o.def.color, Math.floor(st.t * 6) % 4);
+            const mh = Math.min(200, 118 * ((o.def.size || 1.4) / 1.4) * (o.boss ? 1.12 : 0.95));
+            ctx.drawImage(mc, mx - mh / 2, my + 6 - mh, mh, mh);
+          } else SP.monster(ctx, o.def, mx, my, 26 * (o.def.size || 1.4) * (o.boss ? 1 : 0.9), o.color || o.def.color, st.t);
           ctx.globalAlpha = 1;
           if (st.hp <= 0) st.mFade -= dt;
         }

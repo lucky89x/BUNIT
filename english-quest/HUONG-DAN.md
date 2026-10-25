@@ -249,6 +249,38 @@ Bản đồ giờ được **dựng thành cảnh 3D** bằng thư viện Three.
 
 **Các bước tiếp theo (dự kiến):** (2) nhân vật và quái chi tiết hơn bằng mô hình 3D, có hoạt ảnh; (3) cảnh trận đấu 3D; (4) giao diện, khung hội thoại theo phong cách Ghibli; (5) hiệu ứng thời tiết, ngày đêm, nhạc nền mới. Nếu bạn tìm được ảnh mẫu hoặc mô hình 3D (.glb/.gltf) theo phong cách mong muốn, hãy tải lên Drive để mình dùng.
 
+## 5k. Bản 2.0 – Ngân hàng câu hỏi dùng chung, Candy Crush chữ, tranh vẽ Ghibli
+
+**1. Ngân hàng câu hỏi dùng chung (`js/core/qbank.js`)**
+Trước đây mini-game chỉ dạy từ vựng. Giờ mọi trò lấy câu hỏi từ một ngân hàng chung, nên chơi game cũng ôn được:
+- 📘 **Ngữ pháp**: câu điền chỗ trống (am/is/are, have/has, a/an, số nhiều...) từ các bài bé đã học.
+- 💬 **Mẫu câu**: chọn câu viết đúng trong 3 câu (hai câu sai là lỗi thường gặp: sai am/is/are, have/has, a/an hoặc đảo trật tự từ).
+- 📕 **Gói giáo trình** (Global Success...): xem mục "Thêm giáo trình" bên dưới.
+- 🎲 **Tổng hợp**: trộn từ vựng và ngữ pháp.
+Trong 🎮 Khu vui chơi, ô **"Dùng từ"** có thêm các nguồn này. 12 trò dùng được với câu ngữ pháp; trò *Hứng chữ* và *Rắn săn chữ* (đánh vần) chỉ dùng từ vựng; nguồn *Mẫu câu* (câu dài) chỉ chơi được ở Candy Crush chữ. Mọi kết quả vẫn ghi vào Sổ ôn tập, câu sai hiện ở "📒 Ôn lại những điều này" kèm giải thích.
+
+**2. 🍬 Candy Crush chữ** (thay trò "Tiệm kẹo chữ" cũ, quầy vẫn ở Làng)
+Xếp kẹo ghép 3 thật: bấm hai kẹo cạnh nhau (hoặc kéo) để đổi chỗ, hàng 3 kẹo cùng màu nổ, kẹo mới rơi xuống, nổ chuỗi (combo).
+- **Mỗi đáp án là một màu kẹo** (hiện ở bảng bên trái). Ghép kẹo màu của **đáp án đúng** → trả lời đúng. Ghép màu của **đáp án sai** → sai, mất ❤️ và hiện giải thích. Ghép màu không gắn đáp án nào chỉ để sắp xếp lại bàn (tốn 1 lượt).
+- 4 kẹo thẳng hàng → **kẹo sọc** (nổ cả hàng/cột). 5 kẹo thẳng hàng → **kẹo cầu vồng** (đổi chỗ với một màu để nổ hết màu đó).
+- Trò luôn đảm bảo có nước đi ra đúng màu đáp án; sau 8 giây không đi, trò gợi ý bằng ô nhấp nháy (hoặc bấm **H**). 10 câu đúng là thắng; có giới hạn lượt đi (🍀 may mắn thêm lượt).
+- Trang bị: ❤️ số tim, 🛡️ chặn mất tim khi ghép nhầm, 🍀 thêm lượt và điểm.
+
+**3. Thêm giáo trình (Global Success hoặc bất kỳ sách nào)**
+Không cần sửa trò chơi. Tạo file `js/data/packs/gs6-unit1.js`:
+```js
+EQ.QPACKS.push({ id: 'gs6-u1', name: 'Global Success 6 – Unit 1', book: 'gs6', unit: 1, items: [
+  { type: 'fill', q: 'She ___ a teacher.', a: 'is', wrong: ['am', 'are'], ex: 'She đi với "is".', vi: 'Cô ấy là giáo viên.' },
+  { type: 'sent', s: 'What is your name?', vi: 'Bạn tên là gì?' },
+  { type: 'qa',   q: 'How old are you?', a: 'I am eleven.', wrong: ['I have eleven.', 'I is eleven.'], ex: 'Hỏi tuổi trả lời "I am + số".' }
+]});
+```
+rồi thêm một dòng `<script src="js/data/packs/gs6-unit1.js"></script>` vào `index.html` (sau dòng `qbank.js`). Gói hiện trong Khu vui chơi dưới tên 📕. Ba dạng câu: `fill` (điền chỗ trống), `sent` (chọn câu đúng, game tự tạo 2 câu sai), `qa` (hỏi–đáp). Bạn gửi giáo trình (Word/Excel/PDF/ảnh sách) thì nhờ mình chuyển thành các file này.
+
+**4. 🎨 Đồ họa Ghibli (tiếp tục)**
+- **NPC động vật vẽ tay** trong cảnh 3D: cô giáo Cú đeo kính, bác Gấu đầu bếp, ông Rùa thợ mộc, bác sĩ Hươu cao cổ, khỉ con Momo (trước đây là biểu tượng emoji).
+- **Cảnh trận đấu vẽ tay:** phông nền đồi cỏ, mây trôi, hoa dại theo từng vùng (Làng xanh, Rừng thẳm, Lâu đài tím, Hoang Dã vàng nâu); nhân vật nghiêng và quái vẽ màu nước như ngoài bản đồ.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -289,6 +321,8 @@ english-quest/
 ├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
 ├─ js/lib/three.min.js   Thư viện 3D Three.js r158 (giấy phép MIT, xem js/lib/THREE-LICENSE.txt)
 ├─ js/engine/world3d.js  Đồ họa 3D kiểu Ghibli: dựng bản đồ ô thành cảnh 3D (bản 1.9)
+├─ js/core/qbank.js      Ngân hàng câu hỏi dùng chung: từ vựng, ngữ pháp, mẫu câu, gói giáo trình (bản 2.0)
+├─ js/ui/arcade5.js      Candy Crush chữ (ghép 3 thật)
 ├─ js/engine/paint.js    Vẽ tay nhân vật & quái kiểu Ghibli (màu nước) cho chế độ 2.5D
 ├─ js/ui/wild.js         Vùng Hoang Dã: Boss thế giới, suối hồi máu (bản 1.8)
 ├─ js/ui/arcade4.js      Trò Nông trại chữ (bản 1.8)
@@ -314,6 +348,7 @@ english-quest/
 - `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
 - `node tests/v16.cjs` – kiểm tra bản 1.6: game hành động, trang bị trong trận, quái tinh anh, đấu 2 bé, admin.
 - `node tests/v17.cjs` – kiểm tra bản 1.7: 6 quầy trò chơi trên bản đồ, ảnh mới, bot tự chơi từng trò.
+- `node tests/v20.cjs` – kiểm tra bản 2.0: ngân hàng câu hỏi, gói giáo trình, Candy Crush (luật, kẹo sọc, kẹo cầu vồng), 12 trò dùng câu ngữ pháp.
 - `node tests/v19.cjs` – kiểm tra bản 1.9: dựng cảnh 3D 4 vùng, bấm chuột đi/nói chuyện trong 3D, nút đổi 2D ↔ 3D.
 - `node tests/v18.cjs` – kiểm tra bản 1.8: rắn săn chữ mới, trang bị mới, thanh máu & gục ngã, Vùng Hoang Dã + Boss, bấm chuột để đi, nông trại, pháo tháp.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.

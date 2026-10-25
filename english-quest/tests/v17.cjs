@@ -85,28 +85,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok(await S() >= 2, 'Pháo đài: bấm bọ đúng → pháo bắn hạ (' + await S() + ' câu)');
   await page.evaluate(() => EQ.arcade._cur.end(true)); await page.waitForTimeout(200); await clean();
 
-  // 4. Tiệm kẹo chữ
+  // 4. Candy Crush chữ (bản 2.0: ghép 3 thật, đáp án = màu kẹo)
   await play('candy');
-  await shot('candy-start');
-  await page.evaluate(() => EQ.arcade._cur.game.onClick(440, 330));
-  await page.waitForTimeout(900);
   await shot('candy');
   const candy = await page.evaluate(async () => {
     const g = EQ.arcade._cur.game, s = g._st;
-    const before = s.T;
-    // bấm sai 1 lần
-    let wrong = null;
-    s.grid.forEach((col, x) => col.forEach((k, y) => { if (!wrong && k && s.w && k.w.id !== s.w.id) wrong = [x, y]; }));
-    if (wrong) g.onClick(100 + wrong[0] * 112 + 56, 120 + wrong[1] * 92 + 46);
-    for (let n = 0; n < 4; n++) {
-      await new Promise(r => setTimeout(r, 700));
-      let hit = null;
-      s.grid.forEach((col, x) => col.forEach((k, y) => { if (!hit && k && s.w && k.w.id === s.w.id) hit = [x, y]; }));
-      if (hit) g.onClick(100 + hit[0] * 112 + 56, 120 + hit[1] * 92 + 46);
+    for (let k = 0; k < 120 && s.correct < 3 && !s.done; k++) {
+      if (s.phase === 'idle' && !s.nextAt) { const ms = g._moves().filter(m => m.ev.colors.has(s.ansCol)); if (ms.length) g._swap(ms[0].a, ms[0].b); }
+      await new Promise(r => setTimeout(r, 120));
     }
-    return { started: s.started, correct: EQ.arcade._cur.api.S.correct, full: s.grid.every(c => c.every(Boolean)), before };
+    return { correct: s.correct, full: s.grid.every(c => c.every(Boolean)) };
   });
-  ok(candy.started && candy.correct >= 3 && candy.full, 'Kẹo chữ: bấm kẹo đúng nổ, kẹo mới rơi xuống đầy bàn (' + candy.correct + ' câu)');
+  ok(candy.correct >= 3 && candy.full, 'Candy Crush: ghép kẹo đúng màu đáp án → trả lời đúng (' + candy.correct + ' câu), bàn luôn đầy');
   await page.evaluate(() => EQ.arcade._cur.end(true)); await page.waitForTimeout(200); await clean();
 
   // 5. Phi công chữ

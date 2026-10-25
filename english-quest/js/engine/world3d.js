@@ -575,7 +575,9 @@ window.EQ = window.EQ || {};
     else if (e.kind === 'npc' && e.look) o = makeHuman(e.look);
     else if (e.kind === 'npc') {
       o = new T.Group();
-      if (e.statue) { o.add(mk(geo.box, toon('#b0aebb'), 0.7, 0.35, 0.7, 0, 0.17, 0)); const s = emojiSprite(e.e, 1.0, true); s.position.y = 0.85; o.add(s); }
+      if (!e.statue && EQ.paint.animalOf[e.e]) {
+        const sp = billboard(1.25, 1); sp.material.map = texOf(EQ.paint.animal(EQ.paint.animalOf[e.e], 0)); o.add(blobShadow(0.32)); o.add(sp); o.userData.animal = sp;
+      } else if (e.statue) { o.add(mk(geo.box, toon('#b0aebb'), 0.7, 0.35, 0.7, 0, 0.17, 0)); const s = emojiSprite(e.e, 1.0, true); s.position.y = 0.85; o.add(s); }
       else { const s = emojiSprite(e.e || '🙂', 0.95); s.position.y = 0.5; s.userData.bob = true; o.add(s); o.add(mk(geo.cyl, new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 }), 0.25, 0.01, 0.25, 0, 0.01, 0)); }
     } else if (e.kind === 'boss') { const d = EQ.BOSSES[e.boss]; o = new T.Group(); const b = makeMonster(d, d.color, 2.3); o.add(b); o.userData.boss = b; }
     else if (e.kind === 'chest') {
@@ -674,6 +676,7 @@ window.EQ = window.EQ || {};
         if (W.target === e) { const dx = W.player.x / TS - o.position.x, dz = W.player.y / TS - o.position.z; dir = Math.abs(dx) > Math.abs(dz) ? (dx < 0 ? 'left' : 'right') : (dz < 0 ? 'up' : 'down'); }
         setHuman(o, dir, 0);
       }
+      if (o.userData.animal) { const k = 1 + Math.sin(t * 2.2 + e.x) * 0.025; o.userData.animal.scale.set(1.25 * (2 - k), 1.25 * k, 1); }
       if (o.userData.boss) setMon(o.userData.boss, Math.floor(t * 5 + e.x) % 4);
       o.traverse(c => {
         if (c.userData.bob) c.position.y = (c.userData.y0 == null ? (c.userData.y0 = c.position.y) : c.userData.y0) + Math.sin(t * 3 + e.x) * 0.06;

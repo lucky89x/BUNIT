@@ -15,7 +15,7 @@ window.EQ = window.EQ || {};
 
   A.GAMES = {
     race: { name: 'Đua xe từ vựng', icon: '🏎️', desc: 'Lái xe đi qua cổng có từ tiếng Anh đúng. Đúng thì tăng tốc!', keys: '← → hoặc A D (hoặc bấm chuột bên trái/phải)' },
-    catch: { name: 'Hứng chữ', icon: '🧺', desc: 'Di chuyển giỏ hứng đúng chữ cái để ghép thành từ. Luyện chính tả!', keys: '← → hoặc A D, hoặc di chuột' },
+    catch: { vocabOnly: true, name: 'Hứng chữ', icon: '🧺', desc: 'Di chuyển giỏ hứng đúng chữ cái để ghép thành từ. Luyện chính tả!', keys: '← → hoặc A D, hoặc di chuột' },
     obby: { name: 'Vượt chướng ngại', icon: '🧗', desc: 'Chạy, nhảy qua các bục như Roblox. Húc vào khối có từ đúng để cầu hiện ra!', keys: '← → để chạy, Space / ↑ / W để nhảy' },
     balloon: { name: 'Bắn bóng bay', icon: '🎈', desc: 'Bấm vào quả bóng bay có từ đúng. Bình tĩnh, không bị tính giờ!', keys: 'Bấm chuột vào bóng (hoặc phím 1–4)' }
   };
@@ -35,8 +35,23 @@ window.EQ = window.EQ || {};
     }
     out.push({ id: 'due', name: '⏰ Từ cần ôn (' + L.dueIds(p).length + ')', ids: L.dueIds(p) });
     out.push({ id: 'learned', name: '📖 Tất cả từ đã học (' + learned.length + ')', ids: learned });
+    // bản 2.0: ngữ pháp, mẫu câu, giáo trình – lấy từ ngân hàng câu hỏi dùng chung (js/core/qbank.js)
+    if (EQ.qbank) {
+      const g = EQ.qbank.sources(p);
+      g.forEach(s => { s.ids = s.pool.map(w => w.id); out.push(s); });
+      const gp = g.find(s => s.id === 'qb_grammar');
+      out.push({ id: 'mix', name: '🎲 Tổng hợp: từ vựng + ngữ pháp', ids: learned.concat(gp ? gp.ids : []), mix: true });
+    }
     return out;
   };
+  // danh sách đề cho một nguồn (từ thật hoặc "từ giả" bọc câu hỏi)
+  function poolOf(p, src) {
+    if (src.pool) return src.pool.slice();
+    if (src.mix) return EQ.qbank.mix(p, poolFrom(p, learnedIds(p)));
+    return poolFrom(p, src.ids);
+  }
+  const learnedIds = p => EQ.learn.learnedIds(p);
+  A.poolOf = poolOf;
   function poolFrom(p, ids) {
     const L = EQ.learn;
     let ws = ids.map(id => EQ.V[id]).filter(Boolean);
@@ -46,6 +61,13 @@ window.EQ = window.EQ || {};
     return ws;
   }
   function distractors(w, pool, n) {
+    if (w.qq) { // câu ngữ pháp/mẫu câu: đáp án sai lấy từ chính câu hỏi, bổ sung đáp án của câu khác
+      const q = w.qq, out = [];
+      const add = en => { if (out.length < n && en !== q.answer && !out.some(o => o.en === en)) out.push({ id: 'q:' + q.id + ':' + en, en, vi: '', t: q.topic, long: q.long }); };
+      q.options.forEach(add);
+      U.shuffle(pool.filter(x => x.qq && x.qq.kind === q.kind && !!x.qq.long === !!q.long)).forEach(x => add(x.en));
+      return out;
+    }
     const same = U.shuffle(pool.filter(x => x.id !== w.id && x.en !== w.en && x.t === w.t));
     const other = U.shuffle(pool.filter(x => x.id !== w.id && x.en !== w.en && x.t !== w.t));
     const extra = U.shuffle(EQ.VOCAB.filter(x => x.id !== w.id && x.en !== w.en && x.t === w.t));
@@ -56,11 +78,13 @@ window.EQ = window.EQ || {};
   // kiểu câu hỏi theo trình độ: nghĩa tiếng Việt, hình, hoặc nghe
   function promptFor(p, w) {
     const modes = ['vi'];
+    if (w.qq) return 'vi';
     if (w.pic) modes.push('pic', 'vi');
     if (EQ.speech.available() && p.diff >= 1.6) modes.push('listen');
     return U.pick(modes);
   }
   function record(p, w, ok, mode) {
+    if (w.qq) return EQ.qbank.record(p, w.qq, ok, mode);
     EQ.learn.record(p, { correct: ok, wordId: w.id, topic: w.t, key: 'w:' + w.id, text: w.en + ' = ' + w.vi, mode: mode || 'pic' });
   }
 
@@ -86,8 +110,12 @@ window.EQ = window.EQ || {};
       body.appendChild(el('div', { class: 'am-gear' }, '🎒 Trang bị của bạn trong trò ⚡ Hành động: ❤️ ' + E.hp + ' mạng • ⚔️ phi tiêu/búa ' + E.atk + ' sát thương • 🛡️ ' + E.def + '% chặn va chạm • 🍀 +' + E.luck + '% điểm, ' + E.crit + '% chí mạng. Mua/nâng cấp ở 💎 Tiệm trang sức để chơi giỏi hơn!'));
       body.appendChild(el('div', { class: 'am-grid' }, Object.keys(A.GAMES).map(id => {
         const g = A.GAMES[id];
-        return el('button', { class: 'am-card ' + id + (g.action ? ' action' : ''), disabled: !enough, onclick: () => { close(); A.play(id, poolFrom(p, src.ids)); } }, [
+        // trò đánh vần chỉ dùng từ vựng; câu dài chỉ dùng được ở trò có hỗ trợ (g.long)
+        const gram = !!(src.grammar || src.mix);
+        const bad = (gram && g.vocabOnly) || (src.longOnly && !g.long);
+        return el('button', { class: 'am-card ' + id + (g.action ? ' action' : ''), disabled: !enough || bad, title: bad ? 'Trò này không dùng được với nguồn câu hỏi đã chọn' : '', onclick: () => { close(); A.play(id, poolOf(p, src)); } }, [
           g.action ? el('div', { class: 'am-tag' }, '⚡ HÀNH ĐỘNG • dùng trang bị') : null,
+          bad ? el('div', { class: 'am-tag' }, gram && g.vocabOnly ? '🔤 Chỉ dùng với từ vựng' : '💬 Chỉ trò Candy Crush') : null,
           el('div', { class: 'am-icon' }, g.icon), el('div', { class: 'am-name' }, g.name), el('div', { class: 'am-desc' }, g.desc),
           el('div', { class: 'am-keys' }, '🎮 ' + g.keys), g.where ? el('div', { class: 'am-where' }, '📍 Quầy ở ' + g.where) : null, el('div', { class: 'am-best' }, '🏆 Kỷ lục: ' + (p.arcade[id] || 0))
         ]);
@@ -100,6 +128,8 @@ window.EQ = window.EQ || {};
   // ---------- khung chung cho mọi trò ----------
   A.play = function (id, pool) {
     const p = EQ.game.profile;
+    // câu dài (mẫu câu) chỉ trò có g.long mới hiển thị được
+    if (!A.GAMES[id].long) pool = pool.filter(w => !w.long);
     const cv = el('canvas', { width: CW, height: CH, class: 'arcade-cv' });
     const ctx = cv.getContext('2d');
     const hud = el('div', { class: 'ar-hud' });
@@ -135,7 +165,7 @@ window.EQ = window.EQ || {};
         if (ok) { S.correct++; EQ.audio.sfx('correct'); } else { EQ.audio.sfx('wrong'); if (!S.missed.some(m => m.id === w.id)) S.missed.push(w); }
         record(p, w, ok, mode);
       },
-      say: t => EQ.speech.speak(t),
+      say: t => { const q = pool.find(w => w.qq && w.en === t); EQ.speech.speak(q ? q.qq.say : t); },
       burst: (x, y, n, cols) => { for (let i = 0; i < (n || 20); i++) { const a = Math.random() * 7, s = 80 + Math.random() * 200; S.fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 100, life: 0.8 + Math.random() * 0.5, c: U.pick(cols || ['#ffd54f', '#ff80ab', '#80d8ff', '#b9f6ca', '#fff']), s: 3 + Math.random() * 4 }); } },
       float: (x, y, text, c) => S.fx.push({ x, y, text, c: c || '#fff59d', life: 1.2, vy: -40 }),
       finish: () => end(false),
@@ -183,7 +213,7 @@ window.EQ = window.EQ || {};
         el('div', { class: 'ar-big' }, aborted ? '⏸️ Dừng chơi' : (S.correct >= S.total * 0.8 ? '🏆 Tuyệt vời!' : '🎉 Hoàn thành!')),
         el('div', { class: 'ar-score' }, 'Điểm: ' + S.score + (isBest ? '  🆕 Kỷ lục mới!' : '')),
         el('div', null, '✅ Đúng ' + S.correct + '/' + S.total + '   •   +' + xp + ' XP   •   +' + coins + ' 🪙'),
-        S.missed.length ? el('div', { class: 'ar-missed' }, [el('b', null, '📒 Ôn lại các từ này:'), el('div', null, S.missed.slice(0, 8).map(w => el('span', { class: 'ar-chip' }, [w.en + ' = ' + w.vi, EQ.challenge.speakBtn(w.en, '🔊', 'small')])))]) : el('div', { class: 'muted' }, 'Không sai từ nào. Giỏi quá!'),
+        S.missed.length ? el('div', { class: 'ar-missed' }, [el('b', null, '📒 Ôn lại những điều này:'), el('div', null, S.missed.slice(0, 8).map(w => el('span', { class: 'ar-chip' }, [w.qq ? w.qq.review : w.en + ' = ' + w.vi, EQ.challenge.speakBtn(w.qq ? w.qq.say : w.en, '🔊', 'small')])))]) : el('div', { class: 'muted' }, 'Không sai từ nào. Giỏi quá!'),
         el('div', { class: 'row center' }, [
           el('button', { class: 'btn primary big', onclick: () => { cleanup(); A.play(id, U.shuffle(pool)); } }, '🔁 Chơi lại'),
           el('button', { class: 'btn', onclick: () => { cleanup(); A.open(); } }, '🎮 Trò khác'),
