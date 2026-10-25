@@ -4,8 +4,9 @@ window.EQ = window.EQ || {};
   const U = EQ.U, el = U.el, SP = EQ.sprites;
   const B = {};
 
-  B.power = p => 1 + (p.items.spellbook ? 1 : 0) + Math.floor((p.level - 1) / 4);
-  B.maxHearts = p => Math.min(6, 3 + Math.floor((p.level - 1) / 3));
+  // chỉ số lấy từ cấp độ + trang bị (xem js/data/gear.js)
+  B.power = p => EQ.rpg.stats(p).atk;
+  B.maxHearts = p => EQ.rpg.stats(p).hp;
 
   // o: {def, color, hp, name, spec, boss, hard}
   B.start = function (o) {
@@ -128,9 +129,15 @@ window.EQ = window.EQ || {};
           src.missed(q);
           st.mJump = 1;
           await new Promise(res => st.fx.push({ type: 'puff', life: 5, onHit: res }));
-          st.hearts--; st.shake = 0.4;
-          EQ.audio.sfx('bump');
-          fxText(170, 70, '-1 ❤️', '#ff8a80');
+          // phòng thủ: có cơ hội chặn đòn
+          if (Math.random() * 100 < EQ.rpg.stats(p).def) {
+            EQ.audio.sfx('heal'); fxText(170, 70, '🛡️ Chặn!', '#80d8ff');
+          } else {
+            const lose = o.matk || 1;
+            st.hearts = Math.max(0, st.hearts - lose); st.shake = 0.4;
+            EQ.audio.sfx('bump');
+            fxText(170, 70, '-' + lose + ' ❤️', '#ff8a80');
+          }
         }
         drawBars();
         if (st.hp <= 0) return win();

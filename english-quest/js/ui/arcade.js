@@ -170,6 +170,7 @@ window.EQ = window.EQ || {};
       const isBest = S.score > best;
       if (isBest) p.arcade[id] = S.score;
       await EQ.game.reward(p, { xp, gold: coins }, true);
+      EQ.rpg.count(p, 'arcade');
       EQ.game.saveNow();
       res.classList.remove('hidden');
       res.innerHTML = '';

@@ -112,6 +112,22 @@ Mỗi câu trả lời trong trò chơi được ghi vào hệ thống ôn tập
 
 **📘 Từ vựng đúng theo sách:** đã nhập **712 từ mới** từ ảnh "Sổ tay kiến thức Toán Văn Anh lớp 6 & lớp 8" mà phụ huynh tải lên Google Drive (cùng 134 từ trùng với từ đã có), chia đúng theo 24 Unit. File dữ liệu: `js/data/sgk-words.js` – mỗi dòng `từ = nghĩa`, phụ huynh có thể sửa trực tiếp nếu thấy sai.
 
+## 5e. Bản 1.4 – Kiếm vàng, trang sức tăng sức mạnh, Tháp Thử Thách
+
+**🪙 Kiếm vàng:** đánh quái, làm nhiệm vụ, chơi Khu vui chơi, ôn tập… đều có vàng. Ở Làng có **📋 Bảng nhiệm vụ** (cạnh quảng trường; Rừng và Lâu đài cũng có). Mỗi ngày có 3 việc mới, ví dụ "Trả lời đúng 30 câu", "Hạ 3 quái vật", "Học 8 từ mới", "Chơi 2 ván Khu vui chơi". Xong việc thì bấm **Nhận thưởng**. Bảng nhiệm vụ cũng mở được từ nút trong 📜 Nhiệm vụ.
+
+**💎 Tiệm trang sức** (bà chủ áo tím, cạnh chợ trong Làng): có 20 món chia 4 ô, mỗi món có 5 cấp độ hiếm, từ Thường đến Huyền thoại.
+- 🪄 **Vũ khí** (đũa, trượng): tăng ⚔️ **Sức mạnh**, tức sát thương mỗi câu trả lời đúng.
+- 👑 **Mũ / vương miện**: tăng 🛡️ **Phòng thủ**, tức cơ hội chặn đòn khi trả lời sai. Một số món còn thêm ❤️ máu.
+- 📿 **Dây chuyền**: tăng ❤️ **Máu** (số tim) và 🛡️.
+- 💍 **Nhẫn**: tăng 🍀 **May mắn**, tức nhận thêm % vàng.
+
+Mỗi món nâng cấp được từ +1 đến +5. Trang bị đang mặc **hiện ngay trên nhân vật** (mũ, vương miện, đũa, dây chuyền). Chỉ số tổng hợp lại thành **💪 Lực chiến**, hiện ở góc trên cùng. Xem trang bị trong 🎒 Túi đồ → 💎 Trang bị.
+
+**🗼 Tháp Thử Thách** (tòa tháp tím trong Làng): 30 tầng. Tầng càng cao thì quái càng nhiều máu và đánh càng đau. Mỗi tầng ghi **Lực chiến đề xuất** theo màu: xanh là dễ, vàng là vừa sức, đỏ là khó. Cứ 5 tầng có một **Trùm**, thắng lần đầu sẽ rơi **trang bị quý**. Vượt tầng lần đầu được nhiều vàng, đánh lại được ít hơn.
+
+> Trang bị chỉ giúp đánh khỏe hơn và chịu đòn tốt hơn. **Vẫn phải trả lời đúng tiếng Anh mới hạ được quái vật**, nên vàng và đồ đẹp là phần thưởng cho việc học, không thay được việc học.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.

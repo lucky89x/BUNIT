@@ -265,7 +265,7 @@ window.EQ = window.EQ || {};
     H.lv.textContent = 'Cấp ' + p.level;
     H.xpFill.style.width = Math.min(100, p.xp / need * 100) + '%';
     H.xpText.textContent = 'XP ' + p.xp + ' / ' + need;
-    H.gold.textContent = '🪙 ' + p.gold + '   ⭐ ' + EQ.learn.learnedIds(p).length + ' từ';
+    H.gold.textContent = '🪙 ' + p.gold + '   💪 ' + EQ.rpg.power(p) + '   ⭐ ' + EQ.learn.learnedIds(p).length + ' từ';
     if (!H.port.firstChild || H._outfit !== p.avatar.outfit + p.avatar.hair + p.avatar.hairC + p.avatar.skin) {
       H.port.innerHTML = ''; H.port.appendChild(UI.portrait({ look: EQ.sprites.playerLook(p.avatar) }));
       H._outfit = p.avatar.outfit + p.avatar.hair + p.avatar.hairC + p.avatar.skin;

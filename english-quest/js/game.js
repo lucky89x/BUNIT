@@ -55,6 +55,7 @@ window.EQ = window.EQ || {};
     G.profile = p;
     EQ.store.data.lastProfile = p.id;
     p._ageWord = U.numWord(p.age);
+    EQ.rpg.ensure(p); EQ.rpg.dailyJobs(p); EQ.rpg.syncLook(p);
     EQ.learn.registerCustom(p);
     p.lastPlayed = Date.now();
     G.session = 0;
@@ -216,6 +217,10 @@ window.EQ = window.EQ || {};
       const s = Q.stage(p, mine.id);
       return EQ.ui.dialog([{ s: 'npc', en: s.objEn || 'Good luck!', vi: s.objEn ? s.obj : 'Chúc may mắn!' }, { s: 'pip', vi: 'Nhiệm vụ "' + mine.title + '": ' + s.obj + '.' }], sp);
     }
+    // 5a. tiệm trang sức, bảng nhiệm vụ, tháp thử thách
+    if (e.jeweler) return EQ.rpgui.jeweler(sp);
+    if (e.jobs) return EQ.rpgui.jobs();
+    if (e.tower) return EQ.rpgui.tower(sp);
     // 5. cô giáo dạy theo sách
     if (e.book) {
       await EQ.ui.dialog([{ s: 'npc', en: 'Hello! What unit are you studying at school?', vi: 'Chào em! Ở lớp em đang học Unit mấy?' }], sp);
@@ -340,7 +345,7 @@ window.EQ = window.EQ || {};
     const qs = ids.map(id => EQ.learn.wordQ(p, EQ.V[id], U.pick(modes)));
     const r = await EQ.challenge.run(qs, { title: 'Luyện từ' + (region ? ': ' + EQ.REGIONS[region].name : ''), icon: '📒', mastery: true });
     if (r.completed) {
-      p.reviews++;
+      p.reviews++; EQ.rpg.count(p, 'review');
       await G.reward(p, { xp: 8 + r.correct * 2, gold: 2 });
       if (region) { const m = EQ.learn.regionMastery(p, region); EQ.ui.toast('📒 ' + EQ.REGIONS[region].name + ': đã thuộc ' + m.ok + '/' + m.total + ' từ', 'good', 4000); }
       G.checkBadges(p);
@@ -355,7 +360,7 @@ window.EQ = window.EQ || {};
     const modes = EQ.learn.wordModes(p);
     const qs = ids.map(id => EQ.learn.wordQ(p, EQ.V[id], U.pick(modes)));
     const r = await EQ.challenge.run(qs, { title: 'Ôn: ' + title, icon: '🔁', mastery: true });
-    if (r.completed) { p.reviews++; await G.reward(p, { xp: 8 + r.correct * 2, gold: 2 }); G.checkBadges(p); }
+    if (r.completed) { p.reviews++; EQ.rpg.count(p, 'review'); await G.reward(p, { xp: 8 + r.correct * 2, gold: 2 }); G.checkBadges(p); }
     G.saveNow();
   };
   G.dailyAvailable = p => !(p.dailyDone || {})[U.today()] && EQ.learn.learnedIds(p).length >= 8;
@@ -371,7 +376,7 @@ window.EQ = window.EQ || {};
     if (r.completed) {
       p.dailyDone = p.dailyDone || {};
       p.dailyDone[U.today()] = true;
-      p.dailyCount = (p.dailyCount || 0) + 1;
+      p.dailyCount = (p.dailyCount || 0) + 1; EQ.rpg.count(p, 'review');
       await G.reward(p, { xp: 30, gold: 10 });
       EQ.ui.banner('⭐ Xong thử thách hôm nay!', 'Hẹn gặp lại ngày mai nhé', 'gold');
       if (p.dailyCount >= 5) G.award(p, 'daily5');
@@ -473,6 +478,7 @@ window.EQ = window.EQ || {};
       EQ.world.removeMonster(m);
       EQ.world.burst(m.x, m.y - 10, [m.color, '#ffffff', '#fff59d'], 24);
       await G.reward(p, { xp: m.def.xp, gold: m.def.gold });
+      EQ.rpg.count(p, 'kill');
     } else {
       // đẩy quái vật ra xa một chút
       const a = Math.atan2(m.y - EQ.world.player.y, m.x - EQ.world.player.x);
@@ -528,6 +534,7 @@ window.EQ = window.EQ || {};
         if (G.mode === 'play') EQ.world.burst(EQ.world.player.x, EQ.world.player.y - 30, ['#ffd54f', '#fff59d', '#ffffff'], 40);
       }
     }
+    if (r.gold && EQ.rpg) r = Object.assign({}, r, { gold: Math.round(r.gold * (1 + EQ.rpg.stats(p).luck / 100)) });
     if (r.gold) { p.gold += r.gold; lines.push('+' + r.gold + ' 🪙'); EQ.audio.sfx('coin'); if (G.mode === 'play' && !quiet) setTimeout(() => EQ.world.atPlayer('+' + r.gold + ' 🪙', '#ffd54f'), 250); }
     if (r.items) for (const k in r.items) {
       p.items[k] = (p.items[k] || 0) + r.items[k];

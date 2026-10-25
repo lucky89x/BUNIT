@@ -322,7 +322,9 @@ window.EQ = window.EQ || {};
   function drawEnt(ctx, e, p, t) {
     const c = W.entCenter(e);
     const by = (e.y + 0.95) * TS;
-    if (e.kind === 'npc') {
+    if (e.kind === 'npc' && e.draw) {
+      SP.deco(ctx, e.draw, c.x, by, t);
+    } else if (e.kind === 'npc') {
       if (e.look) {
         let dir = 'down';
         if (W.target === e) {

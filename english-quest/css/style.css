@@ -465,3 +465,55 @@ button { font-family: inherit; cursor: pointer; }
 .ar-score { font-size: 22px; font-weight: 800; margin: 4px 0; }
 .ar-missed { margin-top: 8px; }
 .ar-chip { display: inline-flex; align-items: center; background: #fff0f0; border-radius: 10px; padding: 2px 4px 2px 10px; margin: 3px; font-size: 14px; }
+
+/* ===== v1.4: Trang bị, Bảng nhiệm vụ, Tháp Thử Thách ===== */
+.tabs.small .tab { font-size: 14px; padding: 6px 12px; }
+.gearview .g-wrap { display: grid; grid-template-columns: 260px 1fr; gap: 16px; margin-top: 10px; }
+.g-panel { background: linear-gradient(180deg, #f3ecff, #fff7e6); border-radius: 20px; padding: 14px; text-align: center; box-shadow: inset 0 0 0 2px #e4d7ff; }
+.g-prev { display: flex; justify-content: center; margin-bottom: 6px; }
+.g-prev canvas { background: radial-gradient(circle, #fff 0%, #e8dcff 70%); border-radius: 50%; }
+.g-power { font-size: 18px; font-weight: 800; color: #6a1b9a; }
+.g-power b { font-size: 26px; color: #e65100; margin-left: 4px; }
+.g-statgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0; }
+.g-statgrid > div { background: #fff; border-radius: 12px; padding: 6px; font-size: 13px; display: flex; flex-direction: column; box-shadow: 0 2px 0 rgba(0,0,0,.08); }
+.g-statgrid b { font-size: 20px; color: var(--pri2); }
+.g-gold { margin-top: 8px; font-size: 18px; font-weight: 800; background: #fff3c4; border-radius: 12px; padding: 6px; }
+.g-right { min-width: 0; }
+.g-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 420px; overflow-y: auto; padding: 4px; }
+.g-item { background: #fff; border: 3px solid #ccc; border-radius: 16px; padding: 10px; box-shadow: 0 3px 0 rgba(0,0,0,.1); }
+.g-item.owned { background: #fbfaff; }
+.g-item.eq { box-shadow: 0 0 0 3px #ffd54f, 0 3px 0 rgba(0,0,0,.1); background: #fffbea; }
+.g-top { display: flex; gap: 10px; align-items: center; }
+.g-e { font-size: 36px; font-family: var(--emoji); line-height: 1; }
+.g-name { font-weight: 900; font-size: 16px; }
+.g-tier { font-size: 12px; font-weight: 800; }
+.g-stats { font-size: 14px; font-weight: 700; color: #2e7d32; margin: 6px 0 2px; }
+.g-desc { font-size: 12px; color: #666; margin-bottom: 6px; }
+.g-max { font-weight: 900; color: #e65100; padding: 4px 8px; }
+.g-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.g-slot { display: flex; gap: 8px; align-items: center; background: #f5f5f5; border: 2px dashed #ccc; border-radius: 14px; padding: 8px; font-size: 13px; }
+.g-slot.on { background: #fffbea; border: 2px solid #ffd54f; }
+.g-slot-i { font-size: 28px; font-family: var(--emoji); }
+.jobview .job { display: flex; gap: 12px; align-items: center; background: #fff; border-radius: 16px; padding: 10px 14px; margin: 8px 0; box-shadow: 0 3px 0 rgba(0,0,0,.08); border: 2px solid #eee; }
+.job.done { border-color: #66bb6a; background: #f1fbf1; }
+.job.claimed { opacity: .6; }
+.job-i { font-size: 34px; font-family: var(--emoji); }
+.job-m { flex: 1; }
+.job-bar { height: 10px; background: #eee; border-radius: 6px; overflow: hidden; margin: 4px 0; }
+.job-fill { height: 100%; background: linear-gradient(90deg, #66bb6a, #ffd54f); }
+.job-ok { font-weight: 800; color: #2e7d32; }
+.towerview .tw-head { text-align: center; }
+.tw-head h2 { margin: 0; }
+.tw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 430px; overflow-y: auto; padding: 6px; margin: 10px 0;
+  background: linear-gradient(180deg, #3b2c6b, #6a5aa8); border-radius: 18px; }
+.tw-floor { border: 0; border-radius: 12px; padding: 8px 6px; text-align: center; color: #333; background: #ddd; font-size: 12px; box-shadow: 0 3px 0 rgba(0,0,0,.3); }
+.tw-floor:hover:not(:disabled) { transform: translateY(-2px); }
+.tw-floor.cleared { background: #c8e6c9; }
+.tw-floor.open.easy { background: #a5d6a7; }
+.tw-floor.open.ok { background: #fff59d; }
+.tw-floor.open.hard { background: #ef9a9a; }
+.tw-floor.locked { background: #6d6489; color: #cfc8e6; cursor: not-allowed; }
+.tw-floor.boss { box-shadow: 0 0 0 3px #ffd54f, 0 3px 0 rgba(0,0,0,.3); }
+.tw-n { font-weight: 900; font-size: 14px; }
+.tw-m { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tw-r, .tw-g { font-weight: 700; }

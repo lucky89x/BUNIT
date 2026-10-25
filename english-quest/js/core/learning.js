@@ -26,6 +26,7 @@ window.EQ = window.EQ || {};
       added.push(id);
     });
     if (added.length) {
+      if (EQ.rpg) EQ.rpg.count(p, 'learn', added.length);
       p.daily[day] = p.daily[day] || { newWords: 0, answers: 0 };
       p.daily[day].newWords += added.length;
     }
@@ -82,6 +83,7 @@ window.EQ = window.EQ || {};
     const tp = info.topic || 'other';
     p.topics[tp] = p.topics[tp] || { ok: 0, bad: 0 };
     if (c) p.topics[tp].ok++; else p.topics[tp].bad++;
+    if (c && EQ.rpg) EQ.rpg.count(p, 'correct');
     if (info.wordId && p.vocab[info.wordId]) {
       const e = p.vocab[info.wordId];
       e.seen++; e.last = L.now();

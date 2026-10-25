@@ -302,7 +302,7 @@ window.EQ = window.EQ || {};
     const close = EQ.ui.modal(body, { cls: 'wide', onEsc: () => close() });
     function draw() {
       body.innerHTML = '';
-      body.appendChild(el('div', { class: 'tabs' }, [['items', '🎒 Vật phẩm'], ['wardrobe', '👗 Tủ đồ'], ['badges', '🏅 Huy hiệu']].map(t => el('button', { class: 'tab' + (tab === t[0] ? ' on' : ''), onclick: () => { tab = t[0]; draw(); } }, t[1]))));
+      body.appendChild(el('div', { class: 'tabs' }, [['items', '🎒 Vật phẩm'], ['gear', '💎 Trang bị'], ['wardrobe', '👗 Tủ đồ'], ['badges', '🏅 Huy hiệu']].map(t => el('button', { class: 'tab' + (tab === t[0] ? ' on' : ''), onclick: () => { if (t[0] === 'gear') { close(); EQ.rpgui.gearScreen('mine'); return; } tab = t[0]; draw(); } }, t[1]))));
       if (tab === 'items') {
         const ks = Object.keys(p.items).filter(k => p.items[k] > 0 && EQ.ITEMS[k]);
         body.appendChild(el('div', { class: 'gold-line' }, '🪙 ' + p.gold + ' vàng'));
@@ -405,7 +405,7 @@ window.EQ = window.EQ || {};
       const modes = EQ.learn.wordModes(p);
       const qs = ws.map((w, i) => EQ.learn.wordQ(p, w, modes[i % modes.length]));
       const r = await EQ.challenge.run(qs, { title: 'Ôn tập nhanh', icon: '🔁', retry: true });
-      if (r.completed) { p.reviews++; await EQ.game.reward(p, { xp: 10 + r.correct * 2, gold: 2 }); EQ.game.checkBadges(p); EQ.ui.toast('🔁 Ôn xong! Từ nào nhớ tốt sẽ được hỏi lại sau lâu hơn.', 'good'); }
+      if (r.completed) { p.reviews++; EQ.rpg.count(p, 'review'); await EQ.game.reward(p, { xp: 10 + r.correct * 2, gold: 2 }); EQ.game.checkBadges(p); EQ.ui.toast('🔁 Ôn xong! Từ nào nhớ tốt sẽ được hỏi lại sau lâu hơn.', 'good'); }
       draw();
     }
     draw();
@@ -437,7 +437,10 @@ window.EQ = window.EQ || {};
       sec('✅ Đã hoàn thành', done, q => el('div', { class: 'qrow done' }, [el('div', null, [el('b', null, '✓ ' + q.title), el('div', { class: 'muted small' }, q.summary)])]));
       const locked = EQ.QUESTS.filter(q => !p.quests[q.id] && !Q.available(p, q.id));
       body.appendChild(el('p', { class: 'muted small' }, '🔒 Còn ' + locked.length + ' nhiệm vụ sẽ mở khi bạn tiếp tục cuộc phiêu lưu.'));
-      body.appendChild(el('div', { class: 'row center' }, [el('button', { class: 'btn primary', onclick: () => close() }, 'Đóng')]));
+      body.appendChild(el('div', { class: 'row center' }, [
+        el('button', { class: 'btn', onclick: () => { close(); EQ.rpgui.jobs(); } }, '📋 Bảng nhiệm vụ hằng ngày'),
+        el('button', { class: 'btn', onclick: () => { close(); EQ.rpgui.tower(); } }, '🗼 Tháp Thử Thách'),
+        el('button', { class: 'btn primary', onclick: () => close() }, 'Đóng')]));
     }
     draw();
   };
