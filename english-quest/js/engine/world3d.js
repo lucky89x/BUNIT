@@ -454,125 +454,55 @@ window.EQ = window.EQ || {};
     leaves.build(G3); trunks.build(G3);
   }
 
-  // ---------- NHÂN VẬT CHIBI ----------
+  // ---------- NHÂN VẬT & QUÁI: TRANH VẼ TAY DỰNG ĐỨNG (2.5D) ----------
+  // Ảnh vẽ bằng EQ.paint (js/engine/paint.js), dán lên tấm "billboard" luôn quay về máy quay, có bóng tròn dưới chân.
   function mk(g, m, sx, sy, sz, x, y, z) { const o = new T.Mesh(g, m); o.scale.set(sx, sy, sz); o.position.set(x, y, z); o.castShadow = true; return o; }
-  function makeHuman(look, opt) {
-    opt = opt || {};
-    const g = new T.Group(), body = new T.Group(); g.add(body);
-    const L = look || {};
-    const skin = toon(L.skin || '#ffe0bd'), top = toon(L.top || '#4fc3f7'), bot = toon(L.bottom || '#1565c0'), hairM = toon(L.hairC || '#3e2723');
-    const legL = mk(geo.cyl, bot, 0.07, 0.24, 0.07, -0.08, 0, 0), legR = mk(geo.cyl, bot, 0.07, 0.24, 0.07, 0.08, 0, 0);
-    const shoe = toon(L.g && L.g.boots ? L.g.boots : '#5d4037');
-    legL.add(mk(geo.sph, shoe, 1.3, 0.4, 1.8, 0, 0.02, 0.25)); legR.add(mk(geo.sph, shoe, 1.3, 0.4, 1.8, 0, 0.02, 0.25));
-    body.add(legL, legR);
-    const torso = mk(geo.sph, top, 0.2, 0.24, 0.17, 0, 0.42, 0); body.add(torso);
-    if (L.apron) body.add(mk(geo.box, toon(L.apron), 0.26, 0.24, 0.02, 0, 0.38, 0.165));
-    if (L.collar) body.add(mk(geo.box, toon(L.collar), 0.3, 0.06, 0.2, 0, 0.6, 0.02));
-    if (L.g && L.g.armor) body.add(mk(geo.sph, toon(L.g.armor), 0.21, 0.17, 0.18, 0, 0.47, 0.01));
-    if (L.cape) { const cp = mk(geo.box, toon(L.cape), 0.34, 0.42, 0.03, 0, 0.38, -0.17); cp.rotation.x = 0.12; body.add(cp); }
-    const armL = new T.Group(), armR = new T.Group(); armL.position.set(-0.21, 0.55, 0); armR.position.set(0.21, 0.55, 0);
-    [armL, armR].forEach(a => { const s = mk(geo.cyl, top, 0.055, 0.25, 0.055, 0, 0, 0); s.rotation.x = Math.PI; a.add(s); });
-    const hand = toon(L.g && L.g.glove ? L.g.glove : (L.skin || '#ffe0bd'));
-    armL.add(mk(geo.sph, hand, 0.065, 0.065, 0.065, 0, -0.27, 0)); armR.add(mk(geo.sph, hand, 0.065, 0.065, 0.065, 0, -0.27, 0));
-    if (L.g && L.g.wand) { const wd = mk(geo.cyl, toon('#6d4c41'), 0.02, 0.4, 0.02, 0, -0.32, 0.02); wd.rotation.x = 1.1; armR.add(wd); const tip = new T.Mesh(geo.sph, new T.MeshBasicMaterial({ color: L.g.wand })); tip.scale.setScalar(0.06); tip.position.set(0, -0.45, 0.4); armR.add(tip); }
-    body.add(armL, armR);
-    if (L.g && L.g.neck) body.add(mk(geo.sph, toon(L.g.neck), 0.04, 0.04, 0.04, 0, 0.58, 0.15));
-    // đầu to tròn kiểu chibi
-    const head = new T.Group(); head.position.set(0, 0.86, 0); body.add(head);
-    head.add(mk(geo.sph, skin, 0.25, 0.235, 0.23, 0, 0, 0));
-    const eyeM = toon('#2b1d16'), white = new T.MeshBasicMaterial({ color: 0xffffff });
-    [-1, 1].forEach(s => {
-      head.add(mk(geo.sph, eyeM, 0.035, 0.05, 0.02, s * 0.085, -0.01, 0.215));
-      const gl = new T.Mesh(geo.sph, white); gl.scale.setScalar(0.012); gl.position.set(s * 0.085 + 0.01, 0.015, 0.232); head.add(gl);
-      head.add(mk(geo.sph, toon('#ff9f9f'), 0.04, 0.022, 0.01, s * 0.14, -0.07, 0.2)); // má hồng
-    });
-    // tóc
-    if (L.hair !== 'bald') {
-      const cap = new T.Mesh(new T.SphereGeometry(1, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.52), hairM);
-      cap.scale.set(0.265, 0.26, 0.25); cap.position.set(0, 0.02, -0.01); cap.rotation.x = -0.25; cap.castShadow = true; head.add(cap);
-      head.add(mk(geo.sph, hairM, 0.24, 0.07, 0.08, 0, 0.13, 0.16)); // mái
-      if (L.hair === 'long') head.add(mk(geo.sph, hairM, 0.24, 0.3, 0.12, 0, -0.16, -0.12));
-      if (L.hair === 'pony') head.add(mk(geo.sph, hairM, 0.09, 0.2, 0.09, 0, -0.08, -0.27));
-      if (L.hair === 'bun') head.add(mk(geo.sph, hairM, 0.11, 0.11, 0.11, 0, 0.25, -0.08));
-      if (L.hair === 'twin') { head.add(mk(geo.sph, hairM, 0.08, 0.18, 0.08, -0.27, -0.1, -0.05)); head.add(mk(geo.sph, hairM, 0.08, 0.18, 0.08, 0.27, -0.1, -0.05)); }
-    } else head.add(mk(geo.sph, toon(L.hairC || '#e0e0e0'), 0.255, 0.12, 0.2, 0, -0.03, -0.08));
-    if (L.beard) head.add(mk(geo.sph, toon(L.beard), 0.17, 0.13, 0.1, 0, -0.17, 0.14));
-    if (L.glasses) [-1, 1].forEach(s => { const r = new T.Mesh(new T.TorusGeometry(0.05, 0.008, 6, 16), toon('#37474f')); r.position.set(s * 0.085, -0.01, 0.235); head.add(r); });
-    if (L.wizard) { const hat = mk(geo.cone, toon(L.hat || '#3949ab'), 0.24, 0.45, 0.24, 0, 0.16, 0); hat.rotation.z = 0.15; head.add(hat); head.add(mk(geo.cyl, toon(L.hat || '#3949ab'), 0.36, 0.03, 0.36, 0, 0.15, 0)); }
-    else if (L.hat) { head.add(mk(geo.cyl, toon(L.hat), 0.33, 0.03, 0.33, 0, 0.14, 0)); head.add(mk(geo.cyl, toon(L.hat), 0.2, 0.16, 0.2, 0, 0.15, 0)); }
-    if (L.helmet) { const hm = new T.Mesh(new T.SphereGeometry(1, 16, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), toon(L.helmet)); hm.scale.set(0.27, 0.27, 0.26); hm.position.y = 0.03; head.add(hm); }
-    if (L.crown) crown(head, 0.2, '#ffd54f');
-    if (L.bow) head.add(mk(geo.sph, toon(L.bow), 0.1, 0.06, 0.05, 0.16, 0.2, 0.05));
-    const gh = L.g && L.g.hat;
-    if (gh) {
-      if (gh === 'h2') { const hat = mk(geo.cone, toon('#5e35b1'), 0.24, 0.45, 0.24, 0, 0.16, 0); head.add(hat); head.add(mk(geo.cyl, toon('#4527a0'), 0.36, 0.03, 0.36, 0, 0.15, 0)); }
-      else if (gh === 'h1') { head.add(mk(geo.sph, toon('#ff80ab'), 0.07, 0.05, 0.05, -0.14, 0.2, 0.08)); head.add(mk(geo.sph, toon('#ff80ab'), 0.07, 0.05, 0.05, 0.14, 0.2, 0.08)); }
-      else crown(head, 0.2, L.g.hatC || '#ffd54f');
+  const texCache = new WeakMap();
+  function texOf(cnv) {
+    let t = texCache.get(cnv);
+    if (!t) { t = new T.CanvasTexture(cnv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; texCache.set(cnv, t); }
+    return t;
+  }
+  let _shTex = null;
+  function blobShadow(r) {
+    if (!_shTex) {
+      const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 2, 32, 32, 31); gr.addColorStop(0, 'rgba(30,40,20,.42)'); gr.addColorStop(1, 'rgba(30,40,20,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64); _shTex = new T.CanvasTexture(c);
     }
-    g.userData = { body, legL, legR, armL, armR, head };
-    if (opt.scale) g.scale.setScalar(opt.scale);
+    const m = new T.Mesh(new T.PlaneGeometry(r * 2, r * 1.3), new T.MeshBasicMaterial({ map: _shTex, transparent: true, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2; m.position.y = 0.025; return m;
+  }
+  function billboard(h, aspect) {
+    const s = new T.Sprite(new T.SpriteMaterial({ transparent: true, alphaTest: 0.06 }));
+    s.center.set(0.5, 0.03); s.scale.set(h * aspect, h, 1); return s;
+  }
+  function makeHuman(look) {
+    const g = new T.Group(), s = billboard(1.55, 2 / 3);
+    g.add(blobShadow(0.3)); g.add(s);
+    g.userData = { spr: s, look, k: '' };
+    setHuman(g, 'down', 0);
     return g;
+  }
+  function setHuman(o, dir, f) {
+    const k = dir + f; if (o.userData.k === k) return;
+    o.userData.k = k; o.userData.spr.material.map = texOf(EQ.paint.human(o.userData.look, dir, f)); o.userData.spr.material.needsUpdate = true;
+  }
+  function makeMonster(def, color, size) {
+    const g = new T.Group(), s = billboard(size || 0.85, 1);
+    g.add(blobShadow((size || 0.85) * 0.42)); g.add(s);
+    g.userData = { spr: s, mdef: def, col: color || def.color, k: -1 };
+    setMon(g, 0);
+    return g;
+  }
+  function setMon(o, f) {
+    if (o.userData.k === f) return;
+    o.userData.k = f; o.userData.spr.material.map = texOf(EQ.paint.monster(o.userData.mdef, o.userData.col, f)); o.userData.spr.material.needsUpdate = true;
   }
   function crown(parent, y, col) {
     const m = toon(col, { mat: { emissive: new T.Color(col).multiplyScalar(0.25) } });
     parent.add(mk(geo.cyl, m, 0.15, 0.07, 0.15, 0, y, 0));
     for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; parent.add(mk(geo.cone, m, 0.035, 0.09, 0.035, Math.cos(a) * 0.13, y + 0.07, Math.sin(a) * 0.13)); }
-  }
-  function animHuman(o, moving, t, dir) {
-    const u = o.userData; if (!u.body) return;
-    const s = moving ? Math.sin(t * 11) : 0;
-    u.legL.rotation.x = s * 0.6; u.legR.rotation.x = -s * 0.6;
-    u.armL.rotation.x = -s * 0.5; u.armR.rotation.x = s * 0.5;
-    u.body.position.y = moving ? Math.abs(Math.sin(t * 11)) * 0.05 : Math.sin(t * 2) * 0.008;
-    u.head.rotation.z = moving ? 0 : Math.sin(t * 1.3) * 0.04;
-    if (dir) {
-      const want = { down: 0, up: Math.PI, left: -Math.PI / 2, right: Math.PI / 2 }[dir];
-      let d = want - o.rotation.y; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2;
-      o.rotation.y += d * 0.25;
-    }
-  }
-
-  // ---------- QUÁI VẬT ----------
-  function makeMonster(def, color, scale) {
-    const g = new T.Group(), body = new T.Group(); g.add(body);
-    const c = color || def.color || '#66bb6a', m = toon(c);
-    const eyes = (y, z, s) => [-1, 1].forEach(k => { body.add(mk(geo.sph, toon('#ffffff'), 0.07 * s, 0.09 * s, 0.03, k * 0.1 * s, y, z)); body.add(mk(geo.sph, toon('#1b1b1b'), 0.035 * s, 0.05 * s, 0.02, k * 0.1 * s, y - 0.01, z + 0.025)); });
-    const kind = def.draw;
-    if (kind === 'fluff') {
-      body.add(mk(geo.blob, m, 0.3, 0.3, 0.3, 0, 0.32, 0));
-      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; body.add(mk(geo.blob, m, 0.11, 0.11, 0.11, Math.cos(a) * 0.27, 0.32 + Math.sin(a * 2) * 0.12, Math.sin(a) * 0.2)); }
-      eyes(0.36, 0.28, 1);
-    } else if (kind === 'mush') {
-      body.add(mk(geo.cyl, toon('#f6ead2'), 0.15, 0.3, 0.15, 0, 0, 0));
-      const cap = new T.Mesh(new T.SphereGeometry(1, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), m); cap.scale.set(0.36, 0.28, 0.36); cap.position.y = 0.28; cap.castShadow = true; body.add(cap);
-      for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; body.add(mk(geo.sph, toon('#ffffff'), 0.05, 0.03, 0.05, Math.cos(a) * 0.22, 0.45, Math.sin(a) * 0.22)); }
-      eyes(0.16, 0.15, 0.9);
-    } else if (kind === 'star') {
-      const s = new T.Shape();
-      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 0.14 : 0.32; i ? s.lineTo(Math.cos(a) * r, -Math.sin(a) * r) : s.moveTo(Math.cos(a) * r, -Math.sin(a) * r); }
-      const sg = new T.ExtrudeGeometry(s, { depth: 0.12, bevelEnabled: true, bevelSize: 0.04, bevelThickness: 0.04, bevelSegments: 2 }); sg.translate(0, 0, -0.06);
-      const st = new T.Mesh(sg, toon(c, { mat: { emissive: new T.Color(c).multiplyScalar(0.35) } })); st.position.y = 0.42; st.castShadow = true; body.add(st);
-      eyes(0.45, 0.13, 0.8);
-    } else if (kind === 'golem') {
-      body.add(mk(geo.rock, toon(c), 0.3, 0.32, 0.26, 0, 0.36, 0));
-      body.add(mk(geo.rock, toon(c), 0.12, 0.2, 0.12, -0.32, 0.3, 0));
-      body.add(mk(geo.rock, toon(c), 0.12, 0.2, 0.12, 0.32, 0.3, 0));
-      body.add(mk(geo.sph, toon('#ffffff'), 0.1, 0.1, 0.04, 0, 0.45, 0.25)); body.add(mk(geo.sph, toon('#d32f2f'), 0.05, 0.05, 0.03, 0, 0.45, 0.28));
-    } else { // slime
-      const sl = mk(geo.blob, toon(c, { mat: { transparent: true, opacity: 0.92 } }), 0.3, 0.24, 0.3, 0, 0.22, 0); body.add(sl);
-      body.add(mk(geo.sph, new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }), 0.06, 0.04, 0.03, -0.12, 0.36, 0.2));
-      eyes(0.26, 0.26, 1);
-    }
-    if (def.crown) crown(body, kind === 'golem' ? 0.72 : kind === 'mush' ? 0.58 : 0.55, '#ffd54f');
-    g.scale.setScalar(scale || 1);
-    g.userData = { body, kind };
-    return g;
-  }
-  function animMonster(o, t, ph) {
-    const u = o.userData; if (!u.body) return;
-    if (u.kind === 'slime' || !u.kind) { const b = Math.abs(Math.sin(t * 3 + ph)); u.body.position.y = b * 0.12; u.body.scale.set(1 + (1 - b) * 0.12, 1 - (1 - b) * 0.15, 1 + (1 - b) * 0.12); }
-    else if (u.kind === 'star') { u.body.rotation.y = Math.sin(t * 2 + ph) * 0.5; u.body.position.y = Math.sin(t * 3 + ph) * 0.06 + 0.06; }
-    else u.body.position.y = Math.abs(Math.sin(t * 4 + ph)) * 0.05;
   }
 
   // ---------- ĐỒ VẬT, QUẦY, CỔNG... ----------
@@ -634,7 +564,7 @@ window.EQ = window.EQ || {};
       if (e && e.e) { const s = emojiSprite(e.e, 0.4); s.position.y = 1.4; g.add(s); }
       return g;
     }
-    if (kind === 'wboss') { const bossDef = EQ.wild && EQ.wild.def || { draw: 'golem', color: '#7e57c2', crown: true }; const b = makeMonster(bossDef, bossDef.color, 2.6); g.add(b); g.userData.anim = true; return g; }
+    if (kind === 'wboss') { const bossDef = EQ.wild && EQ.wild.def || { draw: 'golem', color: '#7e57c2', crown: true }; const b = makeMonster(bossDef, bossDef.color, 2.9); g.add(b); g.userData.boss = b; return g; }
     // không rõ loại: hộp gỗ nhỏ
     g.add(mk(geo.box, toon('#b07a45'), 0.5, 0.5, 0.5, 0, 0.25, 0));
     return g;
@@ -647,7 +577,7 @@ window.EQ = window.EQ || {};
       o = new T.Group();
       if (e.statue) { o.add(mk(geo.box, toon('#b0aebb'), 0.7, 0.35, 0.7, 0, 0.17, 0)); const s = emojiSprite(e.e, 1.0, true); s.position.y = 0.85; o.add(s); }
       else { const s = emojiSprite(e.e || '🙂', 0.95); s.position.y = 0.5; s.userData.bob = true; o.add(s); o.add(mk(geo.cyl, new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 }), 0.25, 0.01, 0.25, 0, 0.01, 0)); }
-    } else if (e.kind === 'boss') { const d = EQ.BOSSES[e.boss]; o = makeMonster(d, d.color, 2.2); o.userData.anim = true; }
+    } else if (e.kind === 'boss') { const d = EQ.BOSSES[e.boss]; o = new T.Group(); const b = makeMonster(d, d.color, 2.3); o.add(b); o.userData.boss = b; }
     else if (e.kind === 'chest') {
       o = new T.Group(); const open = !!p.flags['chest:' + e.id];
       o.add(mk(geo.box, toon('#9a5f2e'), 0.6, 0.35, 0.42, 0, 0.18, 0));
@@ -694,10 +624,9 @@ window.EQ = window.EQ || {};
     monMap.forEach((o, m) => { if (!live.has(m)) { reg.remove(o); monMap.delete(m); } });
     W.monsters.forEach(m => {
       let o = monMap.get(m);
-      if (!o) { o = makeMonster(m.def, m.color, m.elite ? 1.5 : 1.0); monMap.set(m, o); reg.add(o); }
+      if (!o) { o = makeMonster(m.def, m.color, m.elite ? 1.2 : 0.85); monMap.set(m, o); reg.add(o); }
       o.position.set(m.x / TS, 0, m.y / TS);
-      if (m.vx || m.vy) o.rotation.y = Math.atan2(m.vx, m.vy);
-      animMonster(o, t, m.phase || 0);
+      setMon(o, Math.floor(t * 6 + (m.phase || 0) * 3) % 4);
     });
   }
   function syncPlayer(p, t) {
@@ -706,7 +635,7 @@ window.EQ = window.EQ || {};
     if (!player || key !== playerKey) { if (player) scene.remove(player); player = makeHuman(look); playerKey = key; scene.add(player); }
     const pl = W.player;
     player.position.set(pl.x / TS, 0, pl.y / TS);
-    animHuman(player, pl.moving, t, pl.dir);
+    setHuman(player, pl.dir, pl.moving ? Math.floor(pl.anim) % 4 : 0);
   }
 
   function loadRegion(p) {
@@ -741,12 +670,11 @@ window.EQ = window.EQ || {};
       const e = o.userData.ent;
       if (e.kind === 'npc' && e.look) {
         // quay mặt về phía người chơi khi đứng gần
-        const near = W.target === e, dx = W.player.x / TS - o.position.x, dz = W.player.y / TS - o.position.z;
-        const want = near ? Math.atan2(dx, dz) : 0;
-        o.rotation.y += (want - o.rotation.y) * 0.15;
-        animHuman(o, false, t + e.x, null);
+        let dir = 'down';
+        if (W.target === e) { const dx = W.player.x / TS - o.position.x, dz = W.player.y / TS - o.position.z; dir = Math.abs(dx) > Math.abs(dz) ? (dx < 0 ? 'left' : 'right') : (dz < 0 ? 'up' : 'down'); }
+        setHuman(o, dir, 0);
       }
-      if (o.userData.anim) animMonster(o.children[0] && o.children[0].userData.body ? o.children[0] : o, t, e.x);
+      if (o.userData.boss) setMon(o.userData.boss, Math.floor(t * 5 + e.x) % 4);
       o.traverse(c => {
         if (c.userData.bob) c.position.y = (c.userData.y0 == null ? (c.userData.y0 = c.position.y) : c.userData.y0) + Math.sin(t * 3 + e.x) * 0.06;
         if (c.userData.spin) c.rotation.z = t * 1.5;
@@ -787,7 +715,7 @@ window.EQ = window.EQ || {};
     const B = W.bubble, pl = W.player;
     W.ents.forEach(e => {
       if (['npc', 'boss', 'pickup', 'chest', 'gate', 'sign'].indexOf(e.kind) < 0) return;
-      const hgt = e.kind === 'boss' ? 2.1 : e.draw === 'wboss' ? 2.3 : e.draw === 'booth' || e.draw === 'stall' || e.draw === 'jewelstall' ? 2.05 : e.draw === 'tower' ? 3.9 : e.kind === 'npc' ? 1.45 : 0.9;
+      const hgt = e.kind === 'boss' ? 2.4 : e.draw === 'wboss' ? 2.3 : e.draw === 'booth' || e.draw === 'stall' || e.draw === 'jewelstall' ? 2.05 : e.draw === 'tower' ? 3.9 : e.kind === 'npc' ? 1.65 : 0.9;
       const s = proj(e.x + 0.5, hgt, e.y + 0.6); if (!s.ok) return;
       const near = W.target === e;
       const d = Math.hypot(pl.x / TS - e.x - 0.5, pl.y / TS - e.y - 0.6);

@@ -237,8 +237,9 @@ Bản đồ giờ được **dựng thành cảnh 3D** bằng thư viện Three.
 - **Cây tán tròn bồng bềnh** (kiểu Ghibli), rừng thông nhiều tầng, cây táo có quả đỏ, bụi hoa hồng, đá, nấm.
 - **Nhà kiểu châu Âu:** tường vôi kem, khung gỗ, mái ngói nhiều màu (đỏ, xanh, cam...), ống khói, cửa gỗ, cửa sổ có bồn hoa.
 - **Sông hồ gợn sóng lấp lánh**, có lá súng; lâu đài tường gạch đá vẽ tay.
-- **Nhân vật chibi** đầu tròn, má hồng, mắt long lanh. Trang bị hiện trên người (áo giáp, bao tay, giày, mũ, vương miện, đũa phép). Nhân vật vung tay bước đi; NPC quay mặt về phía bé khi đứng gần.
-- **Quái vật 3D:** slime nảy tưng tưng, bông xù, nấm, tinh tú, người đá; trùm to có vương miện; Boss Quỷ Một Mắt khổng lồ.
+- **Phương án 2.5D (đã chọn):** cảnh vật là 3D, còn **nhân vật, NPC và quái vật là tranh 2D vẽ tay kiểu Ghibli** dựng đứng trong cảnh (giống Octopath Traveler), có bóng tròn dưới chân. Tranh do mã nguồn tự vẽ (`js/engine/paint.js`) theo lối màu nước: nét viền nâu mảnh, mảng màu có sáng tối, má hồng, mắt to long lanh, vân giấy.
+- Mỗi nhân vật có **4 hướng** (trước, sau, trái, phải) × **4 khung bước đi**. Trang bị hiện trên người: áo giáp, bao tay, giày, dây chuyền, mũ, vương miện, đũa phép phát sáng. NPC quay mặt về phía bé khi đứng gần.
+- **Quái vẽ tay:** slime trong veo nảy tưng tưng, bông xù hồng, nấm đốm, ngôi sao, người đá một mắt; trùm có vương miện; Boss Quỷ Một Mắt khổng lồ.
 - **Bầu trời & ánh sáng:** trời xanh chuyển màu, mây trắng to trôi chậm, nắng vàng ấm, bóng đổ mềm.
 - **Cây, nhà, tường che khuất nhân vật sẽ tự trong suốt** nên lúc nào cũng thấy bé.
 - Vẫn hiện đủ tên NPC, dấu ❗, nút E, chỉ số quái, mũi tên nhiệm vụ.
@@ -288,6 +289,7 @@ english-quest/
 ├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
 ├─ js/lib/three.min.js   Thư viện 3D Three.js r158 (giấy phép MIT, xem js/lib/THREE-LICENSE.txt)
 ├─ js/engine/world3d.js  Đồ họa 3D kiểu Ghibli: dựng bản đồ ô thành cảnh 3D (bản 1.9)
+├─ js/engine/paint.js    Vẽ tay nhân vật & quái kiểu Ghibli (màu nước) cho chế độ 2.5D
 ├─ js/ui/wild.js         Vùng Hoang Dã: Boss thế giới, suối hồi máu (bản 1.8)
 ├─ js/ui/arcade4.js      Trò Nông trại chữ (bản 1.8)
 ├─ js/data/maps.js       Bản đồ 4 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC, quầy trò chơi
