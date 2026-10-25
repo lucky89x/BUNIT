@@ -1,4 +1,4 @@
-/* ENGLISH QUEST – Trang bị, chỉ số, Bảng nhiệm vụ hằng ngày, Tháp Thử Thách (bản 1.4)
+/* ENGLISH QUEST – Trang bị, chỉ số, Bảng nhiệm vụ hằng ngày, Tháp Thử Thách (bản 1.4; 1.6: hiệu quả trang bị toàn game – R.effects)
  *
  * Chỉ số nhân vật:
  *   ⚔️ Sức mạnh (atk)  – sát thương mỗi câu trả lời đúng
@@ -84,6 +84,21 @@ window.EQ = window.EQ || {};
     const s = R.stats(p);
     return Math.round(s.atk * 12 + s.hp * 6 + s.def * 1.2 + s.luck * 0.3 + p.level * 2);
   };
+  // Hiệu quả trang bị dùng chung cho toàn game (đánh quái, Tháp, trò hành động, đấu 2 bé)
+  R.effects = function (p) {
+    const s = R.stats(p);
+    const w = p.gear && p.gear.eq.weapon && R.GI[p.gear.eq.weapon];
+    return {
+      atk: s.atk, hp: s.hp, def: s.def, luck: s.luck,
+      crit: Math.min(40, Math.round(s.luck / 4)),   // % đánh chí mạng (x2 sát thương)
+      weapon: w || null,                             // vũ khí đang cầm → hình phép thuật khi tấn công
+      neckCol: p.gear && p.gear.eq.neck && R.GI[p.gear.eq.neck] ? R.GI[p.gear.eq.neck].col : null,
+      tier: w ? w.tier : 0
+    };
+  };
+  // số câu đúng cần để hạ quái có hp máu
+  R.hitsToKill = (p, hp) => Math.max(1, Math.ceil(hp / R.stats(p).atk));
+
   // màu trang bị để vẽ lên nhân vật
   R.syncLook = function (p) {
     R.ensure(p);

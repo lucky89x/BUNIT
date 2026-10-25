@@ -139,6 +139,38 @@ Game dùng hình pixel art từ bộ **Ninja Adventure** (tác giả Pixel-boy &
 
 Ảnh gốc nằm trong `assets/ninja/` (xem `assets/ninja/CREDITS.md`). Các ảnh đã được nhúng sẵn vào `js/data/ninja-assets.js`, nên **bấm đúp `index.html` vẫn chơi được**, không cần mạng. Nếu thay ảnh, chạy `python tools/build-ninja-assets.py` để đóng gói lại.
 
+## 5g. Bản 1.6 – Trang bị có giá trị thật, game hành động, đấu 2 bé, Admin
+
+**🎒 Trang bị có tác dụng trong toàn game, kể cả khi chơi một mình:**
+- ⚔️ **Đánh quái:** mỗi câu đúng gây sát thương bằng Sức mạnh. Trong trận có dòng *"Còn cần N câu đúng"*. Bé có thể so sánh: tay không cần 10 câu để hạ quái tinh anh, cầm Trượng rồng vàng chỉ cần 2 câu.
+- 🐉 **Vũ khí hiện trên tay** và quyết định hình phép thuật: vũ khí càng quý, tia phép càng to và sáng. Từ cấp Quý trở lên, tia phép có hình rồng hoặc sao băng.
+- 🛡️ **Khiên hiện ra** khi trang bị chặn đòn lúc trả lời sai.
+- 🍀 **May mắn:** có cơ hội đánh **💥 CHÍ MẠNG x2**, nhận thêm vàng, và dễ nhặt đồ rơi hơn.
+- ⭐ **Quái tinh anh** lang thang trên bản đồ: nhiều máu, đánh mất 2 tim mỗi đòn, thưởng gấp 4 vàng và có thể **rơi trang bị**. Trên đầu mỗi quái có nhãn **💪 sức mạnh • số câu cần**, tô màu xanh (dễ), vàng (vừa sức) hoặc đỏ (khó) so với Lực chiến của bé.
+- Ô **"Trang bị giúp bạn thế nào?"** trong Tiệm trang sức ghi rõ số liệu cho từng bé.
+
+**🎮 4 trò ⚡ Hành động mới trong Khu vui chơi** (tổng 8 trò). Cả 4 trò dùng trang bị: ❤️ là số mạng, ⚔️ là sát thương phi tiêu/búa, 🛡️ là % chặn va chạm, 🍀 là % điểm thưởng và chí mạng.
+- 🥷 **Ninja vượt ải:** chạy, nhảy đôi qua chông, phi tiêu (F) diệt quái, chạm cuộn giấy có từ đúng.
+- 🗡️ **Ninja diệt quái:** đi khắp đấu trường (W A S D), bấm chuột phi tiêu vào con quái mang từ đúng. Quái mạnh dần qua từng đợt.
+- 🔨 **Đập chuột chữ:** đập con chuột cầm từ đúng trước khi nó trốn.
+- 🐍 **Rắn săn chữ:** ăn chữ cái theo đúng thứ tự để ghép từ (luyện chính tả).
+
+> Về trang gamevui.vn: các game ở đó thuộc bản quyền của người khác, có quảng cáo và cần Internet, nên không đưa thẳng vào được (vi phạm bản quyền, mất tính "không quảng cáo, chạy ngoại tuyến"). Thay vào đó game có các trò hành động tương tự do chúng tôi tự viết, gắn với từ vựng và trang bị của bé.
+
+**🏷️ Tên trên đầu:** NPC, cửa hàng (🛒 Chú Ben, 💎 Tiệm trang sức), 📋 Bảng nhiệm vụ, 🗼 Tháp… luôn hiện tên trên đầu. Cửa hàng có nhãn màu vàng cho dễ nhận ra.
+
+**🆚 Đấu trường 2 bé** (màn hình chính hoặc ⏸️ Tạm dừng): hai bé ngồi cùng máy, chọn 2 nhân vật và thay phiên trả lời. Mỗi bé nhận câu hỏi theo trình độ của mình và tiến độ học ghi vào đúng hồ sơ của bé đó.
+- 🆚 **Đấu với nhau:** trả lời đúng thì tung phép vào bạn. ❤️ Máu = 30 + 6×Máu, ⚔️ sát thương = 3 + 2×Sức mạnh, 🛡️ đỡ một nửa đòn, 🍀 chí mạng. Trả lời sai thì đòn trượt, nên học giỏi vẫn quan trọng nhất.
+- 🤝 **Cùng đánh trùm:** hai bé góp sát thương hạ một trùm khổng lồ, dùng chung tim.
+- Người thắng nhận 35 vàng, người thua nhận 15 vàng (vẫn có thưởng để khuyến khích).
+
+**📊 So sánh nhân vật:** bảng xếp cạnh nhau các mục Cấp, 💪 Lực chiến, ⚔️❤️🛡️🍀, trang bị đang mặc, số từ đã học, tầng Tháp, số trận thắng, vàng. Ô màu cam là người dẫn đầu.
+
+**🛠️ Admin** (màn hình chính → 🛠️ Admin, **mật khẩu mặc định: `admin`**, nên đổi ngay trong tab 🔑):
+- 🗺️ **Bản đồ:** xem toàn bộ từng vùng kèm tên NPC, trùm, rương, cổng. **Bấm vào chỗ bất kỳ** để dịch chuyển nhân vật tới đó.
+- 📜 **Nhiệm vụ:** xem trạng thái từng nhiệm vụ (chưa mở, có thể nhận, đang làm, đã xong), đánh dấu hoàn thành hoặc đặt lại.
+- 👤 **Nhân vật:** cộng vàng, lên cấp, tặng hoặc nâng cấp trang bị, mặc đồ mạnh nhất, mở trang phục, mở mọi cổng, đặt lại Tháp.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -196,6 +228,7 @@ english-quest/
 - `node tests/data-check.cjs` – kiểm tra từ vựng, ngữ pháp, nhiệm vụ, bản đồ.
 - `node tests/playthrough.cjs` – bot tự chơi hết chương 1 trên Chromium (cần Playwright).
 - `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
+- `node tests/v16.cjs` – kiểm tra bản 1.6: game hành động, trang bị trong trận, quái tinh anh, đấu 2 bé, admin.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
 ## 10. Bản quyền nội dung

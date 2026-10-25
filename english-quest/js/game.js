@@ -473,12 +473,17 @@ window.EQ = window.EQ || {};
     const p = G.profile;
     G.lock = true;
     EQ.audio.sfx('bump');
-    const res = await EQ.battle.start({ def: m.def, color: m.color, hp: m.def.hp, name: m.def.name, spec: {} });
+    const res = await EQ.battle.start({ def: m.def, color: m.color, hp: m.def.hp, name: m.def.name, matk: m.def.matk, boss: false, spec: {} });
     if (res === 'win') {
       EQ.world.removeMonster(m);
       EQ.world.burst(m.x, m.y - 10, [m.color, '#ffffff', '#fff59d'], 24);
       await G.reward(p, { xp: m.def.xp, gold: m.def.gold });
       EQ.rpg.count(p, 'kill');
+      // quái tinh anh có thể rơi trang bị (tỉ lệ tăng theo May mắn)
+      if (m.def.elite && Math.random() * 100 < 20 + EQ.rpg.stats(p).luck / 3) {
+        const cand = EQ.rpg.GEAR.filter(it => it.tier <= 2 && p.gear.owned[it.id] == null);
+        if (cand.length) { const it = U.pick(cand); EQ.rpg.give(p, it.id); await EQ.ui.alert('Quái tinh anh để lại: <b>' + it.e + ' ' + U.esc(it.name) + '</b>!<br>Vào 🎒 Trang bị để mặc vào nhé.', { icon: '🎁', title: 'Rơi đồ!' }); }
+      }
     } else {
       // đẩy quái vật ra xa một chút
       const a = Math.atan2(m.y - EQ.world.player.y, m.x - EQ.world.player.x);

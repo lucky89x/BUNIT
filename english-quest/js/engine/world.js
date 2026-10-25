@@ -94,10 +94,16 @@ window.EQ = window.EQ || {};
       if (W.solid(tx, ty)) continue;
       const x = (tx + 0.5) * TS, y = (ty + 0.75) * TS;
       if (U.dist(x, y, W.player.x, W.player.y) < TS * 4) continue;
-      W.monsters.push({ x, y, def, kind: m.kind, color: U.pick(def.colors), vx: 0, vy: 0, timer: 0, zone: z, phase: Math.random() * 6 });
+      // ⭐ Quái tinh anh: nhiều máu, đánh mạnh, thưởng lớn → cần trang bị tốt để hạ nhanh
+      const elite = Math.random() < 0.25;
+      const d = elite ? Object.assign({}, def, { name: '⭐ ' + def.name + ' tinh anh', hp: 8 + Math.floor(p.level / 2), xp: def.xp * 2, gold: def.gold * 4, matk: 2, elite: true, size: 1.8 }) : def;
+      d.rec = W.monsterRec(d);
+      W.monsters.push({ x, y, def: d, kind: m.kind, elite, color: U.pick(def.colors), vx: 0, vy: 0, timer: 0, zone: z, phase: Math.random() * 6 });
       return;
     }
   };
+  // sức mạnh đề xuất của quái (cùng thang với 💪 Lực chiến)
+  W.monsterRec = d => Math.round(d.hp * 5 + ((d.matk || 1) - 1) * 15 + 5);
   W.removeMonster = function (mon) {
     W.monsters = W.monsters.filter(m => m !== mon);
     W.respawn.push(45 + Math.random() * 30);
@@ -265,7 +271,10 @@ window.EQ = window.EQ || {};
         SP.drawTallTree(ctx, tr[0], tr[1], tr[2], t);
         ctx.globalAlpha = 1;
       }
-      else if (it.m) SP.monster(ctx, it.m.def, it.m.x, it.m.y + 2, 11, it.m.color, t + it.m.phase);
+      else if (it.m) {
+        SP.monster(ctx, it.m.def, it.m.x, it.m.y + 2, it.m.elite ? 15 : 11, it.m.color, t + it.m.phase);
+        monTag(ctx, it.m, p);
+      }
       else drawEnt(ctx, it.e, p, t);
     });
     // lớp trên cùng: bong bóng, tên, mũi tên
@@ -387,10 +396,37 @@ window.EQ = window.EQ || {};
         const bob = Math.sin(t * 5) * 3;
         bubble(ctx, c.x, top - 12 + bob, mk === '!' ? '!' : '…', mk === '!' ? '#ffd54f' : '#80d8ff', '#3b2a00', 'bold 16px system-ui');
       }
-      if (near || e.kind === 'boss') bubble(ctx, c.x, top + 10, e.name, 'rgba(30,25,60,.85)', '#fff');
+      if (near || e.kind === 'boss') bubble(ctx, c.x, top + 10, W.label(e), 'rgba(30,25,60,.85)', '#fff');
+      else nameTag(ctx, e, c.x, top + 12);
     }
     if (e.kind === 'pickup' && near) bubble(ctx, c.x, by - 40, e.label, 'rgba(30,25,60,.85)', '#fff');
     if (near) bubble(ctx, c.x + 24, by - 22, 'E', '#ffffff', '#4527a0', 'bold 14px system-ui');
+  }
+
+  // Tên nhân vật / cửa hàng luôn hiện trên đầu (mờ dần khi ở xa người chơi)
+  const TAGS = [['shop', '🛒'], ['jeweler', '💎'], ['jobs', '📋'], ['tower', '🗼'], ['book', '📗'], ['sage', '⭐']];
+  W.label = function (e) {
+    const t = TAGS.find(x => e[x[0]]);
+    return (t ? t[1] + ' ' : '') + e.name;
+  };
+  // nhãn sức mạnh trên đầu quái: xanh = dễ, vàng = vừa sức, đỏ = khó (so với 💪 Lực chiến)
+  function monTag(ctx, m, p) {
+    const pw = EQ.rpg.power(p), rec = m.def.rec || W.monsterRec(m.def), r = pw / rec;
+    const col = r >= 1.2 ? '#69f0ae' : r >= 0.85 ? '#ffd54f' : '#ff5252';
+    const hits = EQ.rpg.hitsToKill(p, m.def.hp);
+    ctx.save(); ctx.globalAlpha = 0.95;
+    bubble(ctx, m.x, m.y - (m.elite ? 44 : 34), (m.elite ? '⭐' : '') + '💪' + rec + ' • ' + hits + '⚔️', 'rgba(20,15,40,.8)', col, 'bold 10px "Baloo 2", system-ui, sans-serif');
+    ctx.restore();
+  }
+  function nameTag(ctx, e, x, y) {
+    if (!e.name) return;
+    const pl = W.player, d = Math.hypot(pl.x - x, pl.y - y) / TS;
+    if (d > 11) return;
+    const shop = TAGS.some(t => e[t[0]]);
+    ctx.save();
+    ctx.globalAlpha = d < 6 ? 0.95 : Math.max(0, 0.95 - (d - 6) * 0.19);
+    bubble(ctx, x, y, W.label(e), shop ? 'rgba(255,213,79,.92)' : 'rgba(30,25,60,.62)', shop ? '#3b2a00' : '#fff', 'bold 11px "Baloo 2", system-ui, sans-serif');
+    ctx.restore();
   }
 
   function drawQuestPointer(ctx, p, t) {

@@ -440,7 +440,8 @@ button { font-family: inherit; cursor: pointer; }
 .hud-arcade span { font-size: 26px; font-family: var(--emoji); }
 .hud-arcade:hover { filter: brightness(1.1); }
 .arcade-menu .am-head h2 { margin: 0; }
-.am-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+.am-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; max-height: 62vh; overflow: auto; }
+@media (max-width: 900px) { .am-grid { grid-template-columns: repeat(2, 1fr); } }
 .am-card { border: 0; border-radius: 20px; padding: 14px; text-align: left; color: #fff; box-shadow: 0 5px 0 rgba(0,0,0,.25); transition: transform .1s; }
 .am-card:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); }
 .am-card:disabled { opacity: .45; cursor: not-allowed; }
@@ -517,3 +518,38 @@ button { font-family: inherit; cursor: pointer; }
 .tw-n { font-weight: 900; font-size: 14px; }
 .tw-m { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tw-r, .tw-g { font-weight: 700; }
+
+/* ===== Bản 1.6: trang bị hiện trong trận, Khu vui chơi hành động, đấu 2 bé, admin ===== */
+.bt-gear { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 4px 0 6px; }
+.bt-gear span { background: rgba(94, 53, 177, .1); border: 1px solid rgba(94, 53, 177, .25); border-radius: 999px; padding: 2px 10px; font-size: 13px; font-weight: 600; }
+.am-card.action { border: 3px solid #ff7043; }
+.am-tag { display: inline-block; background: #ff7043; color: #fff; border-radius: 6px; font-size: 11px; padding: 1px 6px; font-weight: 700; margin-bottom: 4px; }
+.am-gear { background: #fff3e0; border: 1px dashed #ff9800; border-radius: 10px; padding: 6px 10px; font-size: 13px; margin: 6px 0; }
+.g-why { background: #f3e5f5; border-radius: 10px; padding: 8px 10px; font-size: 12.5px; text-align: left; margin-top: 6px; }
+.g-why b { color: #6a1b9a; }
+.g-why ul { margin: 4px 0 0 16px; padding: 0; }
+.duel { min-width: min(940px, 94vw); }
+.duel-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+.duel-side { text-align: center; padding: 6px; border-radius: 12px; border: 3px solid transparent; }
+.duel-side.turn { border-color: #ffb300; background: #fff8e1; box-shadow: 0 0 0 3px rgba(255, 179, 0, .25); }
+.duel-hp { height: 14px; border-radius: 8px; background: #ffcdd2; overflow: hidden; margin: 4px 0; }
+.duel-hp > div { height: 100%; background: linear-gradient(90deg, #ef5350, #ff8a65); transition: width .4s; }
+.duel-vs { font-size: 36px; font-weight: 800; color: #e53935; }
+.duel-stats { font-size: 12px; color: #555; }
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cmp-table th, .cmp-table td { border-bottom: 1px solid #eee; padding: 6px 8px; text-align: center; }
+.cmp-table th { background: #ede7f6; }
+.cmp-table td.best { background: #fff8e1; font-weight: 800; color: #e65100; }
+.pick-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.pick-list .pcard-s { border: 3px solid #ddd; border-radius: 12px; padding: 8px; cursor: pointer; background: #fff; min-width: 120px; text-align: center; }
+.pick-list .pcard-s.on { border-color: #7e57c2; background: #ede7f6; }
+.admin { min-width: min(980px, 95vw); }
+.admin .adm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.admin .adm-box { border: 1px solid #ddd; border-radius: 10px; padding: 8px 10px; background: #fafafa; }
+.admin .adm-q { display: flex; justify-content: space-between; align-items: center; gap: 6px; border-bottom: 1px dashed #ddd; padding: 3px 0; font-size: 13px; }
+.admin .adm-list { max-height: 46vh; overflow: auto; }
+.admin canvas.adm-map { width: 100%; image-rendering: pixelated; border-radius: 8px; border: 1px solid #ccc; }
+.am-card.runner { background: linear-gradient(135deg, #263238, #546e7a); }
+.am-card.slayer { background: linear-gradient(135deg, #b71c1c, #ef6c00); }
+.am-card.whack { background: linear-gradient(135deg, #6d4c41, #a1887f); }
+.am-card.snake { background: linear-gradient(135deg, #2e7d32, #9ccc65); }

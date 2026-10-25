@@ -7,6 +7,7 @@ window.EQ = window.EQ || {};
   // chỉ số lấy từ cấp độ + trang bị (xem js/data/gear.js)
   B.power = p => EQ.rpg.stats(p).atk;
   B.maxHearts = p => EQ.rpg.stats(p).hp;
+  B.critChance = p => Math.min(40, Math.round(EQ.rpg.stats(p).luck / 4));
 
   // o: {def, color, hp, name, spec, boss, hard}
   B.start = function (o) {
@@ -22,6 +23,19 @@ window.EQ = window.EQ || {};
       const hpText = el('div', { class: 'hp-text' });
       const comboEl = el('div', { class: 'bt-combo' });
       const qbox = el('div', { class: 'qbox' });
+      const E = EQ.rpg.effects(p);
+      const gearEl = el('div', { class: 'bt-gear' });
+      function drawGear() {
+        const hits = Math.max(1, Math.ceil(Math.max(0, st.hp) / E.atk));
+        gearEl.innerHTML = '';
+        [
+          (E.weapon ? E.weapon.e + ' ' + E.weapon.name : '✋ Tay không') + ': ⚔️ ' + E.atk + ' sát thương/câu đúng',
+          '🎯 Còn cần ' + hits + ' câu đúng',
+          '🛡️ Chặn đòn ' + E.def + '%',
+          '🍀 Chí mạng ' + E.crit + '%',
+          '❤️ ' + E.hp + ' tim'
+        ].forEach(t => gearEl.appendChild(el('span', null, t)));
+      }
       const pieBtn = el('button', { class: 'btn small' });
       const fleeBtn = el('button', { class: 'btn ghost small' }, '🏃 Rời trận');
       const body = el('div', { class: 'battle' }, [
@@ -30,12 +44,14 @@ window.EQ = window.EQ || {};
           comboEl,
           el('div', { class: 'bt-side right' }, [el('b', null, (o.boss ? '👑 ' : '') + o.name), el('div', { class: 'hp-bar' }, [hpFill, hpText])])
         ]),
+        gearEl,
         cv,
         qbox,
         el('div', { class: 'row bt-actions' }, [pieBtn, el('span', { class: 'bt-tip' }, 'Không giới hạn thời gian – cứ bình tĩnh suy nghĩ nhé!'), fleeBtn])
       ]);
       const close = EQ.ui.modal(body, { cls: 'wide battle-card', onEsc: () => fleeBtn.click() });
       function drawBars() {
+        drawGear();
         heartsEl.innerHTML = '';
         for (let i = 0; i < st.maxHearts; i++) heartsEl.appendChild(el('span', { class: 'heart' + (i < st.hearts ? '' : ' empty') }, i < st.hearts ? '❤️' : '🤍'));
         hpFill.style.width = Math.max(0, st.hp / st.maxHp * 100) + '%';
@@ -65,9 +81,23 @@ window.EQ = window.EQ || {};
         ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.ellipse(170, 178, 90, 14, 0, 0, 7); ctx.ellipse(540, 178, 120, 18, 0, 0, 7); ctx.fill();
         const sx = st.shake > 0 ? Math.sin(st.t * 60) * 4 : 0; st.shake = Math.max(0, st.shake - dt);
         SP.human(ctx, 170 + sx, 180, SP.playerLook(p.avatar), 'right', Math.floor(st.t * 4), { scale: 4, moving: false });
-        // đũa phép
-        ctx.fillStyle = '#8d6e63'; ctx.fillRect(205 + sx, 120, 18, 4);
-        ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(225 + sx, 122, 5 + Math.sin(st.t * 8), 0, 7); ctx.fill();
+        // vũ khí đang cầm (trang bị) hoặc đũa gỗ mặc định
+        if (E.weapon) {
+          ctx.save(); ctx.translate(222 + sx, 120); ctx.rotate(-0.5 + Math.sin(st.t * 3) * 0.08);
+          ctx.shadowColor = E.weapon.col; ctx.shadowBlur = 8 + E.tier * 4;
+          ctx.font = (22 + E.tier * 4) + 'px ' + SP.EMOJI_FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(E.weapon.e, 0, 0);
+          ctx.restore();
+        } else {
+          ctx.fillStyle = '#8d6e63'; ctx.fillRect(205 + sx, 120, 18, 4);
+          ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(225 + sx, 122, 5 + Math.sin(st.t * 8), 0, 7); ctx.fill();
+        }
+        // khiên khi chặn đòn (màu dây chuyền đang đeo)
+        if (st.shield > 0) {
+          st.shield -= dt;
+          ctx.save(); ctx.globalAlpha = Math.min(0.7, st.shield * 1.5);
+          ctx.strokeStyle = E.neckCol || '#80d8ff'; ctx.lineWidth = 5; ctx.fillStyle = 'rgba(128,216,255,.18)';
+          ctx.beginPath(); ctx.arc(170, 140, 62, 0, 7); ctx.fill(); ctx.stroke(); ctx.restore();
+        }
         if (st.hp > 0 || st.mFade > 0) {
           const mx = 540 + (st.mShake > 0 ? Math.sin(st.t * 70) * 6 : 0);
           const my = 182 - (st.mJump > 0 ? Math.sin((1 - st.mJump) * Math.PI) * 30 : 0);
@@ -82,7 +112,12 @@ window.EQ = window.EQ || {};
           if (f.type === 'bolt') {
             f.k = Math.min(1, (f.k || 0) + dt * 2.2);
             const x = 230 + (520 - 230) * f.k, y = 120 - Math.sin(f.k * Math.PI) * 50;
-            for (let i = 0; i < 6; i++) { ctx.fillStyle = ['#fff59d', '#ffd54f', '#b388ff', '#80d8ff'][i % 4]; ctx.beginPath(); ctx.arc(x - i * 7, y + Math.sin(st.t * 30 + i) * 3, 9 - i, 0, 7); ctx.fill(); }
+            // to và sáng hơn khi Sức mạnh cao; vũ khí quý có hình riêng
+            const big = 1 + Math.min(1.5, (E.atk - 1) * 0.12) + (f.crit ? 0.5 : 0);
+            const cols = E.weapon ? [E.weapon.col, '#ffffff', E.weapon.col, '#fff59d'] : ['#fff59d', '#ffd54f', '#b388ff', '#80d8ff'];
+            const n = 6 + E.tier * 2;
+            for (let i = 0; i < n; i++) { ctx.fillStyle = cols[i % 4]; ctx.beginPath(); ctx.arc(x - i * 7 * big, y + Math.sin(st.t * 30 + i) * 3, Math.max(1, (9 - i * 6 / n * 1.4) * big), 0, 7); ctx.fill(); }
+            if (E.tier >= 3) { ctx.font = Math.round(26 * big) + 'px ' + SP.EMOJI_FONT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(E.weapon.e, x + 6, y); }
             if (f.k >= 1 && !f.hit) { f.hit = true; f.life = 0; f.onHit && f.onHit(); }
           } else if (f.type === 'puff') {
             f.k = Math.min(1, (f.k || 0) + dt * 2.2);
@@ -117,12 +152,16 @@ window.EQ = window.EQ || {};
         if (r.correct) {
           st.combo++;
           let dmg = B.power(p) + (st.combo >= 3 ? 1 : 0);
+          // 🍀 May mắn: cơ hội đánh chí mạng gấp đôi
+          const crit = Math.random() * 100 < B.critChance(p);
+          if (crit) dmg *= 2;
           EQ.audio.sfx('spell');
-          await new Promise(res => st.fx.push({ type: 'bolt', life: 5, onHit: res }));
+          await new Promise(res => st.fx.push({ type: 'bolt', life: 5, crit, onHit: res }));
+          if (dmg >= st.hp && st.hp > 0 && st.hp === st.maxHp) fxText(360, 40, '⚡ Hạ gục chỉ với 1 đòn!', '#ffe082');
           st.hp -= dmg; st.mShake = 0.4;
           EQ.audio.sfx('hit');
           sparks(540, 120, 18);
-          fxText(540, 70, '-' + dmg + (st.combo >= 3 ? ' 🔥' : ''), '#fff59d');
+          fxText(540, 70, (crit ? '💥 CHÍ MẠNG -' : '-') + dmg + (st.combo >= 3 ? ' 🔥' : ''), crit ? '#ff8a65' : '#fff59d');
           EQ.game.reward(p, { xp: r.hint ? 2 : 4 }, true);
         } else {
           st.combo = 0;
@@ -131,7 +170,8 @@ window.EQ = window.EQ || {};
           await new Promise(res => st.fx.push({ type: 'puff', life: 5, onHit: res }));
           // phòng thủ: có cơ hội chặn đòn
           if (Math.random() * 100 < EQ.rpg.stats(p).def) {
-            EQ.audio.sfx('heal'); fxText(170, 70, '🛡️ Chặn!', '#80d8ff');
+            st.shield = 0.9;
+            EQ.audio.sfx('heal'); fxText(170, 70, '🛡️ Trang bị chặn đòn!', '#80d8ff');
           } else {
             const lose = o.matk || 1;
             st.hearts = Math.max(0, st.hearts - lose); st.shake = 0.4;

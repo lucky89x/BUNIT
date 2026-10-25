@@ -82,9 +82,12 @@ window.EQ = window.EQ || {};
         ? ['Unit này mới học ' + src.ids.length + ' từ. Cần ít nhất 6 từ đã học. ', el('button', { class: 'btn small primary', onclick: async () => { close(); await EQ.screens.learnWords(src.all.filter(i => !p.vocab[i]).slice(0, 8), 'Unit ' + p.schoolUnit[p.book]); A.open(); } }, '✨ Học 8 từ mới của Unit')]
         : 'Cần ít nhất 6 từ đã học. Hãy làm nhiệm vụ hoặc vào mục 📗 Sách để học từ trước nhé!'));
       p.arcade = p.arcade || {};
+      const E = EQ.rpg.effects(p);
+      body.appendChild(el('div', { class: 'am-gear' }, '🎒 Trang bị của bạn trong trò ⚡ Hành động: ❤️ ' + E.hp + ' mạng • ⚔️ phi tiêu/búa ' + E.atk + ' sát thương • 🛡️ ' + E.def + '% chặn va chạm • 🍀 +' + E.luck + '% điểm, ' + E.crit + '% chí mạng. Mua/nâng cấp ở 💎 Tiệm trang sức để chơi giỏi hơn!'));
       body.appendChild(el('div', { class: 'am-grid' }, Object.keys(A.GAMES).map(id => {
         const g = A.GAMES[id];
-        return el('button', { class: 'am-card ' + id, disabled: !enough, onclick: () => { close(); A.play(id, poolFrom(p, src.ids)); } }, [
+        return el('button', { class: 'am-card ' + id + (g.action ? ' action' : ''), disabled: !enough, onclick: () => { close(); A.play(id, poolFrom(p, src.ids)); } }, [
+          g.action ? el('div', { class: 'am-tag' }, '⚡ HÀNH ĐỘNG • dùng trang bị') : null,
           el('div', { class: 'am-icon' }, g.icon), el('div', { class: 'am-name' }, g.name), el('div', { class: 'am-desc' }, g.desc),
           el('div', { class: 'am-keys' }, '🎮 ' + g.keys), el('div', { class: 'am-best' }, '🏆 Kỷ lục: ' + (p.arcade[id] || 0))
         ]);

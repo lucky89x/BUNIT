@@ -60,6 +60,11 @@ window.EQ = window.EQ || {};
           last ? el('button', { class: 'btn primary big', onclick: () => { hideScreen(); EQ.game.startProfile(last); } }, [el('span', null, '▶ Tiếp tục'), el('small', null, ' – ' + last.name + ' (Cấp ' + last.level + ')')]) : null,
           el('button', { class: 'btn big ' + (last ? '' : 'primary'), onclick: () => S.profiles() }, '⭐ Bắt đầu / Chọn nhân vật'),
           el('div', { class: 'row center' }, [
+            el('button', { class: 'btn', onclick: () => EQ.duel.setup() }, '🆚 Đấu trường 2 bé'),
+            el('button', { class: 'btn', onclick: () => EQ.duel.compare() }, '📊 So sánh nhân vật'),
+            el('button', { class: 'btn', onclick: () => EQ.admin.login() }, '🛠️ Admin')
+          ]),
+          el('div', { class: 'row center' }, [
             el('button', { class: 'btn', onclick: () => S.settings() }, '⚙️ Cài đặt'),
             el('button', { class: 'btn', onclick: () => S.achievements() }, '🏅 Thành tích'),
             el('button', { class: 'btn', onclick: () => S.help() }, '❓ Hướng dẫn'),
@@ -211,6 +216,8 @@ window.EQ = window.EQ || {};
       el('div', { class: 'menu' }, [
         el('button', { class: 'btn primary big', onclick: () => close() }, '▶ Tiếp tục chơi'),
         el('button', { class: 'btn', onclick: () => { close(); S.settings(); } }, '⚙️ Cài đặt'),
+        el('button', { class: 'btn', onclick: () => { close(); EQ.duel.setup(); } }, '🆚 Đấu trường 2 bé'),
+        el('button', { class: 'btn', onclick: () => { close(); EQ.duel.compare(); } }, '📊 So sánh nhân vật'),
         el('button', { class: 'btn', onclick: () => { close(); S.achievements(); } }, '🏅 Thành tích'),
         el('button', { class: 'btn', onclick: () => { close(); S.help(); } }, '❓ Hướng dẫn'),
         el('button', { class: 'btn', onclick: () => { close(); EQ.game.toMenu(); } }, '💾 Lưu & về màn hình chính')

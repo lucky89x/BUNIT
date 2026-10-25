@@ -24,8 +24,24 @@ window.EQ = window.EQ || {};
         el('div', null, ['🛡️ Phòng thủ', el('b', null, s.def + '%')]),
         el('div', null, ['🍀 May mắn', el('b', null, '+' + s.luck + '%')])
       ]),
-      el('div', { class: 'muted small' }, '⚔️ = sát thương mỗi câu đúng • 🛡️ = cơ hội chặn đòn khi trả lời sai • 🍀 = vàng nhận thêm'),
+      whyBox(p),
       el('div', { class: 'g-gold' }, '🪙 ' + p.gold + ' vàng')
+    ]);
+  }
+  // Giải thích bằng số liệu thật: trang bị giúp gì trong toàn game
+  function whyBox(p) {
+    const E = R.effects(p);
+    const slime = (EQ.MONSTERS.slime || { hp: 3 }).hp, elite = 8 + Math.floor(p.level / 2), boss = (EQ.BOSSES.slimeKing || { hp: 8 }).hp;
+    const h = hp => R.hitsToKill(p, hp);
+    return el('div', { class: 'g-why' }, [
+      el('b', null, '🎒 Trang bị giúp bạn thế nào?'),
+      el('ul', null, [
+        el('li', null, '⚔️ Đánh quái: quái thường cần ' + h(slime) + ' câu đúng, ⭐ quái tinh anh cần ' + h(elite) + ' câu, Vua Slime cần ' + h(boss) + ' câu.'),
+        el('li', null, '🛡️ Trả lời sai: ' + E.def + '% không bị mất tim (khiên hiện ra). ⭐ Quái tinh anh đánh mất 2 tim/lần.'),
+        el('li', null, '❤️ ' + E.hp + ' tim trong trận, ' + E.hp + ' mạng trong trò ⚡ Hành động.'),
+        el('li', null, '🍀 ' + E.crit + '% đòn chí mạng x2, +' + E.luck + '% vàng & điểm, dễ nhặt đồ rơi từ quái tinh anh.'),
+        el('li', null, '🗼 Tháp Thử Thách, 🆚 Đấu trường 2 bé, 🎮 game hành động đều dùng các chỉ số này.')
+      ])
     ]);
   }
   function itemCard(p, it, mode, redraw) {
