@@ -56,7 +56,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.waitForTimeout(300);
   await page.evaluate(() => EQ.game.talkTo(EQ.REGIONS.village.entities.find(x => x.id === 'mg_candy')));
   await page.waitForTimeout(300); await shot('booth');
-  ok(await page.evaluate(() => !!document.querySelector('.booth-card img.booth-img') && /Tiệm kẹo chữ/.test(document.querySelector('.booth-card').textContent)), 'Nói chuyện với quầy mở bảng giới thiệu trò chơi');
+  ok(await page.evaluate(() => !!document.querySelector('.booth-card img.booth-img') && /Candy Crush chữ/.test(document.querySelector('.booth-card').textContent)), 'Nói chuyện với quầy mở bảng giới thiệu trò chơi');
   await page.evaluate(() => [...document.querySelectorAll('.booth-card .btn')].find(b => /Chơi/.test(b.textContent)).click());
   await page.waitForTimeout(400);
   ok(await page.evaluate(() => EQ.arcade._cur && !!EQ.arcade._cur.game._st), 'Bấm ▶ Chơi vào được trò');
