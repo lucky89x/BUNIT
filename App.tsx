@@ -1,194 +1,145 @@
-import React, { useState } from 'react';
-import Header from './components/Header';
+import React, { useCallback, useEffect, useState } from 'react';
+import Sidebar, { Logo } from './components/Sidebar';
 import LoadingOverlay from './components/LoadingOverlay';
-import AudioPlayer from './components/AudioPlayer';
+import Toast, { ToastMsg } from './components/Toast';
+import StudioPage from './pages/StudioPage';
+import LibraryPage from './pages/LibraryPage';
+import SettingsPage from './pages/SettingsPage';
 import { generateSpeech } from './services/geminiService';
-import { VOICE_OPTIONS, VoiceName } from './types';
-import { Wand2, AlertCircle, Gauge } from 'lucide-react';
+import { loadVoices, sortVoices } from './services/browserTts';
+import { clearHistory, deleteHistory, listHistory, saveHistory } from './services/historyDb';
+import { loadSettings, saveSettings } from './services/settings';
+import { AppSettings, HistoryItem, Page, VoiceName } from './types';
+import { makeTitle, slugify } from './utils/textUtils';
+
+const TITLES: Record<Page, [string, string]> = {
+  studio: ['Phòng thu', 'Soạn kịch bản và chuyển thành giọng nói tiếng Việt'],
+  library: ['Thư viện', 'Các bản ghi đã tạo, lưu ngay trên máy'],
+  settings: ['Cài đặt', 'API key và lựa chọn mặc định'],
+};
+
+const wavDuration = (size: number) => Math.max(0, (size - 44) / (24000 * 2));
 
 const App: React.FC = () => {
-  const [text, setText] = useState<string>('');
-  const [selectedVoice, setSelectedVoice] = useState<VoiceName>(VoiceName.Zephyr); // Default to a clear voice
-  const [speed, setSpeed] = useState<number>(1);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<Page>('studio');
+  const [settings, setSettings] = useState<AppSettings>(loadSettings);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [online, setOnline] = useState(navigator.onLine);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [audio, setAudio] = useState<{ url: string; name: string } | null>(null);
+  const [toast, setToast] = useState<ToastMsg | null>(null);
 
-  const handleGenerate = async () => {
-    if (!text.trim()) {
-        setError('Vui lòng nhập nội dung văn bản.');
-        return;
-    }
+  const notify = useCallback((kind: ToastMsg['kind'], text: string) => setToast({ id: Date.now(), kind, text }), []);
+  const closeToast = useCallback(() => setToast(null), []);
 
-    if (text.length > 3000) {
-        setError('Văn bản quá dài. Vui lòng giới hạn dưới 3000 ký tự để có kết quả tốt nhất.');
-        return;
-    }
+  useEffect(() => {
+    loadVoices().then((v) => setVoices(sortVoices(v)));
+    listHistory().then(setHistory).catch(() => notify('error', 'Không mở được thư viện lưu trữ của trình duyệt.'));
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, [notify]);
 
-    setIsLoading(true);
-    setError(null);
-    setAudioUrl(null);
+  useEffect(() => () => { if (audio) URL.revokeObjectURL(audio.url); }, [audio]);
 
+  const updateSettings = (s: AppSettings) => {
+    setSettings(s);
+    saveSettings(s);
+  };
+
+  const handleGenerate = async (text: string, voice: VoiceName, speed: number) => {
+    setProgress({ done: 0, total: 1 });
+    setAudio(null);
     try {
-      const blob = await generateSpeech(text, selectedVoice, speed);
-      const url = URL.createObjectURL(blob);
-      setAudioUrl(url);
+      const blob = await generateSpeech(text, voice, speed, settings.apiKey, (done, total) => setProgress({ done, total }));
+      const title = makeTitle(text);
+      setAudio({ url: URL.createObjectURL(blob), name: slugify(title) });
+      const item: HistoryItem = {
+        id: crypto.randomUUID(),
+        createdAt: Date.now(),
+        title,
+        text,
+        voice,
+        engine: 'gemini',
+        speed,
+        duration: wavDuration(blob.size),
+        size: blob.size,
+        blob,
+      };
+      await saveHistory(item).catch(() => undefined);
+      setHistory((h) => [item, ...h]);
+      notify('ok', 'Đã tạo xong và lưu vào Thư viện.');
     } catch (err: any) {
       console.error(err);
-      setError('Đã có lỗi xảy ra khi tạo giọng nói. Vui lòng kiểm tra kết nối mạng và API Key.');
+      const msg = String(err?.message || err);
+      notify('error', /api key|API_KEY|401|403/i.test(msg)
+        ? 'API key không hợp lệ hoặc chưa nhập. Kiểm tra lại ở mục Cài đặt.'
+        : `Lỗi khi tạo giọng nói: ${msg}`);
     } finally {
-      setIsLoading(false);
+      setProgress(null);
     }
   };
 
-  const getSpeedLabel = (val: number) => {
-    if (val <= 0.5) return 'Rất chậm';
-    if (val <= 0.75) return 'Chậm';
-    if (val < 1.0) return 'Hơi chậm';
-    if (val === 1.0) return 'Bình thường';
-    if (val <= 1.25) return 'Hơi nhanh';
-    if (val <= 1.5) return 'Nhanh';
-    return 'Rất nhanh';
-  };
+  const [title, subtitle] = TITLES[page];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
-      <Header />
-      <LoadingOverlay isVisible={isLoading} />
+    <div className="flex min-h-full">
+      <Sidebar page={page} onNavigate={setPage} online={online} historyCount={history.length} />
+      <LoadingOverlay isVisible={!!progress} done={progress?.done || 0} total={progress?.total || 0} />
+      <Toast toast={toast} onClose={closeToast} />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto p-4 md:p-8">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Left Column: Input */}
-            <div className="lg:col-span-2 space-y-6">
-                
-                <div className="bg-slate-900 rounded-xl p-1 border border-slate-800 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/50 transition-all">
-                     <textarea
-                        className="w-full h-80 bg-slate-900 text-slate-100 p-4 rounded-lg resize-none focus:outline-none placeholder:text-slate-600 leading-relaxed text-lg"
-                        placeholder="Nhập nội dung kịch bản bạn muốn lồng tiếng vào đây..."
-                        value={text}
-                        onChange={(e) => {
-                            setText(e.target.value);
-                            if (error) setError(null);
-                        }}
-                        maxLength={5000}
-                    />
-                    <div className="px-4 py-2 flex justify-between items-center text-xs text-slate-500 border-t border-slate-800">
-                        <span>Nhập tiếng Việt có dấu</span>
-                        <span>{text.length} / 5000 ký tự</span>
-                    </div>
-                </div>
-
-                {error && (
-                    <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-800/50 rounded-lg text-red-400 text-sm animate-in fade-in slide-in-from-top-2">
-                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p>{error}</p>
-                    </div>
-                )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-20 border-b border-ink-800 bg-ink-950/70 backdrop-blur">
+          <div className="flex items-center gap-4 px-4 py-4 md:px-8">
+            <div className="lg:hidden"><Logo /></div>
+            <div className="hidden min-w-0 lg:block">
+              <div className="flex items-center gap-2 text-[11px] text-ink-400">
+                <span>VietVoice</span><span className="text-ink-600">/</span><span className="text-ink-300">{title}</span>
+              </div>
+              <h1 className="mt-0.5 text-xl font-bold tracking-tight">{title}</h1>
             </div>
-
-            {/* Right Column: Settings & Actions */}
-            <div className="space-y-6">
-                
-                {/* Voice Selection */}
-                <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-                    <h2 className="text-slate-100 font-semibold mb-4 text-sm uppercase tracking-wider">Chọn Giọng Đọc</h2>
-                    <div className="space-y-3">
-                        {VOICE_OPTIONS.map((voice) => (
-                            <label 
-                                key={voice.id}
-                                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                                    selectedVoice === voice.id 
-                                    ? 'bg-indigo-600/10 border-indigo-500/50 ring-1 ring-indigo-500/50' 
-                                    : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
-                                }`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="voice"
-                                    className="mt-1 sr-only"
-                                    checked={selectedVoice === voice.id}
-                                    onChange={() => setSelectedVoice(voice.id)}
-                                />
-                                <div className={`w-4 h-4 mt-1 rounded-full border flex items-center justify-center ${selectedVoice === voice.id ? 'border-indigo-500' : 'border-slate-500'}`}>
-                                    {selectedVoice === voice.id && <div className="w-2 h-2 rounded-full bg-indigo-500" />}
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`font-medium ${selectedVoice === voice.id ? 'text-indigo-400' : 'text-slate-200'}`}>
-                                            {voice.name}
-                                        </span>
-                                        <span className="text-[10px] uppercase px-1.5 py-0.5 bg-slate-700 rounded text-slate-400 font-semibold">
-                                            {voice.gender}
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1">{voice.description}</p>
-                                </div>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Speed Control */}
-                <div className="bg-slate-900 rounded-xl p-6 border border-slate-800">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-slate-100 font-semibold text-sm uppercase tracking-wider flex items-center gap-2">
-                            <Gauge className="w-4 h-4 text-slate-400" />
-                            Tốc độ đọc
-                        </h2>
-                        <span className="text-xs font-mono bg-slate-800 text-indigo-400 px-2 py-1 rounded">
-                            {speed}x
-                        </span>
-                    </div>
-                    
-                    <div className="mb-2 flex justify-between text-xs text-slate-500 font-medium">
-                        <span>Chậm</span>
-                        <span>Bình thường</span>
-                        <span>Nhanh</span>
-                    </div>
-                    
-                    <input
-                        type="range"
-                        min="0.5"
-                        max="2"
-                        step="0.25"
-                        value={speed}
-                        onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
-                    />
-                    
-                    <div className="mt-3 text-center">
-                        <span className="text-sm text-slate-300 font-medium">
-                            {getSpeedLabel(speed)}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Generate Button */}
-                <button
-                    onClick={handleGenerate}
-                    disabled={isLoading || !text.trim()}
-                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/40 transition-all flex items-center justify-center gap-2 group"
-                >
-                    <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    <span>Tạo Giọng Nói</span>
-                </button>
-
-                 <div className="bg-slate-900/50 p-4 rounded-lg border border-slate-800 text-xs text-slate-400 leading-relaxed">
-                    <p>💡 <strong>Mẹo:</strong> Sử dụng dấu câu (chấm, phẩy) để ngắt nghỉ hợp lý. Kiểm tra chính tả tiếng Việt để AI đọc chính xác nhất.</p>
-                </div>
+            <div className="ml-auto flex items-center gap-2 rounded-full border border-ink-700 bg-ink-900 px-3 py-1.5 text-[11px] font-medium">
+              <span className={`h-2 w-2 rounded-full ${online ? 'bg-jade-400' : 'bg-amber-400'}`} />
+              {online ? 'Online' : 'Offline'}
             </div>
-        </div>
+          </div>
+        </header>
 
-        {/* Audio Output Section */}
-        {audioUrl && (
-            <div className="max-w-2xl mx-auto">
-                 <AudioPlayer audioUrl={audioUrl} fileName="vietvoice_output" />
-            </div>
-        )}
-
-      </main>
+        <main className="flex-1 px-4 pt-6 pb-24 md:px-8 lg:pb-10">
+          <p className="mb-6 text-sm text-ink-400 lg:-mt-1">
+            <span className="font-semibold text-ink-100 lg:hidden">{title} · </span>{subtitle}
+          </p>
+          {page === 'studio' && (
+            <StudioPage
+              settings={settings}
+              voices={voices}
+              online={online}
+              audioUrl={audio?.url || null}
+              audioName={audio?.name || 'vietvoice'}
+              onGenerate={handleGenerate}
+              onError={(m) => notify('error', m)}
+              onBrowserVoiceChange={(uri) => updateSettings({ ...settings, browserVoiceURI: uri })}
+            />
+          )}
+          {page === 'library' && (
+            <LibraryPage
+              items={history}
+              onDelete={async (id) => { await deleteHistory(id); setHistory((h) => h.filter((i) => i.id !== id)); }}
+              onClear={async () => { await clearHistory(); setHistory([]); }}
+              onCopy={(t) => navigator.clipboard.writeText(t).then(() => notify('ok', 'Đã chép văn bản.'), () => notify('error', 'Không chép được.'))}
+            />
+          )}
+          {page === 'settings' && (
+            <SettingsPage settings={settings} voices={voices} onSave={(s) => { updateSettings(s); notify('ok', 'Đã lưu cài đặt.'); }} />
+          )}
+        </main>
+      </div>
     </div>
   );
 };

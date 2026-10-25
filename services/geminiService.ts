@@ -1,8 +1,11 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { VoiceName } from "../types";
 import { base64ToUint8Array, createWavBlob } from "../utils/wavUtils";
+import { splitText } from "../utils/textUtils";
 
-const API_KEY = process.env.API_KEY;
+const SAMPLE_RATE = 24000;
+// Mỗi lần gọi API chỉ gửi một đoạn vừa phải để giọng đọc ổn định
+const CHUNK_SIZE = 2000;
 
 const getSpeedInstruction = (speed: number): string => {
   if (speed <= 0.5) return "Đọc rất chậm: ";
@@ -17,23 +20,25 @@ const getSpeedInstruction = (speed: number): string => {
 export const generateSpeech = async (
   text: string,
   voiceName: VoiceName,
-  speed: number = 1
+  speed: number = 1,
+  apiKey: string,
+  onProgress?: (done: number, total: number) => void
 ): Promise<Blob> => {
-  if (!API_KEY) {
-    throw new Error("API Key is missing. Please check your environment configuration.");
+  const key = apiKey || process.env.API_KEY;
+  if (!key) {
+    throw new Error("Chưa có API key Gemini. Vào mục Cài đặt để nhập khóa.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
-
-  // Prepend speed instruction to the text
-  // Gemini TTS follows instructions like "Say cheerfully: ..." or "Speak fast: ..."
+  const ai = new GoogleGenAI({ apiKey: key });
   const instruction = getSpeedInstruction(speed);
-  const finalPrompt = instruction ? `${instruction}${text}` : text;
+  const chunks = splitText(text, CHUNK_SIZE);
+  const parts: Uint8Array[] = [];
 
-  try {
+  onProgress?.(0, chunks.length);
+  for (let i = 0; i < chunks.length; i++) {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
-      contents: [{ parts: [{ text: finalPrompt }] }],
+      contents: [{ parts: [{ text: `${instruction}${chunks[i]}` }] }],
       config: {
         responseModalities: [Modality.AUDIO],
         speechConfig: {
@@ -45,20 +50,23 @@ export const generateSpeech = async (
     });
 
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-
     if (!base64Audio) {
-      throw new Error("No audio data received from Gemini.");
+      throw new Error("Gemini không trả về dữ liệu âm thanh.");
     }
-
-    const pcmData = base64ToUint8Array(base64Audio);
-    
-    // Gemini 2.5 Flash TTS typically outputs 24kHz audio
-    const wavBlob = createWavBlob(pcmData, 24000);
-    
-    return wavBlob;
-
-  } catch (error) {
-    console.error("Error generating speech:", error);
-    throw error;
+    parts.push(base64ToUint8Array(base64Audio));
+    onProgress?.(i + 1, chunks.length);
   }
+
+  // Ghép PCM các đoạn, chèn 0.3s lặng giữa các đoạn cho tự nhiên
+  const gap = new Uint8Array(Math.round(SAMPLE_RATE * 0.3) * 2);
+  const total = parts.reduce((s, p) => s + p.length, 0) + gap.length * (parts.length - 1);
+  const pcm = new Uint8Array(total);
+  let offset = 0;
+  parts.forEach((p, i) => {
+    pcm.set(p, offset);
+    offset += p.length;
+    if (i < parts.length - 1) offset += gap.length;
+  });
+
+  return createWavBlob(pcm, SAMPLE_RATE);
 };

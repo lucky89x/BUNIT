@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "@fontsource/be-vietnam-pro/vietnamese-400.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-500.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-600.css";
+@import "@fontsource/be-vietnam-pro/vietnamese-700.css";
+@import "@fontsource/be-vietnam-pro/latin-400.css";
+@import "@fontsource/be-vietnam-pro/latin-500.css";
+@import "@fontsource/be-vietnam-pro/latin-600.css";
+@import "@fontsource/be-vietnam-pro/latin-700.css";
+
+/* Bảng màu "Ninja": nền đen than, điểm nhấn đỏ son */
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --color-ink-950: #07080b;
+  --color-ink-900: #0c0e13;
+  --color-ink-850: #11141b;
+  --color-ink-800: #161a23;
+  --color-ink-700: #222836;
+  --color-ink-600: #2e3546;
+  --color-ink-400: #6b7489;
+  --color-ink-300: #9aa3b5;
+  --color-ink-100: #e6e9ef;
+
+  --color-blade-600: #d61f3c;
+  --color-blade-500: #ef2d4c;
+  --color-blade-400: #ff5470;
+  --color-blade-300: #ff8a9c;
+
+  --color-jade-400: #34d399;
+  --color-amber-400: #fbbf24;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  @apply bg-ink-950 text-ink-100 antialiased font-sans;
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgb(239 45 76 / 0.10), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgb(239 45 76 / 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+::selection { background: var(--color-blade-500); color: white; }
+
+@utility panel {
+  @apply rounded-2xl border border-ink-700/70 bg-ink-900/80 backdrop-blur-sm;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 20px 40px -24px rgb(0 0 0 / 0.8);
+}
+
+@utility panel-title {
+  @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-300;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all
+         disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blade-500/60;
+}
+@utility btn-primary {
+  @apply btn bg-blade-500 text-white hover:bg-blade-400 active:scale-[0.98];
+  box-shadow: 0 10px 30px -10px rgb(239 45 76 / 0.6);
+}
+@utility btn-ghost {
+  @apply btn border border-ink-700 bg-ink-800/60 text-ink-100 hover:border-ink-600 hover:bg-ink-800;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-ink-700 bg-ink-850 px-3.5 py-2.5 text-sm text-ink-100 placeholder:text-ink-400
+         focus:border-blade-500/60 focus:outline-none focus:ring-2 focus:ring-blade-500/20;
+}
+
+input[type="range"].slider {
+  @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-ink-700;
+  accent-color: var(--color-blade-500);
+}
+
+/* Thanh cuộn mảnh */
+* { scrollbar-width: thin; scrollbar-color: var(--color-ink-600) transparent; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.rise { animation: rise .35s ease-out both; }
+
+@keyframes slash { 0% { transform: translateX(-120%) skewX(-20deg); } 100% { transform: translateX(320%) skewX(-20deg); } }
+.slash::after {
+  content: ""; position: absolute; inset: 0; width: 30%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.25), transparent);
+  animation: slash 1.4s ease-in-out infinite;
+}

@@ -21,8 +21,27 @@ export const VOICE_OPTIONS: VoiceOption[] = [
   { id: VoiceName.Zephyr, name: 'Zephyr', gender: 'Nữ', description: 'Giọng trong trẻo, tự nhiên' },
 ];
 
-export interface AudioState {
-  blob: Blob | null;
-  url: string | null;
-  duration: number; // in seconds (estimated)
+/** gemini: chất lượng cao, cần Internet + API key. browser: giọng có sẵn của máy, chạy offline. */
+export type Engine = 'gemini' | 'browser';
+
+export type Page = 'studio' | 'library' | 'settings';
+
+export interface AppSettings {
+  apiKey: string;
+  defaultEngine: Engine;
+  defaultVoice: VoiceName;
+  browserVoiceURI: string;
+}
+
+export interface HistoryItem {
+  id: string;
+  createdAt: number;
+  title: string;
+  text: string;
+  voice: string;
+  engine: Engine;
+  speed: number;
+  duration: number;
+  size: number;
+  blob: Blob;
 }
