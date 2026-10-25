@@ -115,6 +115,10 @@ window.EQ = window.EQ || {};
       { id: 'jewel_stall', kind: 'deco', draw: 'jewelstall', x: 3, y: 10, solid: true },
       { id: 'board_v', kind: 'npc', name: 'Bảng nhiệm vụ', x: 13, y: 12, draw: 'jobboard', jobs: true, e: '📋' },
       { id: 'tower', kind: 'npc', name: 'Tháp Thử Thách', x: 28, y: 11, draw: 'tower', tower: true, e: '🗼' },
+      // quầy trò chơi (bản 1.7)
+      { id: 'mg_candy', kind: 'npc', name: 'Tiệm kẹo chữ', x: 5, y: 25, draw: 'booth', game: 'candy', icon: 'candy_pink', col: '#ec407a' },
+      { id: 'mg_pirate', kind: 'npc', name: 'Bến kho báu', x: 12, y: 21, draw: 'booth', game: 'pirate', icon: 'pir_flag', col: '#5d4037' },
+      { id: 'mg_hill', kind: 'npc', name: 'Đường đua leo đồi', x: 37, y: 25, draw: 'booth', game: 'hill', icon: 'car_girl_body', col: '#43a047' },
       { id: 'lamp_v1', kind: 'deco', draw: 'lamp', x: 10, y: 13, solid: true },
       { id: 'lamp_v2', kind: 'deco', draw: 'lamp', x: 26, y: 13, solid: true },
       { id: 'barrel_v', kind: 'deco', draw: 'barrel', x: 2, y: 10, solid: true },
@@ -193,6 +197,8 @@ window.EQ = window.EQ || {};
         idle: [{ en: 'I love my family.', vi: 'Mình yêu gia đình của mình.' }] },
       { id: 'owl', kind: 'npc', name: 'Cô giáo Cú', x: 14, y: 8, e: '🦉',
         idle: [{ en: 'Good morning, student!', vi: 'Chào buổi sáng, học trò!' }] },
+      { id: 'mg_td', kind: 'npc', name: 'Pháo đài côn trùng', x: 15, y: 18, draw: 'booth', game: 'td', icon: 'td_beetle0', col: '#6d4c41' },
+      { id: 'mg_plane', kind: 'npc', name: 'Sân bay phi công', x: 5, y: 24, draw: 'booth', game: 'plane', icon: 'plane_fly1', col: '#29b6f6' },
       { id: 'bear', kind: 'npc', name: 'Bác Gấu đầu bếp', x: 11, y: 20, e: '🐻',
         idle: [{ en: 'I like fish and bananas!', vi: 'Bác thích cá và chuối!' }] },
       { id: 'turtle', kind: 'npc', name: 'Ông Rùa thợ mộc', x: 18, y: 12, e: '🐢',
@@ -258,6 +264,7 @@ window.EQ = window.EQ || {};
     id: 'castle', name: 'Lâu Đài Ngữ Pháp', en: 'Grammar Castle', w: 40, h: 28, ground: 'S', music: 'castle',
     spawn: { x: 1, y: 14 },
     entities: [
+      { id: 'mg_robot', kind: 'npc', name: 'Đấu trường robot', x: 10, y: 22, draw: 'booth', game: 'robot', icon: 'robot_blue_drive1', col: '#5c6bc0' },
       { id: 'guard', kind: 'npc', name: 'Lính gác Max', x: 13, y: 14, look: LOOK.guard, when: p => !EQ.Q.isDone(p, 'c_guard'),
         idle: [{ en: 'Stop! Who are you?', vi: 'Dừng lại! Bạn là ai?' }] },
       { id: 'guard', kind: 'npc', name: 'Lính gác Max', x: 12, y: 12, look: LOOK.guard, when: p => EQ.Q.isDone(p, 'c_guard'),

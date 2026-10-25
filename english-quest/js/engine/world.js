@@ -332,7 +332,7 @@ window.EQ = window.EQ || {};
     const c = W.entCenter(e);
     const by = (e.y + 0.95) * TS;
     if (e.kind === 'npc' && e.draw) {
-      SP.deco(ctx, e.draw, c.x, by, t);
+      SP.deco(ctx, e.draw, c.x, by, t, e);
     } else if (e.kind === 'npc') {
       if (e.look) {
         let dir = 'down';
@@ -404,7 +404,7 @@ window.EQ = window.EQ || {};
   }
 
   // Tên nhân vật / cửa hàng luôn hiện trên đầu (mờ dần khi ở xa người chơi)
-  const TAGS = [['shop', '🛒'], ['jeweler', '💎'], ['jobs', '📋'], ['tower', '🗼'], ['book', '📗'], ['sage', '⭐']];
+  const TAGS = [['shop', '🛒'], ['jeweler', '💎'], ['jobs', '📋'], ['tower', '🗼'], ['book', '📗'], ['sage', '⭐'], ['game', '🎮']];
   W.label = function (e) {
     const t = TAGS.find(x => e[x[0]]);
     return (t ? t[1] + ' ' : '') + e.name;

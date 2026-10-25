@@ -49,6 +49,8 @@ window.EQ = window.EQ || {};
     c.fillStyle = '#37474f'; c.beginPath(); c.arc(0, 0, r * 0.18, 0, 7); c.fill();
     c.restore();
   }
+  // dùng chung cho các trò ở arcade3.js
+  A.act = { fx, pts, hearts, hurt, gearHud, shuriken };
   const MONS = ['slime', 'fluff', 'mush', 'star', 'golem'];
   const MCOL = ['#66bb6a', '#ce93d8', '#e53935', '#ffd54f', '#78909c', '#42a5f5', '#ff8a65'];
 

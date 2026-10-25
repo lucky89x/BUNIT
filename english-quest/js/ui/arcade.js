@@ -89,7 +89,7 @@ window.EQ = window.EQ || {};
         return el('button', { class: 'am-card ' + id + (g.action ? ' action' : ''), disabled: !enough, onclick: () => { close(); A.play(id, poolFrom(p, src.ids)); } }, [
           g.action ? el('div', { class: 'am-tag' }, '⚡ HÀNH ĐỘNG • dùng trang bị') : null,
           el('div', { class: 'am-icon' }, g.icon), el('div', { class: 'am-name' }, g.name), el('div', { class: 'am-desc' }, g.desc),
-          el('div', { class: 'am-keys' }, '🎮 ' + g.keys), el('div', { class: 'am-best' }, '🏆 Kỷ lục: ' + (p.arcade[id] || 0))
+          el('div', { class: 'am-keys' }, '🎮 ' + g.keys), g.where ? el('div', { class: 'am-where' }, '📍 Quầy ở ' + g.where) : null, el('div', { class: 'am-best' }, '🏆 Kỷ lục: ' + (p.arcade[id] || 0))
         ]);
       })));
       body.appendChild(el('div', { class: 'row center' }, [el('button', { class: 'btn', onclick: () => close() }, 'Đóng')]));
@@ -121,7 +121,9 @@ window.EQ = window.EQ || {};
     const mouse = { x: 0, y: 0 };
     const toCanvas = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * CW, y: (e.clientY - r.top) / r.height * CH }; };
     cv.addEventListener('mousemove', e => { const m = toCanvas(e); mouse.x = m.x; mouse.y = m.y; mouse.moved = true; });
-    cv.addEventListener('mousedown', e => { const m = toCanvas(e); mouse.x = m.x; mouse.y = m.y; if (game.onClick) game.onClick(m.x, m.y); });
+    cv.addEventListener('mousedown', e => { const m = toCanvas(e); mouse.x = m.x; mouse.y = m.y; mouse.down = true; if (game.onClick) game.onClick(m.x, m.y); });
+    const mu = () => { mouse.down = false; };
+    window.addEventListener('mouseup', mu);
 
     const S = { score: 0, coins: 0, correct: 0, total: 0, missed: [], t: 0, fx: [], shake: 0 };
     const api = {
@@ -193,6 +195,7 @@ window.EQ = window.EQ || {};
       quit = true;
       window.removeEventListener('keydown', kd, true);
       window.removeEventListener('keyup', ku, true);
+      window.removeEventListener('mouseup', mu);
       close();
       EQ.audio.music(EQ.REGIONS[p.region].music);
     }

@@ -553,3 +553,18 @@ button { font-family: inherit; cursor: pointer; }
 .am-card.slayer { background: linear-gradient(135deg, #b71c1c, #ef6c00); }
 .am-card.whack { background: linear-gradient(135deg, #6d4c41, #a1887f); }
 .am-card.snake { background: linear-gradient(135deg, #2e7d32, #9ccc65); }
+
+/* ===== v1.7: quầy trò chơi trên bản đồ ===== */
+.am-where { font-size: 12px; background: rgba(255,255,255,.22); border-radius: 8px; padding: 3px 8px; display: inline-block; margin: 2px 4px 0 0; }
+.am-card.td { background: linear-gradient(135deg, #5d4037, #8bc34a); }
+.am-card.candy { background: linear-gradient(135deg, #d81b60, #f48fb1); }
+.am-card.plane { background: linear-gradient(135deg, #0277bd, #4fc3f7); }
+.am-card.hill { background: linear-gradient(135deg, #33691e, #ffb300); }
+.am-card.pirate { background: linear-gradient(135deg, #01579b, #e9c46a); }
+.am-card.robot { background: linear-gradient(135deg, #37474f, #7986cb); }
+.booth-card { max-width: 520px; }
+.booth-card p { margin: 8px 0; }
+.booth-head { display: flex; align-items: center; gap: 14px; }
+.booth-head h2 { margin: 0; }
+.booth-img { width: 84px; height: 84px; object-fit: contain; background: radial-gradient(circle, #fff8e1, #ffe0b2); border-radius: 18px; padding: 6px; }
+.booth-card .am-gear { margin: 8px 0; }

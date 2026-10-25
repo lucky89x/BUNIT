@@ -221,6 +221,7 @@ window.EQ = window.EQ || {};
     if (e.jeweler) return EQ.rpgui.jeweler(sp);
     if (e.jobs) return EQ.rpgui.jobs();
     if (e.tower) return EQ.rpgui.tower(sp);
+    if (e.game) return EQ.arcade.booth(e.game);
     // 5. cô giáo dạy theo sách
     if (e.book) {
       await EQ.ui.dialog([{ s: 'npc', en: 'Hello! What unit are you studying at school?', vi: 'Chào em! Ở lớp em đang học Unit mấy?' }], sp);

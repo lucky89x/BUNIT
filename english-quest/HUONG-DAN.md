@@ -171,6 +171,25 @@ Game dùng hình pixel art từ bộ **Ninja Adventure** (tác giả Pixel-boy &
 - 📜 **Nhiệm vụ:** xem trạng thái từng nhiệm vụ (chưa mở, có thể nhận, đang làm, đã xong), đánh dấu hoàn thành hoặc đặt lại.
 - 👤 **Nhân vật:** cộng vàng, lên cấp, tặng hoặc nâng cấp trang bị, mặc đồ mạnh nhất, mở trang phục, mở mọi cổng, đặt lại Tháp.
 
+## 5h. Bản 1.7 – Quầy trò chơi trên bản đồ (dùng bộ ảnh mới)
+
+Bản này dùng các bộ ảnh mới tải lên Drive (thư mục *game english*) để làm **6 trò mới**. Mỗi trò có **một quầy riêng trên bản đồ**: quầy có mái che sọc màu, hình của trò và nhãn **🎮 tên quầy** trên đầu. Đi tới quầy, bấm **E / Space** (hoặc bấm chuột) để xem giới thiệu, rồi bấm **▶ Chơi**. Cả 6 trò cũng có trong 🎮 Khu vui chơi (phím **G**, tổng 14 trò), thẻ trò ghi rõ **📍 Quầy ở** vùng nào.
+
+| Quầy | Ở đâu | Cách chơi | Trang bị giúp gì |
+|---|---|---|---|
+| 🍬 **Tiệm kẹo chữ** | Làng Khởi Đầu, góc dưới trái (cạnh hồ) | Bàn 24 viên kẹo, mỗi viên mang một từ. Bấm viên có từ đúng: kẹo **cùng màu dính liền nổ cả chùm**, được thêm điểm và thêm giây, kẹo mới rơi xuống (giao diện theo bộ UI *candy match*). | 🍀 cộng điểm và thêm giây; 🛡️ chống mất giờ khi bấm sai |
+| 🏴‍☠️ **Bến kho báu** | Làng, bờ phải hồ cá | Đảo 15 ô cát có dấu X. Đào ô có từ đúng để lấy vật phẩm cướp biển: rương báu, bản đồ, xúc xắc, móng ngựa (x2 lần sau), sổ gợi ý (làm sáng ô đúng), bình máu… Có thể gặp 💣 bom hoặc 💀 đầu lâu. | 🍀 dễ trúng rương báu; 🛡️ chặn bom; ❤️ số mạng |
+| 🚙 **Đường đua leo đồi** | Làng, góc dưới phải | Giữ → để chạy, ← để phanh, vượt đồi, ăn xu. Tới **trạm xăng** xe tự dừng, chọn cây xăng có từ đúng (phím 1–3) để đổ xăng. Hết xăng là thua. | Vũ khí càng mạnh, **xe càng xịn** (xe thể thao → xe đua gai → xe tải quái vật); ⚔️ động cơ khỏe; ❤️ bình xăng to; 🛡️ tiết kiệm xăng |
+| 🐞 **Pháo đài côn trùng** | Rừng Từ Vựng, nửa phía tây (trước sông) | Bọ cánh cứng và bọ bay bò theo đường vào thành, mỗi con mang 1 từ. Bấm con mang từ đúng (hoặc phím 1–4) để 3 khẩu pháo bắn hạ trước khi nó vào thành. | ⚔️ sát thương pháo (pháo đổi màu theo cấp vũ khí); ❤️ độ bền thành |
+| ✈️ **Sân bay phi công** | Rừng, góc dưới trái | Lái máy bay (↑ ↓ hoặc di chuột), bấm Space để bắn đám mây mang từ đúng; bắn hạ hoặc né bọ bay. | ⚔️ sát thương đạn; ❤️ số mạng; 🛡️ chặn va chạm |
+| 🤖 **Đấu trường robot** | Lâu Đài Ngữ Pháp, phòng bên trái (gần lối vào) | Robot địch lao tới, mỗi con mang 1 từ. Bấm vào robot (hoặc phím 1–3) để bắn tên lửa bay vòng qua đầu tới đúng con đó; nhảy (↑) để né va chạm. Màu robot của bé theo trang phục. | ⚔️ sát thương tên lửa; ❤️ số mạng; 🛡️ chặn va chạm |
+
+Mọi câu trả lời đều ghi vào hệ thống ôn tập như các trò khác: từ nào bé chọn sai sẽ được hỏi lại sớm và hiện ở bảng "📒 Ôn lại các từ này" khi kết thúc.
+
+**Ảnh đã dùng:** Kenney Robot Pack, Free Plane Sprite, Hill Climb (xe), Turret Defense (bọ cánh cứng, bọ bay), UI candy match (kẹo, nút Start), Cartoon pirate set (10 vật phẩm). Ảnh được cắt, thu nhỏ và **nhúng sẵn vào game** (`js/data/minigame-assets.js`), nên vẫn chạy được khi không có mạng. Nguồn và giấy phép ghi trong `assets/minigame/CREDITS.md`. Lưu ý: ảnh của Freepik và craftpix.net dùng tự do trong gia đình/lớp học; nếu đem phát hành rộng rãi thì cần ghi nguồn theo điều khoản của họ.
+
+> Hai gói chưa dùng được: *farm game asset* (9,5 MB) và *kenney_space-kit* (6,6 MB) lớn quá giới hạn tải của công cụ Drive, còn *idle turret defense kit* (52 MB) chỉ dùng được phần đã giải nén sẵn (bọ cánh cứng, bọ bay). Các khẩu pháo trong gói đó là ảnh hoạt họa Spine (cần thư viện riêng), nên pháo được vẽ bằng mã. Nếu muốn có trò nông trại hay không gian, hãy giải nén 2 gói đó lên Drive (như thư mục Grounds Enemy) để lần sau dùng tiếp.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -209,7 +228,8 @@ english-quest/
 ├─ js/data/lessons.js    Bài ngữ pháp, câu điền từ, câu sắp xếp, cảnh giới từ
 ├─ js/data/quests.js     Nhiệm vụ, hội thoại, trùm, vật phẩm, trang phục, huy hiệu
 ├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
-├─ js/data/maps.js       Bản đồ 3 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC
+├─ js/data/maps.js       Bản đồ 3 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC, quầy trò chơi
+├─ js/data/minigame-assets.js  Ảnh các trò trên bản đồ (tự sinh: python tools/build-minigame-assets.py)
 ├─ js/core/              Lưu trữ, âm thanh tự tạo, giọng đọc, hệ thống học (ôn tập ngắt quãng, độ khó)
 ├─ js/engine/            Đồ họa pixel tự vẽ, thế giới, va chạm, camera, bản đồ nhỏ
 ├─ js/ui/                Hộp thoại, câu hỏi, trận đấu, các màn hình
@@ -229,8 +249,11 @@ english-quest/
 - `node tests/playthrough.cjs` – bot tự chơi hết chương 1 trên Chromium (cần Playwright).
 - `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
 - `node tests/v16.cjs` – kiểm tra bản 1.6: game hành động, trang bị trong trận, quái tinh anh, đấu 2 bé, admin.
+- `node tests/v17.cjs` – kiểm tra bản 1.7: 6 quầy trò chơi trên bản đồ, ảnh mới, bot tự chơi từng trò.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
 ## 10. Bản quyền nội dung
 
 Toàn bộ hình vẽ pixel, bản đồ, nhạc nền và hiệu ứng âm thanh đều **được tạo bằng mã nguồn** trong game (không dùng ảnh/nhạc bên ngoài). Biểu tượng cảm xúc (emoji) hiển thị bằng phông chữ có sẵn của Windows. Giọng đọc là của hệ điều hành/trình duyệt.
+
+Ngoại lệ: từ bản 1.5 có ảnh nhân vật/quái/nền của bộ **Ninja Adventure** (CC0, xem `assets/ninja/CREDITS.md`); từ bản 1.7 có ảnh các trò trên bản đồ (Kenney CC0, craftpix.net, Freepik – xem `assets/minigame/CREDITS.md`).
