@@ -255,8 +255,9 @@ window.EQ = window.EQ || {};
     if (W.target === g && EQ.game.interact) EQ.game.interact();
   }
   // sx, sy: tọa độ trên khung 960x640. Trả về 'interact' | 'walk' | 'none'
-  W.clickAt = function (sx, sy) {
-    const wx = sx + W.cam.x, wy = sy + W.cam.y;
+  W.clickAt = (sx, sy) => W.clickWorld(sx + W.cam.x, sy + W.cam.y);
+  // wx, wy: tọa độ điểm ảnh trên bản đồ (dùng chung cho đồ họa 2D và 3D)
+  W.clickWorld = function (wx, wy) {
     const tx = Math.floor(wx / TS), ty = Math.floor(wy / TS);
     // bấm vào thực thể (tính cả phần đầu nhô lên ô phía trên)
     const ent = W.ents.find(e => INTER.indexOf(e.kind) >= 0 && e.x === tx && e.y === ty) || W.ents.find(e => INTER.indexOf(e.kind) >= 0 && e.x === tx && e.y === ty + 1);
@@ -478,6 +479,8 @@ window.EQ = window.EQ || {};
     ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
   }
   W.roundRect = roundRect;
+  W.bubble = bubble;
+  W.isShop = e => TAGS.some(t => e[t[0]]);
 
   function drawOverlay(ctx, e, p, t) {
     const c = W.entCenter(e);

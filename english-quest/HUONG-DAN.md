@@ -229,6 +229,25 @@ Cân bằng: nhân vật cấp 1 không trang bị có 85 máu, đánh Slime (3 
 
 **Về game "Situation Normal" trong thư mục Drive:** đây là game 3D cho máy tính (file .exe chạy bằng Java, kèm thư viện Steam) của tác giả khác. Trình duyệt không chạy được file .exe, và đó là sản phẩm có bản quyền riêng, nên **không thể ghép vào English Quest**. Nếu bạn muốn một trò có lối chơi tương tự, hãy mô tả cách chơi, mình sẽ làm một trò mới chạy trong trình duyệt.
 
+## 5j. Bản 1.9 – Đồ họa 3D kiểu Ghibli (thử nghiệm, bước 1)
+
+Bản đồ giờ được **dựng thành cảnh 3D** bằng thư viện Three.js (nhúng sẵn trong `js/lib/`, chạy offline):
+- **Nền vẽ tay:** cỏ là hàng trăm nét cọ nhiều sắc xanh, đường đất và bãi cát viền nhòe như tranh màu nước, hoa dại rải trên cỏ.
+- **Cỏ đung đưa trong gió:** hàng nghìn ngọn cỏ lay theo gió, lau sậy cao ở chỗ cỏ rậm. Có bụi phấn hoa lấp lánh bay lơ lửng.
+- **Cây tán tròn bồng bềnh** (kiểu Ghibli), rừng thông nhiều tầng, cây táo có quả đỏ, bụi hoa hồng, đá, nấm.
+- **Nhà kiểu châu Âu:** tường vôi kem, khung gỗ, mái ngói nhiều màu (đỏ, xanh, cam...), ống khói, cửa gỗ, cửa sổ có bồn hoa.
+- **Sông hồ gợn sóng lấp lánh**, có lá súng; lâu đài tường gạch đá vẽ tay.
+- **Nhân vật chibi** đầu tròn, má hồng, mắt long lanh. Trang bị hiện trên người (áo giáp, bao tay, giày, mũ, vương miện, đũa phép). Nhân vật vung tay bước đi; NPC quay mặt về phía bé khi đứng gần.
+- **Quái vật 3D:** slime nảy tưng tưng, bông xù, nấm, tinh tú, người đá; trùm to có vương miện; Boss Quỷ Một Mắt khổng lồ.
+- **Bầu trời & ánh sáng:** trời xanh chuyển màu, mây trắng to trôi chậm, nắng vàng ấm, bóng đổ mềm.
+- **Cây, nhà, tường che khuất nhân vật sẽ tự trong suốt** nên lúc nào cũng thấy bé.
+- Vẫn hiện đủ tên NPC, dấu ❗, nút E, chỉ số quái, mũi tên nhiệm vụ.
+- **Bấm chuột** lên mặt đất hoặc vào NPC trong cảnh 3D vẫn tự tìm đường đi tới như bản 2D.
+
+**Đổi qua lại:** nút **🎨 Đồ họa: 3D / 2D** ở góc trái dưới màn hình. Máy không hỗ trợ WebGL thì game tự dùng 2D như cũ. Trận đấu và các mini-game vẫn là 2D (sẽ nâng cấp ở các bước sau).
+
+**Các bước tiếp theo (dự kiến):** (2) nhân vật và quái chi tiết hơn bằng mô hình 3D, có hoạt ảnh; (3) cảnh trận đấu 3D; (4) giao diện, khung hội thoại theo phong cách Ghibli; (5) hiệu ứng thời tiết, ngày đêm, nhạc nền mới. Nếu bạn tìm được ảnh mẫu hoặc mô hình 3D (.glb/.gltf) theo phong cách mong muốn, hãy tải lên Drive để mình dùng.
+
 ## 6. Hai bé chơi riêng
 
 Mỗi bé tạo **một nhân vật riêng** (tên, lớp, tuổi, kiểu tóc, màu tóc, màu da). Tiến độ, từ vựng, độ khó, lỗi sai, huy hiệu của mỗi bé hoàn toàn độc lập. Có thể tạo tối đa 6 hồ sơ.
@@ -267,6 +286,8 @@ english-quest/
 ├─ js/data/lessons.js    Bài ngữ pháp, câu điền từ, câu sắp xếp, cảnh giới từ
 ├─ js/data/quests.js     Nhiệm vụ, hội thoại, trùm, vật phẩm, trang phục, huy hiệu
 ├─ js/data/curriculum.js Từ theo chủ đề 24 Unit Global Success 6 & 8
+├─ js/lib/three.min.js   Thư viện 3D Three.js r158 (giấy phép MIT, xem js/lib/THREE-LICENSE.txt)
+├─ js/engine/world3d.js  Đồ họa 3D kiểu Ghibli: dựng bản đồ ô thành cảnh 3D (bản 1.9)
 ├─ js/ui/wild.js         Vùng Hoang Dã: Boss thế giới, suối hồi máu (bản 1.8)
 ├─ js/ui/arcade4.js      Trò Nông trại chữ (bản 1.8)
 ├─ js/data/maps.js       Bản đồ 4 vùng (vẽ bằng lệnh rect/hline/house...) và vị trí NPC, quầy trò chơi
@@ -291,6 +312,7 @@ english-quest/
 - `node tests/arcade.cjs` – bot tự chơi 4 trò trong Khu vui chơi.
 - `node tests/v16.cjs` – kiểm tra bản 1.6: game hành động, trang bị trong trận, quái tinh anh, đấu 2 bé, admin.
 - `node tests/v17.cjs` – kiểm tra bản 1.7: 6 quầy trò chơi trên bản đồ, ảnh mới, bot tự chơi từng trò.
+- `node tests/v19.cjs` – kiểm tra bản 1.9: dựng cảnh 3D 4 vùng, bấm chuột đi/nói chuyện trong 3D, nút đổi 2D ↔ 3D.
 - `node tests/v18.cjs` – kiểm tra bản 1.8: rắn săn chữ mới, trang bị mới, thanh máu & gục ngã, Vùng Hoang Dã + Boss, bấm chuột để đi, nông trại, pháo tháp.
 - `node tests/anti-guess.cjs` – kiểm tra chống đoán mò, thuật toán nhớ lâu, học theo sách, so khớp câu nói.
 
@@ -298,4 +320,4 @@ english-quest/
 
 Toàn bộ hình vẽ pixel, bản đồ, nhạc nền và hiệu ứng âm thanh đều **được tạo bằng mã nguồn** trong game (không dùng ảnh/nhạc bên ngoài). Biểu tượng cảm xúc (emoji) hiển thị bằng phông chữ có sẵn của Windows. Giọng đọc là của hệ điều hành/trình duyệt.
 
-Ngoại lệ: từ bản 1.5 có ảnh nhân vật/quái/nền của bộ **Ninja Adventure** (CC0, xem `assets/ninja/CREDITS.md`); từ bản 1.7 có ảnh các trò trên bản đồ (Kenney CC0, craftpix.net, Freepik – xem `assets/minigame/CREDITS.md`); bản 1.8 thêm ảnh pháo tháp (craftpix.net) và biểu tượng nông trại.
+Ngoại lệ: từ bản 1.5 có ảnh nhân vật/quái/nền của bộ **Ninja Adventure** (CC0, xem `assets/ninja/CREDITS.md`); từ bản 1.7 có ảnh các trò trên bản đồ (Kenney CC0, craftpix.net, Freepik – xem `assets/minigame/CREDITS.md`); bản 1.8 thêm ảnh pháo tháp (craftpix.net) và biểu tượng nông trại. Bản 1.9 dùng thư viện **Three.js** (MIT) để vẽ 3D; mọi hình khối, màu sắc, nền vẽ tay trong cảnh 3D đều do mã nguồn tự tạo.

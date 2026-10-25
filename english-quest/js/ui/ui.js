@@ -255,6 +255,7 @@ window.EQ = window.EQ || {};
     UI.hud.appendChild(left);
     UI.hud.appendChild(el('div', { class: 'hud-top' }, [H.region, H.stones]));
     UI.hud.appendChild(right);
+    UI.hud.appendChild(el('button', { class: 'hud-gfx', title: 'Đổi đồ họa 3D kiểu Ghibli / 2D cổ điển', onclick: e => { const on = EQ.world3d && EQ.world3d.toggle(); e.currentTarget.textContent = on ? '🎨 Đồ họa: 3D' : '🎨 Đồ họa: 2D'; EQ.ui.toast(on ? '🎨 Đồ họa 3D kiểu Ghibli (thử nghiệm)' : '🎨 Đồ họa 2D cổ điển', 'good'); } }, EQ.world3d && EQ.world3d.enabled() ? '🎨 Đồ họa: 3D' : '🎨 Đồ họa: 2D'));
     UI.hud.appendChild(el('button', { class: 'hud-arcade', title: 'Khu vui chơi (G)', onclick: () => EQ.arcade.open() }, [el('span', null, '🎮'), el('b', null, 'Khu vui chơi')]));
     UI.hud.appendChild(el('div', { class: 'hud-help' }, 'Di chuyển: W A S D / phím mũi tên / 🖱️ bấm chuột vào bản đồ • Tương tác: E hoặc bấm vào NPC • Tạm dừng: Esc'));
   };

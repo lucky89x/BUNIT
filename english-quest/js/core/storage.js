@@ -12,7 +12,7 @@ window.EQ = window.EQ || {};
   const DEFAULT_SETTINGS = {
     music: true, sfx: true, musicVol: 0.5, sfxVol: 0.7,
     accent: 'auto', voiceName: '', rate: 0.85,
-    breakMin: 20, alwaysVi: false, speakPractice: false, ninjaArt: true
+    breakMin: 20, alwaysVi: false, speakPractice: false, ninjaArt: true, gfx3d: true
   };
 
   const S = {

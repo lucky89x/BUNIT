@@ -151,7 +151,8 @@ window.EQ = window.EQ || {};
       }
       else { EQ.world.t += dt; EQ.world.player.moving = false; }
       EQ.world.tickFade(dt);
-      EQ.world.render(G.ctx, p);
+      // bản 1.9: đồ họa 3D kiểu Ghibli (nếu bật và máy hỗ trợ WebGL), nếu không thì vẽ 2D như cũ
+      if (!(EQ.world3d && EQ.world3d.render(p, dt))) EQ.world.render(G.ctx, p);
       G.hudT += dt;
       if (G.hudT > 0.25) {
         G.hudT = 0;
@@ -171,6 +172,7 @@ window.EQ = window.EQ || {};
       G.saveT += dt;
       if (G.saveT > 15) { G.saveT = 0; G.saveNow(); }
     } else if (G.mode === 'menu') {
+      if (EQ.world3d) EQ.world3d.hide();
       EQ.screens.drawTitleBg && EQ.screens.drawTitleBg(G.ctx, ts / 1000);
     }
     requestAnimationFrame(G.frame);
