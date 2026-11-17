@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "graphify hook-guard search",
+            "command": "/tmp/claude-0/gv/bin/graphify hook-guard search",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "graphify hook-guard read",
+            "command": "/tmp/claude-0/gv/bin/graphify hook-guard read",
             "timeout": 10
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "graphify hook-guard compact",
+            "command": "/tmp/claude-0/gv/bin/graphify hook-guard compact",
             "timeout": 10
           }
         ]
